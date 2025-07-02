@@ -1,8 +1,8 @@
 package io.github.spcookie
 
-import kotlin.random.Random
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.random.Random
 
 /**
  * Random data generator utility
@@ -27,14 +27,14 @@ object MockRandom {
     /**
      * Generate random natural number (positive integer)
      */
-    fun natural(min: Int = 0, max: Int = 9007199254740992): Int {
+    fun natural(min: Int = 0, max: Int = Int.MAX_VALUE): Int {
         return random.nextInt(min, max + 1)
     }
     
     /**
      * Generate random integer
      */
-    fun integer(min: Int = -9007199254740992, max: Int = 9007199254740992): Int {
+    fun integer(min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE): Int {
         return random.nextInt(min, max + 1)
     }
     

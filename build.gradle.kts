@@ -15,6 +15,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
     
     testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation("org.jetbrains.kotlin:kotlin-test")

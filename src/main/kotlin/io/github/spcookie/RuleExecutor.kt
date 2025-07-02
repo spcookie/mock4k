@@ -43,7 +43,7 @@ class RuleExecutor(private val random: MockRandom) {
                     val result = mutableListOf<Any>()
                     repeat(rule.count) {
                         val item = value[random.integer(0, value.size - 1)]
-                        result.add(engine.generate(item))
+                        item?.let { template -> result.add(engine.generate(template)) }
                     }
                     result
                 }
