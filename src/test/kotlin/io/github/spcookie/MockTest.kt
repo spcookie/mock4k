@@ -1,12 +1,11 @@
 package io.github.spcookie
 
-import io.github.spcookie.Mock
 import org.junit.Test
-import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class MockTest {
-    
+
     @Test
     fun testBasicMock() {
         val template = mapOf(
@@ -16,49 +15,49 @@ class MockTest {
                 )
             )
         )
-        
+
         val result = Mock.mock(template)
         assertNotNull(result)
         println("Basic mock result: $result")
     }
-    
+
     @Test
     fun testStringRule() {
         val template = mapOf(
             "name|3" to "Hello"
         )
-        
+
         val result = Mock.mock(template) as Map<String, Any>
         val name = result["name"] as String
         assertTrue(name == "HelloHelloHello")
         println("String rule result: $result")
     }
-    
+
     @Test
     fun testNumberRule() {
         val template = mapOf(
             "age|18-65" to 25,
             "score|1-100.1-2" to 85.5
         )
-        
+
         val result = Mock.mock(template) as Map<String, Any>
         assertNotNull(result["age"])
         assertNotNull(result["score"])
         println("Number rule result: $result")
     }
-    
+
     @Test
     fun testArrayRule() {
         val template = mapOf(
             "items|3-5" to listOf("apple", "banana", "orange")
         )
-        
+
         val result = Mock.mock(template) as Map<String, Any>
         val items = result["items"] as List<*>
         assertTrue(items.isNotEmpty())
         println("Array rule result: $result")
     }
-    
+
     @Test
     fun testPlaceholder() {
         val template = mapOf(
@@ -67,7 +66,7 @@ class MockTest {
             "date" to "@DATE",
             "id" to "@GUID"
         )
-        
+
         val result = Mock.mock(template) as Map<String, Any>
         assertNotNull(result["name"])
         assertNotNull(result["email"])
@@ -75,7 +74,7 @@ class MockTest {
         assertNotNull(result["id"])
         println("Placeholder result: $result")
     }
-    
+
     @Test
     fun testComplexTemplate() {
         val template = mapOf(
@@ -93,13 +92,13 @@ class MockTest {
                 )
             )
         )
-        
+
         val result = Mock.mock(template) as Map<String, Any>
         val users = result["users"] as List<*>
         assertTrue(users.isNotEmpty())
         println("Complex template result: $result")
     }
-    
+
     @Test
     fun testIncrementRule() {
         val template = mapOf(
@@ -110,26 +109,26 @@ class MockTest {
                 )
             )
         )
-        
+
         val result = Mock.mock(template) as Map<String, Any>
         val list = result["list"] as List<*>
         assertTrue(list.size == 3)
         println("Increment rule result: $result")
     }
-    
+
     @Test
     fun testBooleanRule() {
         val template = mapOf(
             "isActive|1" to true,
             "isEnabled|3-7" to false
         )
-        
+
         val result = Mock.mock(template) as Map<String, Any>
         assertNotNull(result["isActive"])
         assertNotNull(result["isEnabled"])
         println("Boolean rule result: $result")
     }
-    
+
     @Test
     fun testObjectRule() {
         val template = mapOf(
@@ -141,13 +140,13 @@ class MockTest {
                 "logging" to true
             )
         )
-        
+
         val result = Mock.mock(template) as Map<String, Any>
         val config = result["config"] as Map<*, *>
         assertTrue(config.size in 2..3)
         println("Object rule result: $result")
     }
-    
+
     @Test
     fun testRandomMethods() {
         println("Random boolean: ${Mock.Random.boolean()}")

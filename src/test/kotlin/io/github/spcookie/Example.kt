@@ -1,6 +1,5 @@
-package io.github.spcookie.example
+package io.github.spcookie
 
-import io.github.spcookie.Mock
 import com.google.gson.GsonBuilder
 
 /**
