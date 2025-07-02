@@ -1,4 +1,4 @@
-package com.mock4k.random
+package com.mock4k
 
 import kotlin.random.Random
 import java.text.SimpleDateFormat

@@ -6,147 +6,147 @@ import com.mock4k.random.MockRandom;
 import java.util.*;
 
 /**
- * Mock4K Java适配示例
- * 演示如何在Java中使用Kotlin版本的Mock4K库
+ * Mock4K Java Adapter Example
+ * Demonstrates how to use the Kotlin version of Mock4K library in Java
  */
 public class JavaExample {
     
     public static void main(String[] args) {
-        System.out.println("=== Mock4K Java适配示例 ===");
+        System.out.println("=== Mock4K Java Adapter Example ===");
         
-        // 1. 基本mock使用
+        // 1. Basic mock usage
         basicMockExample();
         
-        // 2. 字符串规则
+        // 2. String rules
         stringRuleExample();
         
-        // 3. 数字规则
+        // 3. Number rules
         numberRuleExample();
         
-        // 4. 数组规则
+        // 4. Array rules
         arrayRuleExample();
         
-        // 5. 占位符
+        // 5. Placeholders
         placeholderExample();
         
-        // 6. 复杂嵌套结构
+        // 6. Complex nested structures
         complexTemplateExample();
         
-        // 7. 中文内容生成
+        // 7. Chinese content generation
         chineseContentExample();
         
-        // 8. 直接使用Mock.Random
+        // 8. Direct use of Mock.Random
         mockRandomExample();
     }
     
     /**
-     * 基本mock使用
+     * Basic mock usage
      */
     private static void basicMockExample() {
-        System.out.println("\n--- 基本Mock ---");
+        System.out.println("\n--- Basic Mock ---");
         
-        // 字符串
+        // String
         Object result = Mock.mock("Hello World");
-        System.out.println("字符串: " + result);
+        System.out.println("String: " + result);
         
-        // 数字
+        // Number
         result = Mock.mock(42);
-        System.out.println("数字: " + result);
+        System.out.println("Number: " + result);
         
-        // 布尔值
+        // Boolean
         result = Mock.mock(true);
-        System.out.println("布尔值: " + result);
+        System.out.println("Boolean: " + result);
     }
     
     /**
-     * 字符串规则示例
+     * String rule examples
      */
     private static void stringRuleExample() {
-        System.out.println("\n--- 字符串规则 ---");
+        System.out.println("\n--- String Rules ---");
         
-        // 重复3次
+        // Repeat 3 times
         Map<String, Object> template = new HashMap<>();
         template.put("name|3", "Hello");
         Object result = Mock.mock(template);
-        System.out.println("重复3次: " + result);
+        System.out.println("Repeat 3 times: " + result);
         
-        // 重复2-5次
+        // Repeat 2-5 times
         template.clear();
         template.put("text|2-5", "Hi");
         result = Mock.mock(template);
-        System.out.println("重复2-5次: " + result);
+        System.out.println("Repeat 2-5 times: " + result);
     }
     
     /**
-     * 数字规则示例
+     * Number rule examples
      */
     private static void numberRuleExample() {
-        System.out.println("\n--- 数字规则 ---");
+        System.out.println("\n--- Number Rules ---");
         
-        // 整数范围
+        // Integer range
         Map<String, Object> template = new HashMap<>();
         template.put("age|18-65", 0);
         Object result = Mock.mock(template);
-        System.out.println("年龄(18-65): " + result);
+        System.out.println("Age(18-65): " + result);
         
-        // 浮点数范围
+        // Float range
         template.clear();
         template.put("price|1-100.1-3", 0.0);
         result = Mock.mock(template);
-        System.out.println("价格(1-100.1-3): " + result);
+        System.out.println("Price(1-100.1-3): " + result);
         
-        // 增量
+        // Increment
         template.clear();
         template.put("id|+1", 1);
-        System.out.println("ID增量1: " + Mock.mock(template));
-        System.out.println("ID增量2: " + Mock.mock(template));
-        System.out.println("ID增量3: " + Mock.mock(template));
+        System.out.println("ID increment 1: " + Mock.mock(template));
+        System.out.println("ID increment 2: " + Mock.mock(template));
+        System.out.println("ID increment 3: " + Mock.mock(template));
     }
     
     /**
-     * 数组规则示例
+     * Array rule examples
      */
     private static void arrayRuleExample() {
-        System.out.println("\n--- 数组规则 ---");
+        System.out.println("\n--- Array Rules ---");
         
-        // 从数组中选择1-3个元素
+        // Select 1-3 elements from array
         Map<String, Object> template = new HashMap<>();
         List<String> colors = Arrays.asList("red", "green", "blue", "yellow", "purple");
         template.put("colors|1-3", colors);
         Object result = Mock.mock(template);
-        System.out.println("选择颜色(1-3个): " + result);
+        System.out.println("Select colors(1-3): " + result);
         
-        // 重复数组2次
+        // Repeat array 2 times
         template.clear();
         template.put("numbers|2", Arrays.asList(1, 2, 3));
         result = Mock.mock(template);
-        System.out.println("重复数组2次: " + result);
+        System.out.println("Repeat array 2 times: " + result);
     }
     
     /**
-     * 占位符示例
+     * Placeholder examples
      */
     private static void placeholderExample() {
-        System.out.println("\n--- 占位符 ---");
+        System.out.println("\n--- Placeholders ---");
         
-        System.out.println("姓名: " + Mock.mock("@name"));
-        System.out.println("邮箱: " + Mock.mock("@email"));
-        System.out.println("日期: " + Mock.mock("@date"));
-        System.out.println("时间: " + Mock.mock("@time"));
-        System.out.println("整数(1-100): " + Mock.mock("@integer(1,100)"));
-        System.out.println("字符串(5位): " + Mock.mock("@string(5)"));
-        System.out.println("布尔值: " + Mock.mock("@boolean"));
-        System.out.println("颜色: " + Mock.mock("@color"));
+        System.out.println("Name: " + Mock.mock("@name"));
+        System.out.println("Email: " + Mock.mock("@email"));
+        System.out.println("Date: " + Mock.mock("@date"));
+        System.out.println("Time: " + Mock.mock("@time"));
+        System.out.println("Integer(1-100): " + Mock.mock("@integer(1,100)"));
+        System.out.println("String(5 chars): " + Mock.mock("@string(5)"));
+        System.out.println("Boolean: " + Mock.mock("@boolean"));
+        System.out.println("Color: " + Mock.mock("@color"));
         System.out.println("URL: " + Mock.mock("@url"));
     }
     
     /**
-     * 复杂模板示例
+     * Complex template examples
      */
     private static void complexTemplateExample() {
-        System.out.println("\n--- 复杂模板 ---");
+        System.out.println("\n--- Complex Templates ---");
         
-        // 用户对象模板
+        // User object template
         Map<String, Object> userTemplate = new HashMap<>();
         userTemplate.put("id|+1", 1);
         userTemplate.put("name", "@name");
@@ -154,73 +154,73 @@ public class JavaExample {
         userTemplate.put("age|18-65", 0);
         userTemplate.put("isActive", "@boolean");
         
-        // 地址对象
+        // Address object
         Map<String, Object> address = new HashMap<>();
         address.put("street", "@sentence");
         address.put("city", "@word");
         address.put("zipCode", "@integer(10000,99999)");
         userTemplate.put("address", address);
         
-        // 爱好数组
+        // Hobbies array
         List<String> hobbies = Arrays.asList("reading", "swimming", "coding", "gaming", "music");
         userTemplate.put("hobbies|1-3", hobbies);
         
-        // 生成用户列表
+        // Generate user list
         Map<String, Object> template = new HashMap<>();
         template.put("users|3", userTemplate);
         
         Object result = Mock.mock(template);
-        System.out.println("用户列表: " + result);
+        System.out.println("User list: " + result);
     }
     
     /**
-     * 中文内容示例
+     * Chinese content examples
      */
     private static void chineseContentExample() {
-        System.out.println("\n--- 中文内容 ---");
+        System.out.println("\n--- Chinese Content ---");
         
-        System.out.println("中文姓名: " + Mock.mock("@cname"));
-        System.out.println("中文词语: " + Mock.mock("@cword"));
-        System.out.println("中文句子: " + Mock.mock("@csentence"));
-        System.out.println("中文标题: " + Mock.mock("@ctitle"));
+        System.out.println("Chinese name: " + Mock.mock("@cname"));
+        System.out.println("Chinese word: " + Mock.mock("@cword"));
+        System.out.println("Chinese sentence: " + Mock.mock("@csentence"));
+        System.out.println("Chinese title: " + Mock.mock("@ctitle"));
         
-        // 中文用户模板
+        // Chinese user template
         Map<String, Object> chineseUser = new HashMap<>();
-        chineseUser.put("姓名", "@cname");
-        chineseUser.put("年龄|18-65", 0);
-        chineseUser.put("简介", "@cparagraph");
+        chineseUser.put("name", "@cname");
+        chineseUser.put("age|18-65", 0);
+        chineseUser.put("bio", "@cparagraph");
         
         Object result = Mock.mock(chineseUser);
-        System.out.println("中文用户: " + result);
+        System.out.println("Chinese user: " + result);
     }
     
     /**
-     * 直接使用Mock.Random示例
+     * Direct use of Mock.Random examples
      */
     private static void mockRandomExample() {
-        System.out.println("\n--- Mock.Random方法 ---");
+        System.out.println("\n--- Mock.Random Methods ---");
         
         MockRandom random = Mock.Random;
         
-        System.out.println("随机布尔: " + random.bool());
-        System.out.println("随机整数(1-100): " + random.integer(1, 100));
-        System.out.println("随机浮点数: " + random.floating(0.0, 1.0));
-        System.out.println("随机字符串(8位): " + random.string(8));
-        System.out.println("随机日期: " + random.date());
-        System.out.println("随机时间: " + random.time());
-        System.out.println("随机英文名: " + random.name());
-        System.out.println("随机中文名: " + random.cname());
-        System.out.println("随机邮箱: " + random.email());
-        System.out.println("随机URL: " + random.url());
-        System.out.println("随机IP: " + random.ip());
-        System.out.println("随机颜色: " + random.color());
-        System.out.println("随机GUID: " + random.guid());
+        System.out.println("Random boolean: " + random.bool());
+        System.out.println("Random integer(1-100): " + random.integer(1, 100));
+        System.out.println("Random float: " + random.floating(0.0, 1.0));
+        System.out.println("Random string(8 chars): " + random.string(8));
+        System.out.println("Random date: " + random.date());
+        System.out.println("Random time: " + random.time());
+        System.out.println("Random English name: " + random.name());
+        System.out.println("Random Chinese name: " + random.cname());
+        System.out.println("Random email: " + random.email());
+        System.out.println("Random URL: " + random.url());
+        System.out.println("Random IP: " + random.ip());
+        System.out.println("Random color: " + random.color());
+        System.out.println("Random GUID: " + random.guid());
         
-        // 从列表中选择
+        // Pick from list
         List<String> fruits = Arrays.asList("apple", "banana", "orange", "grape");
-        System.out.println("随机水果: " + random.pick(fruits));
+        System.out.println("Random fruit: " + random.pick(fruits));
         
-        // 打乱列表
-        System.out.println("打乱水果: " + random.shuffle(fruits));
+        // Shuffle list
+        System.out.println("Shuffled fruits: " + random.shuffle(fruits));
     }
 }

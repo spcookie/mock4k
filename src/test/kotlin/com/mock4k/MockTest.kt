@@ -1,5 +1,6 @@
 package com.mock4k
 
+import com.mock4k.Mock
 import org.junit.Test
 import kotlin.test.assertTrue
 import kotlin.test.assertNotNull
