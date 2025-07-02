@@ -6,7 +6,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.9.10"
 }
 
-group = "com.mock4k"
+group = "io.github.spcookie"
 version = "1.0.0"
 
 repositories {
@@ -66,7 +66,7 @@ publishing {
             pom {
                 name.set("Mock4K")
                 description.set("A powerful mock data generation library for Kotlin and Java, inspired by Mock.js")
-                url.set("https://github.com/yourusername/mock4k")
+                url.set("https://github.com/spcookie/mock4k")
                 
                 licenses {
                     license {
@@ -77,16 +77,16 @@ publishing {
                 
                 developers {
                     developer {
-                        id.set("yourusername")
-                        name.set("Your Name")
-                        email.set("your.email@example.com")
+                        id.set("spcookie")
+                        name.set("spcookie")
+                        email.set("spcokie@qq.com")
                     }
                 }
                 
                 scm {
-                    connection.set("scm:git:git://github.com/yourusername/mock4k.git")
-                    developerConnection.set("scm:git:ssh://github.com/yourusername/mock4k.git")
-                    url.set("https://github.com/yourusername/mock4k")
+                    connection.set("scm:git:git://github.com/spcookie/mock4k.git")
+                    developerConnection.set("scm:git:ssh://github.com/spcookie/mock4k.git")
+                    url.set("https://github.com/spcookie/mock4k")
                 }
             }
         }
