@@ -299,13 +299,23 @@ gpg --armor --export-secret-keys YOUR_KEY_ID
 Create `gradle.properties` in your home directory or project root:
 
 ```properties
-ossrhUsername=your_sonatype_username
-ossrhPassword=your_sonatype_password
+centralUsername=your_sonatype_username
+centralPassword=your_sonatype_password
 signingKey=your_gpg_private_key_in_ascii_armor_format
 signingPassword=your_gpg_key_passphrase
 ```
 
-#### 4. Verify Build
+#### 4. Setup GitHub Actions Secrets (for automated publishing)
+
+If you're using GitHub Actions for automated publishing, add these secrets to your repository:
+
+- `CENTRAL_USERNAME`: Your Sonatype username
+- `CENTRAL_PASSWORD`: Your Sonatype password
+- `SIGNING_KEY`: Your GPG private key in ASCII armor format
+- `SIGNING_PASSWORD`: Your GPG key passphrase
+- `GITHUB_TOKEN`: Automatically provided by GitHub Actions
+
+#### 5. Verify Build
 
 ```bash
 # Clean and build the project
@@ -318,17 +328,25 @@ signingPassword=your_gpg_key_passphrase
 ./gradlew dokkaHtml
 ```
 
-#### 5. Publish to Staging
+#### 6. Publish to Staging
 
 ```bash
 ./gradlew publishToSonatype
 ```
 
-#### 6. Release to Central
+#### 7. Release to Central
 
 ```bash
-./gradlew closeAndReleaseRepository
+./gradlew closeAndReleaseSonatypeStagingRepository
 ```
+
+#### 8. Automated Publishing via GitHub Actions
+
+The project includes GitHub Actions workflow that automatically:
+- Publishes to GitHub Packages on every release
+- Publishes to Maven Central when a release is created (if secrets are configured)
+
+To trigger automated publishing, create a new release on GitHub.
 
 ### Publish to GitHub Packages
 

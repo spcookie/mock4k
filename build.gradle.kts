@@ -31,12 +31,12 @@ tasks.test {
 
 // Configure java and kotlin interoperability
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 // Configure source code and document jar
@@ -112,9 +112,13 @@ signing {
     sign(publishing.publications["maven"])
 }
 
-// Sign only at the time of publication
+// Sign only when signing credentials are available
 tasks.withType<Sign>().configureEach {
-    onlyIf { gradle.taskGraph.hasTask("publish") }
+    onlyIf {
+        val signingKey: String? by project
+        val signingPassword: String? by project
+        !signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()
+    }
 }
 
 // Configure Nexus publishing for Central Portal
