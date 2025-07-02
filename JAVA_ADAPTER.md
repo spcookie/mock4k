@@ -1,12 +1,12 @@
-# Mock4K Java适配指南
+# Mock4K Java Integration Guide
 
-本文档介绍如何在Java项目中使用Mock4K库。Mock4K是用Kotlin编写的，但完全兼容Java，可以在Java项目中无缝使用。
+This document describes how to use the Mock4K library in Java projects. Mock4K is written in Kotlin but is fully compatible with Java and can be used seamlessly in Java projects.
 
-## 快速开始
+## Quick Start
 
-### 1. 添加依赖
+### 1. Add Dependency
 
-在你的Java项目中添加Mock4K依赖：
+Add Mock4K dependency to your Java project:
 
 ```gradle
 dependencies {
@@ -14,18 +14,18 @@ dependencies {
 }
 ```
 
-### 2. 基本使用
+### 2. Basic Usage
 
 ```java
 import com.mock4k.Mock;
 
 public class Example {
     public static void main(String[] args) {
-        // 基本mock
+        // Basic mock
         Object result = Mock.mock("Hello World");
         System.out.println(result); // "Hello World"
         
-        // 使用模板
+        // Using templates
         Map<String, Object> template = new HashMap<>();
         template.put("name", "@name");
         template.put("age|18-65", 0);
@@ -36,154 +36,154 @@ public class Example {
 }
 ```
 
-## API参考
+## API Reference
 
-### Mock类
+### Mock Class
 
-Mock4K的主要入口点，提供静态方法来生成模拟数据。
+The main entry point for Mock4K, providing static methods to generate mock data.
 
-#### 方法
+#### Methods
 
-- `Mock.mock(Object template)` - 根据模板生成数据
-- `Mock.mock(Object template, int count)` - 生成指定数量的数据
-- `Mock.Random` - 访问随机数据生成器
+- `Mock.mock(Object template)` - Generate data based on template
+- `Mock.mock(Object template, int count)` - Generate specified amount of data
+- `Mock.Random` - Access random data generators
 
-### 数据模板定义规范
+### Data Template Definition Specification
 
-#### 1. 属性值规则
+#### 1. Property Value Rules
 
-在Java中使用Map来定义对象模板：
+Use Map to define object templates in Java:
 
 ```java
 Map<String, Object> template = new HashMap<>();
 
-// 字符串重复
+// String repetition
 template.put("name|3", "Hello");        // "HelloHelloHello"
-template.put("text|2-5", "Hi");         // "HiHi" 到 "HiHiHiHiHi"
+template.put("text|2-5", "Hi");         // "HiHi" to "HiHiHiHiHi"
 
-// 数字范围
-template.put("age|18-65", 0);           // 18到65之间的整数
-template.put("price|1-100.1-3", 0.0);   // 1.1到100.999之间的浮点数
+// Number range
+template.put("age|18-65", 0);           // Integer between 18-65
+template.put("price|1-100.1-3", 0.0);   // Float between 1.1-100.999
 
-// 增量
+// Increment
 template.put("id|+1", 1);               // 1, 2, 3, 4...
 
-// 布尔值
-template.put("isActive|1", true);       // 随机true/false
+// Boolean
+template.put("isActive|1", true);       // Random true/false
 
-// 数组选择
+// Array selection
 List<String> colors = Arrays.asList("red", "green", "blue");
-template.put("color|1", colors);        // 随机选择1个颜色
-template.put("colors|1-3", colors);     // 随机选择1-3个颜色
+template.put("color|1", colors);        // Randomly select 1 color
+template.put("colors|1-3", colors);     // Randomly select 1-3 colors
 
-// 数组重复
+// Array repetition
 template.put("numbers|2", Arrays.asList(1, 2, 3)); // [1,2,3,1,2,3]
 ```
 
-#### 2. 占位符规则
+#### 2. Placeholder Rules
 
-使用`@placeholder`语法生成随机数据：
+Use `@placeholder` syntax to generate random data:
 
 ```java
-// 基本类型
-Mock.mock("@boolean");          // 随机布尔值
-Mock.mock("@integer");          // 随机整数
-Mock.mock("@integer(1,100)");   // 1-100之间的整数
-Mock.mock("@float(0,1)");       // 0-1之间的浮点数
-Mock.mock("@string(5)");        // 5位随机字符串
+// Basic types
+Mock.mock("@boolean");          // Random boolean
+Mock.mock("@integer");          // Random integer
+Mock.mock("@integer(1,100)");   // Integer between 1-100
+Mock.mock("@float(0,1)");       // Float between 0-1
+Mock.mock("@string(5)");        // 5-character random string
 
-// 日期时间
-Mock.mock("@date");             // 随机日期 "2023-05-15"
-Mock.mock("@time");             // 随机时间 "14:30:25"
-Mock.mock("@datetime");         // 随机日期时间
-Mock.mock("@now");              // 当前时间戳
+// Date and time
+Mock.mock("@date");             // Random date "2023-05-15"
+Mock.mock("@time");             // Random time "14:30:25"
+Mock.mock("@datetime");         // Random datetime
+Mock.mock("@now");              // Current timestamp
 
-// 文本
-Mock.mock("@word");             // 随机单词
-Mock.mock("@sentence");         // 随机句子
-Mock.mock("@paragraph");        // 随机段落
-Mock.mock("@title");            // 随机标题
+// Text
+Mock.mock("@word");             // Random word
+Mock.mock("@sentence");         // Random sentence
+Mock.mock("@paragraph");        // Random paragraph
+Mock.mock("@title");            // Random title
 
-// 中文文本
-Mock.mock("@cword");            // 随机中文词语
-Mock.mock("@csentence");        // 随机中文句子
-Mock.mock("@cparagraph");       // 随机中文段落
-Mock.mock("@ctitle");           // 随机中文标题
+// Chinese text
+Mock.mock("@cword");            // Random Chinese word
+Mock.mock("@csentence");        // Random Chinese sentence
+Mock.mock("@cparagraph");       // Random Chinese paragraph
+Mock.mock("@ctitle");           // Random Chinese title
 
-// 姓名
-Mock.mock("@first");            // 英文名
-Mock.mock("@last");             // 英文姓
-Mock.mock("@name");             // 英文全名
-Mock.mock("@cfirst");           // 中文名
-Mock.mock("@clast");            // 中文姓
-Mock.mock("@cname");            // 中文全名
+// Names
+Mock.mock("@first");            // English first name
+Mock.mock("@last");             // English last name
+Mock.mock("@name");             // English full name
+Mock.mock("@cfirst");           // Chinese first name
+Mock.mock("@clast");            // Chinese last name
+Mock.mock("@cname");            // Chinese full name
 
-// 网络
-Mock.mock("@url");              // 随机URL
-Mock.mock("@domain");           // 随机域名
-Mock.mock("@email");            // 随机邮箱
-Mock.mock("@ip");               // 随机IP地址
+// Network
+Mock.mock("@url");              // Random URL
+Mock.mock("@domain");           // Random domain
+Mock.mock("@email");            // Random email
+Mock.mock("@ip");               // Random IP address
 
-// 颜色
-Mock.mock("@color");            // 随机颜色 "#FF5733"
-Mock.mock("@rgb");              // RGB颜色
-Mock.mock("@rgba");             // RGBA颜色
-Mock.mock("@hsl");              // HSL颜色
+// Colors
+Mock.mock("@color");            // Random color "#FF5733"
+Mock.mock("@rgb");              // RGB color
+Mock.mock("@rgba");             // RGBA color
+Mock.mock("@hsl");              // HSL color
 
-// 其他
-Mock.mock("@guid");             // 随机GUID
-Mock.mock("@id");               // 随机ID
-Mock.mock("@image");            // 随机图片URL
-Mock.mock("@image(300x200)");   // 指定尺寸的图片URL
+// Others
+Mock.mock("@guid");             // Random GUID
+Mock.mock("@id");               // Random ID
+Mock.mock("@image");            // Random image URL
+Mock.mock("@image(300x200)");   // Image URL with specified dimensions
 ```
 
-### MockRandom类
+### MockRandom Class
 
-直接使用随机数据生成器：
+Direct access to random data generators:
 
 ```java
-import com.mock4k.random.MockRandom;
+import com.mock4k.MockRandom;
 
 MockRandom random = Mock.Random;
 
-// 基本类型
+// Basic types
 boolean bool = random.bool();
 int number = random.integer(1, 100);
 double floating = random.floating(0.0, 1.0);
 String text = random.string(10);
 
-// 日期时间
+// Date and time
 String date = random.date();
 String time = random.time();
 String datetime = random.datetime();
 
-// 文本
+// Text
 String word = random.word();
 String sentence = random.sentence();
 String paragraph = random.paragraph();
 
-// 姓名
+// Names
 String name = random.name();
 String cname = random.cname();
 
-// 网络
+// Network
 String email = random.email();
 String url = random.url();
 String ip = random.ip();
 
-// 颜色
+// Colors
 String color = random.color();
 String rgb = random.rgb();
 
-// 辅助方法
+// Utility methods
 List<String> items = Arrays.asList("a", "b", "c");
-String picked = random.pick(items);        // 随机选择一个
-List<String> shuffled = random.shuffle(items); // 打乱列表
+String picked = random.pick(items);        // Randomly pick one
+List<String> shuffled = random.shuffle(items); // Shuffle list
 ```
 
-## 完整示例
+## Complete Examples
 
-### 用户数据生成
+### User Data Generation
 
 ```java
 import com.mock4k.Mock;
@@ -191,7 +191,7 @@ import java.util.*;
 
 public class UserDataExample {
     public static void main(String[] args) {
-        // 定义用户模板
+        // Define user template
         Map<String, Object> userTemplate = new HashMap<>();
         userTemplate.put("id|+1", 1);
         userTemplate.put("name", "@name");
@@ -199,20 +199,20 @@ public class UserDataExample {
         userTemplate.put("age|18-65", 0);
         userTemplate.put("isActive", "@boolean");
         
-        // 地址信息
+        // Address information
         Map<String, Object> address = new HashMap<>();
         address.put("street", "@sentence");
         address.put("city", "@word");
         address.put("zipCode", "@integer(10000,99999)");
         userTemplate.put("address", address);
         
-        // 爱好列表
+        // Hobbies list
         List<String> hobbies = Arrays.asList(
             "reading", "swimming", "coding", "gaming", "music"
         );
         userTemplate.put("hobbies|1-3", hobbies);
         
-        // 生成用户列表
+        // Generate user list
         Map<String, Object> template = new HashMap<>();
         template.put("users|5", userTemplate);
         
@@ -222,7 +222,7 @@ public class UserDataExample {
 }
 ```
 
-### API响应模拟
+### API Response Mocking
 
 ```java
 import com.mock4k.Mock;
@@ -230,19 +230,19 @@ import java.util.*;
 
 public class ApiResponseExample {
     public static void main(String[] args) {
-        // API响应模板
+        // API response template
         Map<String, Object> response = new HashMap<>();
         response.put("code", 200);
         response.put("message", "success");
         response.put("timestamp", "@now");
         
-        // 数据部分
+        // Data section
         Map<String, Object> data = new HashMap<>();
         data.put("total|100-1000", 0);
         data.put("page|1-10", 1);
         data.put("pageSize", 20);
         
-        // 商品列表
+        // Product list
         Map<String, Object> product = new HashMap<>();
         product.put("id|+1", 1);
         product.put("name", "@title");
@@ -260,30 +260,30 @@ public class ApiResponseExample {
 }
 ```
 
-## 注意事项
+## Important Notes
 
-1. **类型转换**: 由于Java的类型系统，你可能需要进行适当的类型转换：
+1. **Type Casting**: Due to Java's type system, you may need appropriate type casting:
    ```java
    @SuppressWarnings("unchecked")
    Map<String, Object> result = (Map<String, Object>) Mock.mock(template);
    ```
 
-2. **集合类型**: 使用Java的集合类型（ArrayList, HashMap等）来定义模板。
+2. **Collection Types**: Use Java collection types (ArrayList, HashMap, etc.) to define templates.
 
-3. **空值处理**: Mock4K会返回Object类型，使用前请检查null值。
+3. **Null Handling**: Mock4K returns Object type, please check for null values before use.
 
-4. **线程安全**: MockRandom是线程安全的，可以在多线程环境中使用。
+4. **Thread Safety**: MockRandom is thread-safe and can be used in multi-threaded environments.
 
-## 与Kotlin版本的差异
+## Differences from Kotlin Version
 
-- Java版本需要显式的类型转换
-- 使用Java集合类型而不是Kotlin集合
-- 方法调用语法略有不同（Java风格）
-- 需要处理检查异常（如果有的话）
+- Java version requires explicit type casting
+- Uses Java collection types instead of Kotlin collections
+- Method call syntax is slightly different (Java style)
+- Need to handle checked exceptions (if any)
 
-## 测试
+## Testing
 
-可以使用JUnit进行测试：
+You can use JUnit for testing:
 
 ```java
 import org.junit.jupiter.api.Test;
@@ -304,4 +304,4 @@ public class MockTest {
 }
 ```
 
-更多示例请参考 `src/main/java/com/mock4k/example/JavaExample.java` 和 `src/test/java/com/mock4k/MockTest.java`。
+For more examples, please refer to `src/main/java/com/mock4k/example/JavaExample.java` and `src/test/java/com/mock4k/MockTest.java`.
