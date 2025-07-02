@@ -64,6 +64,83 @@ dependencies {
 </dependency>
 ```
 
+### GitHub Packages
+
+You can also install Mock4K from GitHub Packages:
+
+#### Gradle (Kotlin DSL)
+
+```kotlin
+repositories {
+    maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/spcookie/mock4k")
+        credentials {
+            username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+        }
+    }
+}
+
+dependencies {
+    implementation("io.github.spcookie:mock4k:1.0.0")
+}
+```
+
+#### Gradle (Groovy DSL)
+
+```groovy
+repositories {
+    maven {
+        name = "GitHubPackages"
+        url = "https://maven.pkg.github.com/spcookie/mock4k"
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+        }
+    }
+}
+
+dependencies {
+    implementation 'io.github.spcookie:mock4k:1.0.0'
+}
+```
+
+#### Maven
+
+Add the repository to your `pom.xml`:
+
+```xml
+<repositories>
+    <repository>
+        <id>github</id>
+        <url>https://maven.pkg.github.com/spcookie/mock4k</url>
+    </repository>
+</repositories>
+
+<dependency>
+    <groupId>io.github.spcookie</groupId>
+    <artifactId>mock4k</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+And configure authentication in your `~/.m2/settings.xml`:
+
+```xml
+<settings>
+    <servers>
+        <server>
+            <id>github</id>
+            <username>your_github_username</username>
+            <password>your_github_personal_access_token</password>
+        </server>
+    </servers>
+</settings>
+```
+
+> **Note**: To use GitHub Packages, you need to authenticate with a GitHub Personal Access Token. You can create one in your GitHub account settings under "Developer settings" > "Personal access tokens" with `read:packages` permission.
+
 ## 🚀 Quick Start
 
 ### Kotlin Example
@@ -252,6 +329,41 @@ signingPassword=your_gpg_key_passphrase
 ```bash
 ./gradlew closeAndReleaseRepository
 ```
+
+### Publish to GitHub Packages
+
+#### 1. Setup GitHub Personal Access Token
+
+- Go to GitHub Settings > Developer settings > Personal access tokens
+- Generate a new token with `write:packages` permission
+- Copy the token for later use
+
+#### 2. Configure Credentials
+
+Add to your `gradle.properties` file:
+
+```properties
+gpr.user=your_github_username
+gpr.key=your_github_personal_access_token
+```
+
+Or set environment variables:
+
+```bash
+export USERNAME=your_github_username
+export TOKEN=your_github_personal_access_token
+```
+
+#### 3. Publish to GitHub Packages
+
+```bash
+# Build and publish to GitHub Packages
+./gradlew publishAllPublicationsToGitHubPackagesRepository
+```
+
+#### 4. Verify Publication
+
+Check your GitHub repository's "Packages" tab to verify the publication was successful.
 
 ### Alternative: Publish to Local Repository
 

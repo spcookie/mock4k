@@ -4,6 +4,7 @@ plugins {
     `maven-publish`
     signing
     id("org.jetbrains.dokka") version "1.9.10"
+    id("io.github.gradle-nexus.publish-plugin") version "1.3.0"
 }
 
 group = "io.github.spcookie"
@@ -93,11 +94,11 @@ publishing {
     
     repositories {
         maven {
-            name = "OSSRH"
-            url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/spcookie/mock4k")
             credentials {
-                username = project.findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME")
-                password = project.findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD")
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
             }
         }
     }
@@ -114,4 +115,16 @@ signing {
 // Sign only at the time of publication
 tasks.withType<Sign>().configureEach {
     onlyIf { gradle.taskGraph.hasTask("publish") }
+}
+
+// Configure Nexus publishing for Central Portal
+nexusPublishing {
+    repositories {
+        sonatype {
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
+            username.set(project.findProperty("centralUsername") as String? ?: System.getenv("CENTRAL_USERNAME"))
+            password.set(project.findProperty("centralPassword") as String? ?: System.getenv("CENTRAL_PASSWORD"))
+        }
+    }
 }
