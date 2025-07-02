@@ -1,7 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.10"
     java
-    application
     `maven-publish`
     signing
     id("org.jetbrains.dokka") version "1.9.10"
@@ -16,8 +15,8 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
-    implementation("com.google.code.gson:gson:2.10.1")
     
+    testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
@@ -38,9 +37,7 @@ kotlin {
     jvmToolchain(11)
 }
 
-application {
-    mainClass.set("com.mock4k.example.ExampleKt")
-}
+
 
 // 配置源码和文档JAR
 java {
