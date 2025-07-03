@@ -4,15 +4,15 @@ package io.github.spcookie
  * Parser for template rules
  */
 class RuleParser {
-    
+
     private val rulePattern = Regex("^(.+?)\\|(.+)$")
-    
+
     /**
      * Parse a property key to extract name and rule
      */
     fun parse(key: String): ParsedRule {
         val match = rulePattern.find(key)
-        
+
         return if (match != null) {
             val name = match.groupValues[1]
             val ruleString = match.groupValues[2]
@@ -21,7 +21,7 @@ class RuleParser {
             ParsedRule(key, null)
         }
     }
-    
+
     private fun parseRuleString(ruleString: String): Rule? {
         return when {
             // +step pattern: name|+1
@@ -29,12 +29,12 @@ class RuleParser {
                 val step = ruleString.substring(1).toIntOrNull() ?: 1
                 Rule.Increment(step)
             }
-            
+
             // Float patterns with decimal places
             ruleString.contains(".") -> {
                 parseFloatRule(ruleString)
             }
-            
+
             // Range pattern: name|1-10
             ruleString.contains("-") -> {
                 val parts = ruleString.split("-")
@@ -46,7 +46,7 @@ class RuleParser {
                     } else null
                 } else null
             }
-            
+
             // Count pattern: name|5
             else -> {
                 val count = ruleString.toIntOrNull()
@@ -56,14 +56,14 @@ class RuleParser {
             }
         }
     }
-    
+
     private fun parseFloatRule(ruleString: String): Rule? {
         val parts = ruleString.split(".")
         if (parts.size != 2) return null
-        
+
         val integerPart = parts[0]
         val decimalPart = parts[1]
-        
+
         return when {
             // Range with decimal range: 1-10.1-3
             integerPart.contains("-") && decimalPart.contains("-") -> {
@@ -79,7 +79,7 @@ class RuleParser {
                     } else null
                 } else null
             }
-            
+
             // Count with decimal range: 5.1-3
             decimalPart.contains("-") -> {
                 val count = integerPart.toIntOrNull()
@@ -92,7 +92,7 @@ class RuleParser {
                     } else null
                 } else null
             }
-            
+
             // Range with fixed decimal places: 1-10.2
             integerPart.contains("-") -> {
                 val intParts = integerPart.split("-")
@@ -105,7 +105,7 @@ class RuleParser {
                     } else null
                 } else null
             }
-            
+
             // Count with fixed decimal places: 5.2
             else -> {
                 val count = integerPart.toIntOrNull()

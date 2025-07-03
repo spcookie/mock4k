@@ -6,27 +6,27 @@ import kotlin.reflect.full.memberFunctions
  * Resolver for @placeholder syntax
  */
 class PlaceholderResolver(private val random: MockRandom) {
-    
+
     private val placeholderPattern = Regex("@([A-Z_]+)(?:\\(([^)]*)\\))?")
-    
+
     /**
      * Resolve placeholders in a string
      */
     fun resolve(template: String): String {
         var result = template
-        
+
         placeholderPattern.findAll(template).forEach { match ->
             val placeholder = match.value
             val methodName = match.groupValues[1].lowercase()
             val params = match.groupValues[2]
-            
+
             val resolvedValue = resolvePlaceholder(methodName, params)
             result = result.replace(placeholder, resolvedValue.toString())
         }
-        
+
         return result
     }
-    
+
     private fun resolvePlaceholder(methodName: String, params: String): Any {
         return try {
             if (params.isNotEmpty()) {
@@ -39,10 +39,10 @@ class PlaceholderResolver(private val random: MockRandom) {
             "@$methodName"
         }
     }
-    
+
     private fun parseParams(params: String): List<Any> {
         if (params.isBlank()) return emptyList()
-        
+
         return params.split(",").map { param ->
             val trimmed = param.trim()
             when {
@@ -56,7 +56,7 @@ class PlaceholderResolver(private val random: MockRandom) {
             }
         }
     }
-    
+
     private fun callMethod(methodName: String): Any {
         val method = random::class.memberFunctions.find { it.name == methodName }
         return if (method != null && method.parameters.size == 1) {
@@ -65,10 +65,10 @@ class PlaceholderResolver(private val random: MockRandom) {
             "@$methodName"
         }
     }
-    
+
     private fun callMethodWithParams(methodName: String, params: List<Any>): Any {
         val methods = random::class.memberFunctions.filter { it.name == methodName }
-        
+
         for (method in methods) {
             if (method.parameters.size == params.size + 1) {
                 return try {
@@ -78,7 +78,7 @@ class PlaceholderResolver(private val random: MockRandom) {
                 }
             }
         }
-        
+
         return "@$methodName"
     }
 }
