@@ -7,7 +7,7 @@ import kotlin.reflect.full.memberFunctions
  */
 class PlaceholderResolver(private val random: MockRandom) {
 
-    private val placeholderPattern = Regex("@([A-Z_]+)(?:\\(([^)]*)\\))?")
+    private val placeholderPattern = Regex("@([a-z|A-Z]+)(?:\\(([^)]*)\\))?")
 
     /**
      * Resolve placeholders in a string
@@ -35,8 +35,8 @@ class PlaceholderResolver(private val random: MockRandom) {
             } else {
                 callMethod(methodName)
             }
-        } catch (e: Exception) {
-            "@$methodName"
+        } catch (_: Exception) {
+            "@${methodName}"
         }
     }
 
@@ -52,33 +52,44 @@ class PlaceholderResolver(private val random: MockRandom) {
                 trimmed.toDoubleOrNull() != null -> trimmed.toDouble()
                 trimmed == "true" -> true
                 trimmed == "false" -> false
+                trimmed.startsWith("PT.") -> parsePhoneType(trimmed) ?: trimmed
                 else -> trimmed
             }
         }
     }
 
+    private fun parsePhoneType(value: String): MockRandom.PhoneType? {
+        return when (value) {
+            "PT.M", "PT.MOBILE" -> MockRandom.PhoneType.MOBILE
+            "PT.L", "PT.LANDLINE" -> MockRandom.PhoneType.LANDLINE
+            "PT.TF", "PT.TOLL_FREE" -> MockRandom.PhoneType.TOLL_FREE
+            "PT.P", "PT.PREMIUM" -> MockRandom.PhoneType.PREMIUM
+            else -> null
+        }
+    }
+
     private fun callMethod(methodName: String): Any {
-        val method = random::class.memberFunctions.find { it.name == methodName }
+        val method = random::class.memberFunctions.find { it.name.lowercase() == methodName.lowercase() }
         return if (method != null && method.parameters.size == 1) {
-            method.call(random) ?: "@$methodName"
+            method.call(random) ?: "@${methodName}"
         } else {
-            "@$methodName"
+            "@${methodName}"
         }
     }
 
     private fun callMethodWithParams(methodName: String, params: List<Any>): Any {
-        val methods = random::class.memberFunctions.filter { it.name == methodName }
+        val methods = random::class.memberFunctions.filter { it.name.lowercase() == methodName.lowercase() }
 
         for (method in methods) {
             if (method.parameters.size == params.size + 1) {
                 return try {
-                    method.call(random, *params.toTypedArray()) ?: "@$methodName"
+                    method.call(random, *params.toTypedArray()) ?: "@${methodName}"
                 } catch (_: Exception) {
                     continue
                 }
             }
         }
 
-        return "@$methodName"
+        return "@${methodName}"
     }
 }

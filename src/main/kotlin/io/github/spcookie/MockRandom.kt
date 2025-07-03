@@ -27,39 +27,87 @@ object MockRandom {
     /**
      * Generate random natural number (positive integer)
      */
-    fun natural(min: Int = 0, max: Int = Int.MAX_VALUE): Int {
+    fun natural(): Int {
+        return random.nextInt(0, Int.MAX_VALUE)
+    }
+
+    /**
+     * Generate random natural number (positive integer) with range
+     */
+    fun natural(min: Int, max: Int): Int {
         return random.nextInt(min, max + 1)
     }
 
     /**
      * Generate random integer
      */
-    fun integer(min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE): Int {
+    fun integer(): Int {
+        return random.nextInt()
+    }
+
+    /**
+     * Generate random integer with range
+     */
+    fun integer(min: Int, max: Int): Int {
         return random.nextInt(min, max + 1)
     }
 
     /**
      * Generate random float
      */
-    fun float(min: Double = -9007199254740992.0, max: Double = 9007199254740992.0): Double {
+    fun float(): Double {
+        return random.nextDouble()
+    }
+
+    /**
+     * Generate random float with range
+     */
+    fun float(min: Double, max: Double): Double {
         return min + random.nextDouble() * (max - min)
     }
 
     /**
      * Generate random character
      */
-    fun character(pool: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"): Char {
+    fun character(): Char {
+        val pool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return pool[random.nextInt(pool.length)]
+    }
+
+    /**
+     * Generate random character from pool
+     */
+    fun character(pool: String): Char {
         return pool[random.nextInt(pool.length)]
     }
 
     /**
      * Generate random string
      */
-    fun string(
-        length: Int = 10,
-        pool: String = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    ): String {
+    fun string(): String {
+        return string(10)
+    }
+
+    /**
+     * Generate random string with length
+     */
+    fun string(length: Int): String {
+        val pool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         return (1..length).map { character(pool) }.joinToString("")
+    }
+
+    /**
+     * Generate random string with length and pool
+     */
+    fun string(length: Int, pool: String): String {
+        return (1..length).map { character(pool) }.joinToString("")
+    }
+
+    /**
+     * Generate range of integers
+     */
+    fun range(): List<Int> {
+        return range(0, 10)
     }
 
     /**
@@ -74,15 +122,22 @@ object MockRandom {
     /**
      * Generate random date
      */
-    fun date(format: String = "yyyy-MM-dd"): String {
-        val start = Calendar.getInstance().apply {
-            set(1970, 0, 1)
-        }.timeInMillis
-        val end = System.currentTimeMillis()
-        val randomTime = start + (random.nextDouble() * (end - start)).toLong()
+    fun date(): String {
+        return date("yyyy-MM-dd")
+    }
 
-        val formatter = SimpleDateFormat(format, Locale.getDefault())
-        return formatter.format(Date(randomTime))
+    /**
+     * Generate random date
+     */
+    fun date(format: String = "yyyy-MM-dd"): String {
+        return datetime(format)
+    }
+
+    /**
+     * Generate random time
+     */
+    fun time(): String {
+        return time("HH:mm:ss")
     }
 
     /**
@@ -106,6 +161,13 @@ object MockRandom {
     /**
      * Generate random datetime
      */
+    fun datetime(): String {
+        return datetime("yyyy-MM-dd HH:mm:ss")
+    }
+
+    /**
+     * Generate random datetime
+     */
     fun datetime(format: String = "yyyy-MM-dd HH:mm:ss"): String {
         val start = Calendar.getInstance().apply {
             set(1970, 0, 1)
@@ -118,7 +180,14 @@ object MockRandom {
     }
 
     /**
-     * Get current datetime
+     * Generate current datetime
+     */
+    fun now(): String {
+        return now("yyyy-MM-dd HH:mm:ss")
+    }
+
+    /**
+     * Generate current datetime
      */
     fun now(format: String = "yyyy-MM-dd HH:mm:ss"): String {
         val formatter = SimpleDateFormat(format, Locale.getDefault())
@@ -147,6 +216,13 @@ object MockRandom {
     /**
      * Generate random sentence
      */
+    fun sentence(): String {
+        return sentence(12, 18)
+    }
+
+    /**
+     * Generate random sentence
+     */
     fun sentence(min: Int = 12, max: Int = 18): String {
         val wordCount = random.nextInt(min, max + 1)
         val words = (1..wordCount).map { word() }
@@ -156,9 +232,23 @@ object MockRandom {
     /**
      * Generate random paragraph
      */
+    fun paragraph(): String {
+        return paragraph(3, 7)
+    }
+
+    /**
+     * Generate random paragraph
+     */
     fun paragraph(min: Int = 3, max: Int = 7): String {
         val sentenceCount = random.nextInt(min, max + 1)
-        return (1..sentenceCount).map { sentence() }.joinToString(" ")
+        return (1..sentenceCount).joinToString(" ") { sentence() }
+    }
+
+    /**
+     * Generate random title
+     */
+    fun title(): String {
+        return title(3, 7)
     }
 
     /**
@@ -166,7 +256,7 @@ object MockRandom {
      */
     fun title(min: Int = 3, max: Int = 7): String {
         val wordCount = random.nextInt(min, max + 1)
-        return (1..wordCount).map { word().replaceFirstChar { it.uppercase() } }.joinToString(" ")
+        return (1..wordCount).joinToString(" ") { word().replaceFirstChar { it.uppercase() } }
     }
 
 
@@ -175,12 +265,12 @@ object MockRandom {
     // Names are now loaded from configuration files
     private fun getFirstNames(): List<String> {
         val names = getDataList("firstNames")
-        return if (names.isNotEmpty()) names else listOf("John", "Jane", "Michael", "Sarah", "David", "Lisa")
+        return names.ifEmpty { listOf("John", "Jane", "Michael", "Sarah", "David", "Lisa") }
     }
 
     private fun getLastNames(): List<String> {
         val names = getDataList("lastNames")
-        return if (names.isNotEmpty()) names else listOf("Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia")
+        return names.ifEmpty { listOf("Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia") }
     }
 
     // Names are now loaded from configuration files
@@ -303,6 +393,13 @@ object MockRandom {
     /**
      * Generate random image URL
      */
+    fun image(): String {
+        return image("200x200", "cccccc", "ffffff", null)
+    }
+
+    /**
+     * Generate random image URL
+     */
     fun image(
         size: String = "200x200",
         background: String = "cccccc",
@@ -318,6 +415,13 @@ object MockRandom {
             }
         }
         return "https://via.placeholder.com/$size/$background/$foreground?text=$imageText"
+    }
+
+    /**
+     * Generate data image URL
+     */
+    fun dataImage(): String {
+        return dataImage("200x200")
     }
 
     /**
@@ -371,9 +475,9 @@ object MockRandom {
 
         // Generate remaining digits (except last check digit)
         val remainingLength = length - prefix.length - 1
-        val middlePart = (1..remainingLength).map {
+        val middlePart = (1..remainingLength).joinToString("") {
             integer(0, 9).toString()
-        }.joinToString("")
+        }
 
         // Front part (excluding check digit)
         val cardWithoutCheck = prefix + middlePart

@@ -20,7 +20,6 @@ dependencies {
     
     testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
-    testImplementation("junit:junit:4.13.2")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
