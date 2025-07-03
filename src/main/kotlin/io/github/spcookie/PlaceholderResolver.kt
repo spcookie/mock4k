@@ -5,7 +5,9 @@ import kotlin.reflect.full.memberFunctions
 /**
  * Resolver for @placeholder syntax
  */
-class PlaceholderResolver(private val random: MockRandom) {
+internal class PlaceholderResolver {
+
+    private val random = MockRandom
 
     private val placeholderPattern = Regex("@([a-z|A-Z]+)(?:\\(([^)]*)\\))?")
 
