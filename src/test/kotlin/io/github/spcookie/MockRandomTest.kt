@@ -9,6 +9,7 @@ import kotlin.test.assertTrue
 
 class MockRandomTest {
 
+
     @Test
     fun testBasicMock() {
         // 测试基本的模拟数据生成

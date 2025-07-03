@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
  */
 class RuleModifierAdvancedTest {
 
+
     // ==================== 字符串规则修饰符 ====================
 
     @Test

@@ -22,23 +22,23 @@ internal class PlaceholderResolver {
             val methodName = match.groupValues[1].lowercase()
             val params = match.groupValues[2]
 
-            val resolvedValue = resolvePlaceholder(methodName, params)
+            val resolvedValue = resolvePlaceholder(methodName, params, placeholder)
             result = result.replace(placeholder, resolvedValue.toString())
         }
 
         return result
     }
 
-    private fun resolvePlaceholder(methodName: String, params: String): Any {
+    private fun resolvePlaceholder(methodName: String, params: String, placeholder: String): Any {
         return try {
             if (params.isNotEmpty()) {
                 val paramList = parseParams(params)
-                callMethodWithParams(methodName, paramList)
+                callMethodWithParams(methodName, paramList, placeholder)
             } else {
-                callMethod(methodName)
+                callMethod(methodName, placeholder)
             }
         } catch (_: Exception) {
-            "@${methodName}"
+            placeholder
         }
     }
 
@@ -70,28 +70,28 @@ internal class PlaceholderResolver {
         }
     }
 
-    private fun callMethod(methodName: String): Any {
+    private fun callMethod(methodName: String, placeholder: String): Any {
         val method = random::class.memberFunctions.find { it.name.lowercase() == methodName.lowercase() }
         return if (method != null && method.parameters.size == 1) {
-            method.call(random) ?: "@${methodName}"
+            method.call(random) ?: placeholder
         } else {
-            "@${methodName}"
+            placeholder
         }
     }
 
-    private fun callMethodWithParams(methodName: String, params: List<Any>): Any {
+    private fun callMethodWithParams(methodName: String, params: List<Any>, placeholder: String): Any {
         val methods = random::class.memberFunctions.filter { it.name.lowercase() == methodName.lowercase() }
 
         for (method in methods) {
             if (method.parameters.size == params.size + 1) {
                 return try {
-                    method.call(random, *params.toTypedArray()) ?: "@${methodName}"
+                    method.call(random, *params.toTypedArray()) ?: placeholder
                 } catch (_: Exception) {
                     continue
                 }
             }
         }
 
-        return "@${methodName}"
+        return placeholder
     }
 }

@@ -16,13 +16,18 @@ object Mock {
     val Locale = LocaleManager
 
     /**
+     * Singleton MockEngine instance to maintain state across calls
+     */
+    private val mockEngine = MockEngine()
+
+    /**
      * Generate mock data based on template
      *
      * @param template The data template
      * @return Generated mock data
      */
     fun mock(template: Any): Any {
-        return MockEngine().generate(template)
+        return mockEngine.generate(template)
     }
 
     /**
@@ -33,7 +38,7 @@ object Mock {
      */
     @Suppress("UNCHECKED_CAST")
     fun mock(template: Map<String, Any>): Map<String, Any> {
-        return MockEngine().generate(template) as Map<String, Any>
+        return mockEngine.generate(template) as Map<String, Any>
     }
 
 }

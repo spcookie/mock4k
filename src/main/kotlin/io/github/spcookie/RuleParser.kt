@@ -22,12 +22,18 @@ internal class RuleParser {
         }
     }
 
+    /**
+     * Parse rule string
+     * Supports different rule types based on context
+     */
     private fun parseRuleString(ruleString: String): Rule? {
         return when {
-            // +step pattern: name|+1
+            // Increment pattern: +step (for numbers and arrays)
             ruleString.startsWith("+") -> {
                 val step = ruleString.substring(1).toIntOrNull() ?: 1
-                Rule.Increment(step)
+                // Return NumberIncrement for backward compatibility
+                // Context-specific parsing will be handled in MockEngine
+                Rule.NumberIncrement(step)
             }
 
             // Float patterns with decimal places
@@ -35,26 +41,116 @@ internal class RuleParser {
                 parseFloatRule(ruleString)
             }
 
-            // Range pattern: name|1-10
+            // Range pattern: min-max (context-dependent)
             ruleString.contains("-") -> {
                 val parts = ruleString.split("-")
                 if (parts.size == 2) {
                     val min = parts[0].toIntOrNull()
                     val max = parts[1].toIntOrNull()
                     if (min != null && max != null) {
-                        Rule.Range(min, max)
+                        // Return NumberRange for backward compatibility
+                        // Context-specific parsing will be handled in MockEngine
+                        Rule.NumberRange(min, max)
                     } else null
                 } else null
             }
 
-            // Count pattern: name|5
+            // Count pattern: count (context-dependent)
             else -> {
                 val count = ruleString.toIntOrNull()
                 if (count != null) {
-                    Rule.Count(count)
+                    // Special case for boolean probability
+                    if (count == 1) {
+                        // Could be boolean random or other single count
+                        // Context will determine the actual rule type
+                        Rule.BooleanRandom(count)
+                    } else {
+                        // Return StringCount for backward compatibility
+                        // Context-specific parsing will be handled in MockEngine
+                        Rule.StringCount(count)
+                    }
                 } else null
             }
         }
+    }
+
+    /**
+     * Parse rule string with context information for more accurate rule determination
+     */
+    fun parseWithContext(key: String, valueType: ValueType): ParsedRule {
+        val match = rulePattern.find(key)
+
+        return if (match != null) {
+            val name = match.groupValues[1]
+            val ruleString = match.groupValues[2]
+            ParsedRule(name, parseRuleStringWithContext(ruleString, valueType))
+        } else {
+            ParsedRule(key, null)
+        }
+    }
+
+    /**
+     * Parse rule string with value type context for accurate rule determination
+     */
+    private fun parseRuleStringWithContext(ruleString: String, valueType: ValueType): Rule? {
+        return when {
+            // Increment pattern: +step
+            ruleString.startsWith("+") -> {
+                val step = ruleString.substring(1).toIntOrNull() ?: 1
+                when (valueType) {
+                    ValueType.NUMBER -> Rule.NumberIncrement(step)
+                    ValueType.ARRAY -> Rule.ArrayPickSequential(step)
+                    else -> Rule.NumberIncrement(step) // fallback
+                }
+            }
+
+            // Float patterns with decimal places
+            ruleString.contains(".") -> {
+                parseFloatRule(ruleString)
+            }
+
+            // Range pattern: min-max
+            ruleString.contains("-") -> {
+                val parts = ruleString.split("-")
+                if (parts.size == 2) {
+                    val min = parts[0].toIntOrNull()
+                    val max = parts[1].toIntOrNull()
+                    if (min != null && max != null) {
+                        when (valueType) {
+                            ValueType.STRING -> Rule.StringRange(min, max)
+                            ValueType.NUMBER -> Rule.NumberRange(min, max)
+                            ValueType.BOOLEAN -> Rule.BooleanWeighted(min, max)
+                            ValueType.OBJECT -> Rule.ObjectRange(min, max)
+                            ValueType.ARRAY -> Rule.ArrayRepeatRange(min, max)
+                        }
+                    } else null
+                } else null
+            }
+
+            // Count pattern: count
+            else -> {
+                val count = ruleString.toIntOrNull()
+                if (count != null) {
+                    when (valueType) {
+                        ValueType.STRING -> Rule.StringCount(count)
+                        ValueType.NUMBER -> Rule.NumberRange(count, count) // single value
+                        ValueType.BOOLEAN -> Rule.BooleanRandom(count)
+                        ValueType.OBJECT -> Rule.ObjectCount(count)
+                        ValueType.ARRAY -> {
+                            if (count == 1) Rule.ArrayPickOne(count)
+                            else Rule.ArrayRepeatCount(count)
+                        }
+                    }
+                } else null
+            }
+        }
+    }
+
+    /**
+     * Value types for context-aware parsing
+     */
+    enum class ValueType {
+        STRING, NUMBER, BOOLEAN, OBJECT, ARRAY
     }
 
     private fun parseFloatRule(ruleString: String): Rule? {

@@ -16,28 +16,55 @@ internal class MockEngine() {
      * Generate mock data based on template
      */
     @Suppress("UNCHECKED_CAST")
-    fun generate(template: Any): Any {
+    fun generate(template: Any, context: ExecutionContext? = null): Any {
+        // For top-level calls, create a new execution context with unique instance ID
+        // For nested calls, use the provided context
+        val executionContext = context ?: ExecutionContext(ruleExecutor.generateInstanceId())
         return when (template) {
-            is Map<*, *> -> generateFromMap(template as Map<String, Any>)
-            is List<*> -> generateFromList(template)
+            is Map<*, *> -> generateFromMap(template as Map<String, Any>, executionContext)
+            is List<*> -> generateFromList(template, executionContext)
             is String -> placeholderResolver.resolve(template)
             else -> template
         }
     }
 
-    private fun generateFromMap(template: Map<String, Any>): Map<String, Any> {
+    private fun generateFromMap(template: Map<String, Any>, context: ExecutionContext): Map<String, Any> {
         val result = mutableMapOf<String, Any>()
 
         template.forEach { (key, value) ->
-            val parsedRule = ruleParser.parse(key)
-            val generatedValue = ruleExecutor.execute(parsedRule, value, this)
+            // Use context-aware parsing for better rule determination
+            val valueType = determineValueType(value)
+            val parsedRule = if (key.contains("|")) {
+                ruleParser.parseWithContext(key, valueType)
+            } else {
+                ruleParser.parse(key)
+            }
+            val childContext = context.createChildContext(parsedRule.name)
+            val generatedValue = ruleExecutor.execute(parsedRule, value, this, childContext)
             result[parsedRule.name] = generatedValue
         }
 
         return result
     }
 
-    private fun generateFromList(template: List<*>): List<Any> {
-        return template.map { generate(it ?: "") }
+    /**
+     * Determine the value type for context-aware rule parsing
+     */
+    private fun determineValueType(value: Any): RuleParser.ValueType {
+        return when (value) {
+            is String -> RuleParser.ValueType.STRING
+            is Number -> RuleParser.ValueType.NUMBER
+            is Boolean -> RuleParser.ValueType.BOOLEAN
+            is Map<*, *> -> RuleParser.ValueType.OBJECT
+            is List<*> -> RuleParser.ValueType.ARRAY
+            else -> RuleParser.ValueType.STRING // fallback
+        }
+    }
+
+    private fun generateFromList(template: List<*>, context: ExecutionContext): List<Any> {
+        return template.mapIndexed { index, item ->
+            val childContext = context.createChildContext("[$index]")
+            generate(item ?: "", childContext)
+        }
     }
 }
