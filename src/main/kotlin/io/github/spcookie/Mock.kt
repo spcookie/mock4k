@@ -28,6 +28,7 @@ object Mock {
      * @param template The data template as map
      * @return Generated mock data
      */
+    @Suppress("UNCHECKED_CAST")
     fun mock(template: Map<String, Any>): Map<String, Any> {
         return engine.generate(template) as Map<String, Any>
     }

@@ -73,7 +73,7 @@ class PlaceholderResolver(private val random: MockRandom) {
             if (method.parameters.size == params.size + 1) {
                 return try {
                     method.call(random, *params.toTypedArray()) ?: "@$methodName"
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     continue
                 }
             }

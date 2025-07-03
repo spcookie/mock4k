@@ -3,7 +3,7 @@ package io.github.spcookie
 /**
  * Core engine for mock data generation
  */
-class MockEngine(private val random: MockRandom = MockRandom) {
+class MockEngine(random: MockRandom = MockRandom) {
 
     private val ruleParser = RuleParser()
     private val ruleExecutor = RuleExecutor(random)
@@ -12,6 +12,7 @@ class MockEngine(private val random: MockRandom = MockRandom) {
     /**
      * Generate mock data based on template
      */
+    @Suppress("UNCHECKED_CAST")
     fun generate(template: Any): Any {
         return when (template) {
             is Map<*, *> -> generateFromMap(template as Map<String, Any>)

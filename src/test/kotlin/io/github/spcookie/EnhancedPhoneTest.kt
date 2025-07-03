@@ -1,6 +1,7 @@
 package io.github.spcookie
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class EnhancedPhoneTest {
@@ -15,10 +16,10 @@ class EnhancedPhoneTest {
 
     @Test
     fun testPhoneTypeGeneration() {
-        val mobilePhone = MockRandom.phoneNumber(PhoneType.MOBILE)
-        val landlinePhone = MockRandom.phoneNumber(PhoneType.LANDLINE)
-        val tollFreePhone = MockRandom.phoneNumber(PhoneType.TOLL_FREE)
-        val premiumPhone = MockRandom.phoneNumber(PhoneType.PREMIUM)
+        val mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE)
+        val landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE)
+        val tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE)
+        val premiumPhone = MockRandom.phoneNumber(MockRandom.PhoneType.PREMIUM)
 
         println("Mobile phone: $mobilePhone")
         println("Landline phone: $landlinePhone")

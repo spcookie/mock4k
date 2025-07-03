@@ -162,6 +162,6 @@ fun main() {
     println("Random boolean: ${Mock.Random.boolean()}")
     println("Random color: ${Mock.Random.color()}")
     println("Random GUID: ${Mock.Random.guid()}")
-    println("Random Chinese name: ${Mock.Random.cname()}")
+    println("Random name: ${Mock.Random.name()}")
     println("Random pick from list: ${Mock.Random.pick(listOf("apple", "banana", "orange"))}")
 }
