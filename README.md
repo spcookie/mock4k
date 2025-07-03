@@ -536,7 +536,7 @@ src/
         ├── EnhancedPhoneTest.kt   # 增强电话号码测试
         ├── Example.kt             # 使用示例
         ├── LocaleManagerTest.kt   # 国际化管理器测试
-        ├── MockRandomI18nTest.kt # 国际化随机数据测试
+        ├── MockRandomTest.kt # 国际化随机数据测试
         ├── MockTest.kt            # 主要单元测试
         ├── NameI18nTest.kt        # 姓名国际化测试
         ├── PhoneI18nTest.kt       # 电话号码国际化测试
