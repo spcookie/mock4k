@@ -112,15 +112,6 @@ signing {
     sign(publishing.publications["maven"])
 }
 
-// Sign only when signing credentials are available
-tasks.withType<Sign>().configureEach {
-    onlyIf {
-        val signingKey: String? by project
-        val signingPassword: String? by project
-        !signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()
-    }
-}
-
 // Configure Nexus publishing for Central Portal
 nexusPublishing {
     repositories {
