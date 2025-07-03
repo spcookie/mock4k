@@ -49,7 +49,7 @@ object MockRandom {
      * Generate random integer with range
      */
     fun integer(min: Int, max: Int): Int {
-        return random.nextInt(min, max + 1)
+        return random.nextInt(min, max)
     }
 
     /**
@@ -108,6 +108,13 @@ object MockRandom {
      */
     fun range(): List<Int> {
         return range(0, 10)
+    }
+
+    /**
+     * Generate range of integers
+     */
+    fun range(start: Int, stop: Int): List<Int> {
+        return range(start, stop, 1)
     }
 
     /**
@@ -601,6 +608,14 @@ object MockRandom {
      */
     fun phoneNumber(phoneType: PhoneType): String {
         return phoneNumber(format = null, phoneType = phoneType)
+    }
+
+    /**
+     * Generate phone number with default settings
+     * @return Generated phone number string
+     */
+    fun phoneNumber(): String {
+        return phoneNumber(format = null, phoneType = null)
     }
 
     /**

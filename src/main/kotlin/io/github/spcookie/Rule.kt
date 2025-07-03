@@ -3,7 +3,7 @@ package io.github.spcookie
 /**
  * Represents different types of generation rules
  */
-sealed interface Rule {
+internal sealed interface Rule {
 
     /**
      * Range rule: min-max

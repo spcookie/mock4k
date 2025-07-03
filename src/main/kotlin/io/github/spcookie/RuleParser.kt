@@ -3,7 +3,7 @@ package io.github.spcookie
 /**
  * Parser for template rules
  */
-class RuleParser {
+internal class RuleParser {
 
     private val rulePattern = Regex("^(.+?)\\|(.+)$")
 

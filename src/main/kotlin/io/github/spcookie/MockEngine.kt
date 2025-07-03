@@ -3,11 +3,14 @@ package io.github.spcookie
 /**
  * Core engine for mock data generation
  */
-class MockEngine(random: MockRandom = MockRandom) {
+internal class MockEngine() {
 
-    private val ruleParser = RuleParser()
-    private val ruleExecutor = RuleExecutor(random)
-    private val placeholderResolver = PlaceholderResolver(random)
+    private val ruleExecutor = RuleExecutor()
+
+    companion object {
+        private val ruleParser = RuleParser()
+        private val placeholderResolver = PlaceholderResolver()
+    }
 
     /**
      * Generate mock data based on template

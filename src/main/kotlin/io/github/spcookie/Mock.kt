@@ -10,7 +10,10 @@ object Mock {
      */
     val Random = MockRandom
 
-    private val engine = MockEngine()
+    /**
+     * The Locale utility instance
+     */
+    val Locale = LocaleManager
 
     /**
      * Generate mock data based on template
@@ -19,7 +22,7 @@ object Mock {
      * @return Generated mock data
      */
     fun mock(template: Any): Any {
-        return engine.generate(template)
+        return MockEngine().generate(template)
     }
 
     /**
@@ -30,18 +33,7 @@ object Mock {
      */
     @Suppress("UNCHECKED_CAST")
     fun mock(template: Map<String, Any>): Map<String, Any> {
-        return engine.generate(template) as Map<String, Any>
+        return MockEngine().generate(template) as Map<String, Any>
     }
 
-    /**
-     * Generate mock data based on template with custom random instance
-     *
-     * @param template The data template
-     * @param random Custom random instance
-     * @return Generated mock data
-     */
-    fun mock(template: Any, random: MockRandom): Any {
-        val customEngine = MockEngine(random)
-        return customEngine.generate(template)
-    }
 }

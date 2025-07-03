@@ -5,7 +5,9 @@ import kotlin.math.pow
 /**
  * Executor for generation rules
  */
-class RuleExecutor(private val random: MockRandom) {
+internal class RuleExecutor {
+
+    private val random = MockRandom
 
     private val incrementCounters = mutableMapOf<String, Int>()
 
