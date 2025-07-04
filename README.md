@@ -21,7 +21,6 @@
 - [📦 安装](#-安装)
 - [🚀 快速开始](#-快速开始)
 - [📚 可用规则](#-可用规则)
-- [🔨 构建和发布](#-构建和发布)
 - [🛠️ 开发](#-开发)
 - [🤝 贡献](#-贡献)
 - [🐛 问题反馈](#-问题反馈)
@@ -452,131 +451,6 @@ MockRandom.setLocale(Locale.CHINESE)
 val chineseName = MockRandom.name() // "张三"
 ```
 
-## 🔨 构建和发布
-
-### 构建项目
-
-```bash
-./gradlew build
-```
-
-### 生成文档
-
-```bash
-./gradlew dokkaHtml
-```
-
-### 发布到 Maven Central
-
-#### 1. 设置 OSSRH 账户
-
-- 在 [OSSRH](https://issues.sonatype.org/) 创建账户
-- 为您的组 ID 创建新的项目工单
-
-#### 2. 生成 GPG 密钥
-
-```bash
-gpg --gen-key
-gpg --list-secret-keys --keyid-format LONG
-gpg --armor --export-secret-keys YOUR_KEY_ID
-```
-
-#### 3. 配置凭据
-
-在您的主目录或项目根目录中创建 `gradle.properties`:
-
-```properties
-centralUsername=your_sonatype_username
-centralPassword=your_sonatype_password
-signingKey=your_gpg_private_key_in_ascii_armor_format
-signingPassword=your_gpg_key_passphrase
-```
-
-#### 4. 设置 GitHub Actions 密钥（用于自动发布）
-
-如果您使用 GitHub Actions 进行自动发布，请将这些密钥添加到您的仓库中：
-
-- `CENTRAL_USERNAME`: 您的 Sonatype 用户名
-- `CENTRAL_PASSWORD`: 您的 Sonatype 密码
-- `SIGNING_KEY`: ASCII armor 格式的 GPG 私钥
-- `SIGNING_PASSWORD`: 您的 GPG 密钥密码短语
-- `GITHUB_TOKEN`: 由 GitHub Actions 自动提供
-
-#### 5. 验证构建
-
-```bash
-# 清理并构建项目
-./gradlew clean build
-
-# 运行测试
-./gradlew test
-
-# 生成文档
-./gradlew dokkaHtml
-```
-
-#### 6. 发布到暂存区
-
-```bash
-./gradlew publishToSonatype
-```
-
-#### 7. 发布到 Central
-
-```bash
-./gradlew closeAndReleaseSonatypeStagingRepository
-```
-
-#### 8. 通过 GitHub Actions 自动发布
-
-项目包含 GitHub Actions 工作流，可以自动：
-
-- 在每次发布时发布到 GitHub Packages
-- 在创建发布时发布到 Maven Central（如果配置了密钥）
-
-要触发自动发布，请在 GitHub 上创建新的发布。
-
-### 发布到 GitHub Packages
-
-#### 1. 设置 GitHub 个人访问令牌
-
-- 转到 GitHub 设置 > 开发者设置 > 个人访问令牌
-- 生成具有 `write:packages` 权限的新令牌
-- 复制令牌以备后用
-
-#### 2. 配置凭据
-
-添加到您的 `gradle.properties` 文件：
-
-```properties
-gpr.user=your_github_username
-gpr.key=your_github_personal_access_token
-```
-
-或设置环境变量：
-
-```bash
-export USERNAME=your_github_username
-export TOKEN=your_github_personal_access_token
-```
-
-#### 3. 发布到 GitHub Packages
-
-```bash
-# 构建并发布到 GitHub Packages
-./gradlew publishAllPublicationsToGitHubPackagesRepository
-```
-
-#### 4. 验证发布
-
-检查您的 GitHub 仓库的 "Packages" 选项卡以验证发布是否成功。
-
-### 替代方案：发布到本地仓库
-
-```bash
-./gradlew publishToMavenLocal
-```
-
 ## 🛠️ 开发
 
 ### 项目结构
@@ -613,15 +487,240 @@ src/
 - **ParsedRule.kt**: 规则解析结果的数据结构
 - **Rule.kt**: 规则定义和相关枚举
 
-### 运行测试
+### 开发环境设置
+
+#### 前置要求
+
+- **Java 17+**: 项目使用 Java 17 作为目标版本
+- **Kotlin 1.9.10+**: 使用最新的 Kotlin 版本
+- **Gradle 8.0+**: 构建工具
+- **IDE**: 推荐使用 IntelliJ IDEA 或 Android Studio
+
+#### 克隆项目
 
 ```bash
-./gradlew test
+git clone https://github.com/spcookie/mock4k.git
+cd mock4k
 ```
 
-### 代码风格
+#### 构建项目
 
-本项目遵循 [官方 Kotlin 编码约定](https://kotlinlang.org/docs/coding-conventions.html)。
+```bash
+# 清理并构建
+./gradlew clean build
+
+# 仅编译
+./gradlew compileKotlin
+
+# 生成文档
+./gradlew dokkaHtml
+```
+
+### 开发流程
+
+#### 1. 本地开发
+
+```bash
+# 运行所有测试
+./gradlew test
+
+# 运行特定测试类
+./gradlew test --tests "*MockRandomTest*"
+
+# 持续测试（监听文件变化）
+./gradlew test --continuous
+```
+
+#### 2. 代码检查
+
+```bash
+# 检查代码风格（如果配置了 ktlint）
+./gradlew ktlintCheck
+
+# 自动修复代码风格
+./gradlew ktlintFormat
+```
+
+#### 3. 调试技巧
+
+- **单元测试调试**: 在 IDE 中直接运行和调试测试用例
+- **日志输出**: 使用 `println()` 或日志框架进行调试
+- **断点调试**: 在 IDE 中设置断点，逐步调试代码执行流程
+
+```kotlin
+// 调试示例
+fun debugMockGeneration() {
+    val template = "@name|@email"
+    println("Template: $template")
+    
+    val result = Mock.mock(template)
+    println("Result: $result")
+    
+    // 设置断点查看解析过程
+    val parsedRules = RuleParser.parse(template)
+    println("Parsed rules: $parsedRules")
+}
+```
+
+### 测试策略
+
+#### 测试结构
+
+```
+src/test/kotlin/io/github/spcookie/
+├── MockTest.kt              # 主要模拟功能测试
+├── MockRandomTest.kt        # 随机数据生成测试
+├── RuleParserTest.kt        # 规则解析测试
+├── RuleExecutorTest.kt      # 规则执行测试
+├── LocaleManagerTest.kt     # 国际化功能测试
+└── integration/             # 集成测试
+    └── EndToEndTest.kt
+```
+
+#### 测试类型
+
+- **单元测试**: 测试单个类或方法的功能
+- **集成测试**: 测试多个组件协同工作
+- **性能测试**: 测试数据生成的性能表现
+- **国际化测试**: 测试多语言环境下的功能
+
+#### 运行测试
+
+```bash
+# 运行所有测试
+./gradlew test
+
+# 运行测试并生成覆盖率报告
+./gradlew test jacocoTestReport
+
+# 运行特定测试套件
+./gradlew test --tests "*Unit*"
+./gradlew test --tests "*Integration*"
+```
+
+### 代码质量保证
+
+#### 代码风格
+
+本项目遵循以下编码规范：
+
+- **Kotlin**: [官方 Kotlin 编码约定](https://kotlinlang.org/docs/coding-conventions.html)
+- **注释规范**:
+    - 代码注释使用英文
+    - 测试代码注释使用中文
+    - 公共 API 必须有完整的 KDoc 注释
+
+#### 代码审查清单
+
+- [ ] 代码遵循项目编码规范
+- [ ] 所有公共 API 都有适当的文档注释
+- [ ] 新功能包含相应的单元测试
+- [ ] 测试覆盖率不低于 80%
+- [ ] 没有引入不必要的依赖
+- [ ] 性能关键路径经过优化
+- [ ] 国际化功能正常工作
+
+#### 提交规范
+
+使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范：
+
+```bash
+# 功能添加
+git commit -m "feat: add new random data generator for credit cards"
+
+# Bug 修复
+git commit -m "fix: resolve null pointer exception in rule parser"
+
+# 文档更新
+git commit -m "docs: update API documentation for MockRandom class"
+
+# 重构
+git commit -m "refactor: simplify rule execution logic"
+
+# 测试
+git commit -m "test: add integration tests for locale manager"
+```
+
+### 性能优化
+
+#### 性能监控
+
+```kotlin
+// 性能测试示例
+@Test
+fun `test mock generation performance`() {
+    val iterations = 10000
+    val startTime = System.currentTimeMillis()
+    
+    repeat(iterations) {
+        Mock.mock("@name|@email|@phone")
+    }
+    
+    val endTime = System.currentTimeMillis()
+    val duration = endTime - startTime
+    
+    println("Generated $iterations mocks in ${duration}ms")
+    assertTrue(duration < 1000, "Performance regression detected")
+}
+```
+
+#### 优化建议
+
+- **缓存机制**: 对解析结果进行缓存，避免重复解析
+- **对象池**: 复用对象实例，减少 GC 压力
+- **延迟初始化**: 按需加载资源文件
+- **并发安全**: 确保多线程环境下的数据一致性
+
+### 发布流程
+
+#### 版本管理
+
+使用 [语义化版本](https://semver.org/) 规范：
+
+- **主版本号**: 不兼容的 API 修改
+- **次版本号**: 向下兼容的功能性新增
+- **修订号**: 向下兼容的问题修正
+
+#### 发布检查清单
+
+- [ ] 所有测试通过
+- [ ] 文档已更新
+- [ ] 版本号已更新
+- [ ] CHANGELOG 已更新
+- [ ] 性能测试通过
+- [ ] 安全扫描通过
+
+### 故障排除
+
+#### 常见问题
+
+**编译错误**:
+
+```bash
+# 清理构建缓存
+./gradlew clean
+
+# 刷新依赖
+./gradlew --refresh-dependencies
+```
+
+**测试失败**:
+
+```bash
+# 查看详细测试报告
+open build/reports/tests/test/index.html
+
+# 运行单个失败的测试
+./gradlew test --tests "FailedTestClass.failedTestMethod"
+```
+
+**内存问题**:
+
+```bash
+# 增加 JVM 内存
+export GRADLE_OPTS="-Xmx2g -XX:MaxMetaspaceSize=512m"
+./gradlew build
+```
 
 ## 🤝 贡献
 
