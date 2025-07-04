@@ -71,16 +71,6 @@ internal class RuleExecutor {
                 is Rule.ArrayPickSequential -> executeArrayPickSequential(rule, value, engine, parsedRule.name, context)
                 is Rule.ArrayRepeatRange -> executeArrayRepeatRange(rule, value, engine, context)
                 is Rule.ArrayRepeatCount -> executeArrayRepeatCount(rule, value, engine, context)
-
-                // Legacy rules for backward compatibility
-                is Rule.Range -> executeNumberRange(Rule.NumberRange(rule.min, rule.max), value, engine)
-                is Rule.Count -> executeStringCount(Rule.StringCount(rule.count), value, engine, context)
-                is Rule.Increment -> executeNumberIncrement(
-                    Rule.NumberIncrement(rule.step),
-                    value,
-                    parsedRule.name,
-                    context
-                )
             }
         } else {
             value

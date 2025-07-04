@@ -635,7 +635,7 @@ object MockRandom {
 
     private fun getAreaCodes(): List<String> {
         val areaCodes = getDataList("areaCodes")
-        return if (areaCodes.isNotEmpty()) areaCodes else listOf("201", "202", "203", "205", "206", "207")
+        return areaCodes.ifEmpty { listOf("201", "202", "203", "205", "206", "207") }
     }
 
     /**
@@ -655,10 +655,10 @@ object MockRandom {
      */
     fun phoneNumber(
         format: String? = null,
-        phoneType: PhoneType? = null
+        phoneType: String? = null
     ): String {
         return when {
-            format != null -> generatePhoneWithFormat(format, phoneType)
+            format != null -> generatePhoneWithFormat(format, parsePhoneType(phoneType))
             else -> {
                 // Use internationalized phone format
                 val phoneFormats = getDataList("phoneFormats")
@@ -667,9 +667,21 @@ object MockRandom {
                 } else {
                     "###-###-####" // fallback
                 }
-                generatePhoneWithFormat(selectedFormat, phoneType)
+                generatePhoneWithFormat(selectedFormat, parsePhoneType(phoneType))
             }
         }
+    }
+
+    private fun parsePhoneType(value: String?): PhoneType? {
+        if (value == null) {
+            return null
+        }
+        for (type in PhoneType.entries) {
+            if (type.alias == value.uppercase()) {
+                return type
+            }
+        }
+        return null
     }
 
     /**
@@ -677,7 +689,7 @@ object MockRandom {
      * @param phoneType Phone type
      * @return Generated phone number string
      */
-    fun phoneNumber(phoneType: PhoneType): String {
+    fun phoneNumber(phoneType: String): String {
         return phoneNumber(format = null, phoneType = phoneType)
     }
 
@@ -964,11 +976,11 @@ object MockRandom {
     /**
      * Phone number type enumeration for international use
      */
-    enum class PhoneType {
-        MOBILE,     // Mobile/Cell phone
-        LANDLINE,   // Fixed line phone
-        TOLL_FREE,  // Toll-free numbers
-        PREMIUM     // Premium rate numbers
+    enum class PhoneType(val alias: String) {
+        MOBILE("M"),     // Mobile/Cell phone
+        LANDLINE("L"),   // Fixed line phone
+        TOLL_FREE("TF"),  // Toll-free numbers
+        PREMIUM("P")    // Premium rate numbers
     }
 
 }

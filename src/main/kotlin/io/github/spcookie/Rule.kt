@@ -142,28 +142,4 @@ internal sealed interface Rule {
         override fun validate(): Boolean = count >= 0
     }
 
-    // ==================== Legacy Compatibility Aliases ====================
-    /**
-     * Legacy Range rule for backward compatibility
-     */
-    @Deprecated("Use specific type rules instead", ReplaceWith("NumberRange(min, max)"))
-    data class Range(val min: Int, val max: Int) : Rule {
-        override fun validate(): Boolean = min <= max
-    }
-
-    /**
-     * Legacy Count rule for backward compatibility
-     */
-    @Deprecated("Use specific type rules instead", ReplaceWith("StringCount(count) or ArrayRepeatCount(count)"))
-    data class Count(val count: Int) : Rule {
-        override fun validate(): Boolean = count >= 0
-    }
-
-    /**
-     * Legacy Increment rule for backward compatibility
-     */
-    @Deprecated("Use NumberIncrement instead", ReplaceWith("NumberIncrement(step)"))
-    data class Increment(val step: Int) : Rule {
-        override fun validate(): Boolean = step != 0
-    }
 }

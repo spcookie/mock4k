@@ -10,13 +10,13 @@ internal class RuleParser {
     /**
      * Parse rule string with context information for more accurate rule determination
      */
-    fun parseWithContext(key: String, valueType: ValueType): ParsedRule {
+    fun parse(key: String, valueType: ValueType): ParsedRule {
         val match = rulePattern.find(key)
 
         return if (match != null) {
             val name = match.groupValues[1]
             val ruleString = match.groupValues[2]
-            ParsedRule(name, parseRuleStringWithContext(ruleString, valueType))
+            ParsedRule(name, parseRuleString(ruleString, valueType))
         } else {
             ParsedRule(key, null)
         }
@@ -25,7 +25,7 @@ internal class RuleParser {
     /**
      * Parse rule string with value type context for accurate rule determination
      */
-    private fun parseRuleStringWithContext(ruleString: String, valueType: ValueType): Rule? {
+    private fun parseRuleString(ruleString: String, valueType: ValueType): Rule? {
         return when {
             // Increment pattern: +step
             ruleString.startsWith("+") -> {

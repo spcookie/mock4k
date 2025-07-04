@@ -54,21 +54,11 @@ internal class PlaceholderResolver {
                 trimmed.toDoubleOrNull() != null -> trimmed.toDouble()
                 trimmed == "true" -> true
                 trimmed == "false" -> false
-                trimmed.startsWith("PT.") -> parsePhoneType(trimmed) ?: trimmed
                 else -> trimmed
             }
         }
     }
 
-    private fun parsePhoneType(value: String): MockRandom.PhoneType? {
-        return when (value) {
-            "PT.M", "PT.MOBILE" -> MockRandom.PhoneType.MOBILE
-            "PT.L", "PT.LANDLINE" -> MockRandom.PhoneType.LANDLINE
-            "PT.TF", "PT.TOLL_FREE" -> MockRandom.PhoneType.TOLL_FREE
-            "PT.P", "PT.PREMIUM" -> MockRandom.PhoneType.PREMIUM
-            else -> null
-        }
-    }
 
     private fun callMethod(methodName: String, placeholder: String): Any {
         val method = random::class.memberFunctions.find { it.name.lowercase() == methodName.lowercase() }

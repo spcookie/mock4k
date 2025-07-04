@@ -35,7 +35,7 @@ internal class MockEngine() {
             // Handle null values directly without processing
             if (value == null) {
                 val parsedRule = if (key.contains("|")) {
-                    ruleParser.parseWithContext(key, RuleParser.ValueType.STRING)
+                    ruleParser.parse(key, RuleParser.ValueType.STRING)
                 } else {
                     ParsedRule(key, null)
                 }
@@ -46,7 +46,7 @@ internal class MockEngine() {
             // Use context-aware parsing for better rule determination
             val valueType = determineValueType(value)
             val parsedRule = if (key.contains("|")) {
-                ruleParser.parseWithContext(key, valueType)
+                ruleParser.parse(key, valueType)
             } else {
                 ParsedRule(key, null)
             }

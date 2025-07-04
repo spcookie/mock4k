@@ -595,10 +595,10 @@ class MockRandomTest {
     @Test
     fun testPhoneTypeGeneration() {
         // 测试电话类型生成
-        val mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE)
-        val landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE)
-        val tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE)
-        val premiumPhone = MockRandom.phoneNumber(MockRandom.PhoneType.PREMIUM)
+        val mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE.alias)
+        val landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE.alias)
+        val tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE.alias)
+        val premiumPhone = MockRandom.phoneNumber(MockRandom.PhoneType.PREMIUM.alias)
 
         println("Mobile phone: $mobilePhone")
         println("Landline phone: $landlinePhone")
