@@ -16,28 +16,39 @@ internal class MockEngine() {
      * Generate mock data based on template
      */
     @Suppress("UNCHECKED_CAST")
-    fun generate(template: Any, context: ExecutionContext? = null): Any {
+    fun generate(template: Any, context: ExecutionContext? = null): Any? {
         // For top-level calls, create a new execution context with unique instance ID
         // For nested calls, use the provided context
-        val executionContext = context ?: ExecutionContext(ruleExecutor.generateInstanceId())
+        val executionContext = context ?: ExecutionContext()
         return when (template) {
-            is Map<*, *> -> generateFromMap(template as Map<String, Any>, executionContext)
+            is Map<*, *> -> generateFromMap(template as Map<String, Any?>, executionContext)
             is List<*> -> generateFromList(template, executionContext)
             is String -> placeholderResolver.resolve(template)
             else -> template
         }
     }
 
-    private fun generateFromMap(template: Map<String, Any>, context: ExecutionContext): Map<String, Any> {
-        val result = mutableMapOf<String, Any>()
+    private fun generateFromMap(template: Map<String, Any?>, context: ExecutionContext): Map<String, Any?> {
+        val result = mutableMapOf<String, Any?>()
 
         template.forEach { (key, value) ->
+            // Handle null values directly without processing
+            if (value == null) {
+                val parsedRule = if (key.contains("|")) {
+                    ruleParser.parseWithContext(key, RuleParser.ValueType.STRING)
+                } else {
+                    ParsedRule(key, null)
+                }
+                result[parsedRule.name] = null
+                return@forEach
+            }
+            
             // Use context-aware parsing for better rule determination
             val valueType = determineValueType(value)
             val parsedRule = if (key.contains("|")) {
                 ruleParser.parseWithContext(key, valueType)
             } else {
-                ruleParser.parse(key)
+                ParsedRule(key, null)
             }
             val childContext = context.createChildContext(parsedRule.name)
             val generatedValue = ruleExecutor.execute(parsedRule, value, this, childContext)
@@ -61,10 +72,10 @@ internal class MockEngine() {
         }
     }
 
-    private fun generateFromList(template: List<*>, context: ExecutionContext): List<Any> {
+    private fun generateFromList(template: List<*>, context: ExecutionContext): List<Any?> {
         return template.mapIndexed { index, item ->
-            val childContext = context.createChildContext("[$index]")
-            generate(item ?: "", childContext)
+//            val childContext = context.createChildContext("[$index]")
+            generate(item ?: "", context)
         }
     }
 }

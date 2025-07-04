@@ -1,6 +1,7 @@
 package io.github.spcookie
 
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Locale management utility for MockRandom
@@ -9,7 +10,7 @@ import java.util.*
 object LocaleManager {
 
     private var currentLocale: Locale = Locale.getDefault()
-    private val localeDataCache = mutableMapOf<String, Properties>()
+    private val localeDataCache = ConcurrentHashMap<String, Properties>()
 
     /**
      * Set current locale

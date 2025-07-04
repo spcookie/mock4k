@@ -49,7 +49,11 @@ object MockRandom {
      * Generate random integer with range
      */
     fun integer(min: Int, max: Int): Int {
-        return random.nextInt(min, max)
+        return if (min == max) {
+            min
+        } else {
+            random.nextInt(min, max + 1)
+        }
     }
 
     /**
@@ -493,6 +497,73 @@ object MockRandom {
         val checkDigit = calculateLuhnCheckDigit(cardWithoutCheck)
 
         return cardWithoutCheck + checkDigit
+    }
+
+    /**
+     * Generate bank card with default settings
+     * @return Random bank card number
+     */
+    fun bankCard(): String {
+        return bankCard(null, null, 19, "debit")
+    }
+
+    /**
+     * Generate bank card with specific bank name
+     * @param bankName Bank name
+     * @return Bank card number for specified bank
+     */
+    fun bankCard(bankName: String): String {
+        return bankCard(bankName, null, 19, "debit")
+    }
+
+    /**
+     * Generate bank card with specific length
+     * @param length Card number length
+     * @return Bank card number with specified length
+     */
+    fun bankCard(length: Int): String {
+        return bankCard(null, null, length, "debit")
+    }
+
+    /**
+     * Generate bank card with bank name and length
+     * @param bankName Bank name
+     * @param length Card number length
+     * @return Bank card number for specified bank and length
+     */
+    fun bankCard(bankName: String, length: Int): String {
+        return bankCard(bankName, null, length, "debit")
+    }
+
+    /**
+     * Generate bank card with bank name and card type
+     * @param bankName Bank name
+     * @param cardType Card type ("debit" or "credit")
+     * @return Bank card number for specified bank and type
+     */
+    fun bankCard(bankName: String, cardType: String): String {
+        return bankCard(bankName, null, 19, cardType)
+    }
+
+    /**
+     * Generate bank card with length and card type
+     * @param length Card number length
+     * @param cardType Card type ("debit" or "credit")
+     * @return Bank card number with specified length and type
+     */
+    fun bankCard(length: Int, cardType: String): String {
+        return bankCard(null, null, length, cardType)
+    }
+
+    /**
+     * Generate bank card with bank name, length and card type
+     * @param bankName Bank name
+     * @param length Card number length
+     * @param cardType Card type ("debit" or "credit")
+     * @return Bank card number for specified bank, length and type
+     */
+    fun bankCard(bankName: String, length: Int, cardType: String): String {
+        return bankCard(bankName, null, length, cardType)
     }
 
     /**

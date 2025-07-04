@@ -26,7 +26,7 @@ object Mock {
      * @param template The data template
      * @return Generated mock data
      */
-    fun mock(template: Any): Any {
+    fun mock(template: Any): Any? {
         return mockEngine.generate(template)
     }
 
@@ -37,8 +37,8 @@ object Mock {
      * @return Generated mock data
      */
     @Suppress("UNCHECKED_CAST")
-    fun mock(template: Map<String, Any>): Map<String, Any> {
-        return mockEngine.generate(template) as Map<String, Any>
+    fun mock(template: Map<String, Any>): Map<String, Any?> {
+        return mockEngine.generate(template) as Map<String, Any?>
     }
 
 }
