@@ -57,27 +57,6 @@ class SyntaxTest {
         }
 
         @Test
-        @DisplayName("Number increment rule: 'name|+step': number")
-        fun testNumberIncrement() {
-            val template = mapOf(
-                "id|+1" to 100
-            )
-
-            // Generate multiple times to test increment
-            val results = mutableListOf<Int>()
-            repeat(3) {
-                val result = mock(template) as Map<String, Any>
-                results.add(result["id"] as Int)
-            }
-
-            // Should increment by 1 each time
-
-            assertEquals(100, results[0])
-            assertEquals(101, results[1])
-            assertEquals(102, results[2])
-        }
-
-        @Test
         @DisplayName("Float range rule: 'name|min-max.dmin-dmax': number")
         fun testFloatRange() {
             val template = mapOf(
@@ -188,14 +167,18 @@ class SyntaxTest {
         @DisplayName("Array pick sequential rule: 'name|+1': array")
         fun testArrayPickSequential() {
             val template = mapOf(
-                "status|+1" to listOf("pending", "processing", "completed")
+                "list|5" to listOf(
+                    mapOf(
+                        "status|+1" to listOf("pending", "processing", "completed")
+                    )
+                )
             )
 
             // Generate multiple times to test sequential picking
             val results = mutableListOf<String>()
-            repeat(5) {
-                val result = mock(template) as Map<String, Any>
-                results.add(result["status"] as String)
+            val result = mock(template) as Map<*, *>
+            for (item in result["list"] as List<*>) {
+                results.add((item as Map<*, *>)["status"] as String)
             }
 
             // Should cycle through the array sequentially
@@ -260,13 +243,17 @@ class SyntaxTest {
         @DisplayName("Legacy Increment rule should still work")
         fun testLegacyIncrement() {
             val template = mapOf(
-                "id|+2" to 10
+                "list|3" to listOf(
+                    mapOf(
+                        "id|+2" to 10
+                    )
+                )
             )
 
             val results = mutableListOf<Int>()
-            repeat(3) {
-                val result = mock(template) as Map<String, Any>
-                results.add(result["id"] as Int)
+            val result = mock(template) as Map<*, *>
+            for (item in result["list"] as List<*>) {
+                results.add((item as Map<*, *>)["id"] as Int)
             }
 
 

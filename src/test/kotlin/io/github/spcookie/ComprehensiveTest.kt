@@ -102,6 +102,7 @@ class ComprehensiveTest {
             "age|18-65" to 25,
             "score|0-100" to 50,
             "temperature|-10-40" to 20,
+            // 'name|min-max': array - 通过重复属性值 array 生成一个新数组，重复次数大于等于 min，小于等于 max
             "items|2-8" to listOf("apple", "banana", "orange")
         )
 
@@ -115,7 +116,13 @@ class ComprehensiveTest {
         assertTrue(age in 18..65, "Age should be in range 18-65, got $age")
         assertTrue(score in 0..100, "Score should be in range 0-100, got $score")
         assertTrue(temperature in -10..40, "Temperature should be in range -10-40, got $temperature")
-        assertTrue(items.size in 2..8, "Items count should be in range 2-8, got ${items.size}")
+        // 验证数组重复范围：原数组有3个元素，重复2-8次，所以结果数组大小应该在6-24之间
+        assertTrue(
+            items.size in 6..24,
+            "Items count should be in range 6-24 (3 elements * 2-8 repetitions), got ${items.size}"
+        )
+        // 验证所有元素都来自原数组
+        assertTrue(items.all { it in listOf("apple", "banana", "orange") }, "All items should be from original array")
 
         println("Range modifier result: $result")
     }
@@ -132,11 +139,10 @@ class ComprehensiveTest {
 
         val tags = result["tags"] as List<*>
         val letters = result["letters"] as String
-        val flags = result["flags"] as Boolean
 
-        assertEquals(5, tags.size)
+        assertEquals(15, tags.size)
         assertEquals(10, letters.length)
-        assertEquals(true, flags)
+        assertEquals(true, result["flags"] is Boolean)
 
         println("Count modifier result: $result")
     }
@@ -554,8 +560,8 @@ class ComprehensiveTest {
         val result = Mock.mock(template) as Map<String, Any>
 
         // 验证边界情况处理
-        val singleItem = result["singleItem"] as List<*>
-        assertEquals(1, singleItem.size, "Single item array should have 1 item")
+        val singleItem = result["singleItem"] as String
+        assertEquals("only", singleItem, "Single item should be a only")
 
         val largeRange = result["largeRange"] as Number
         assertTrue(largeRange.toInt() in 1000..9999, "Large range should be between 1000-9999")

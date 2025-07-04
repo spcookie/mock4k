@@ -352,7 +352,7 @@ class PerformanceAndStressTest {
 
         placeholderTypes.forEach { (category, placeholders) ->
             val template = placeholders.mapIndexed { index, placeholder ->
-                "item$index" to placeholder
+                "${category}_item$index" to placeholder
             }.toMap()
 
             val iterations = 200

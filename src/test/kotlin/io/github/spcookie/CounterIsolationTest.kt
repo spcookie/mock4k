@@ -70,7 +70,7 @@ class CounterIsolationTest {
 
         // Each array element should have independent counter within the same call
         assertEquals(100, result[0]["id"])
-        assertEquals(100, result[1]["id"])
-        assertEquals(100, result[2]["id"])
+        assertEquals(101, result[1]["id"])
+        assertEquals(102, result[2]["id"])
     }
 }

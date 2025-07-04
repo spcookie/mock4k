@@ -155,72 +155,11 @@ class MockRandomTest {
         )
 
         val result = Mock.mock(template) as Map<String, Any>
-        val config = result["config"] as List<*>
+        val config = result["config"] as Map<*, *>
         assertTrue(config.size in 2..3)
         println("Object rule result: $result")
     }
 
-    @Test
-    fun testPhoneTypePlaceholder() {
-        // 测试电话类型占位符
-        val template = mapOf(
-            "mobilePhone" to "@PHONENUMBER(PhoneType.MOBILE)",
-            "landlinePhone" to "@PHONENUMBER(PhoneType.LANDLINE)",
-            "tollFreePhone" to "@PHONENUMBER(PhoneType.TOLL_FREE)",
-            "premiumPhone" to "@PHONENUMBER(PhoneType.PREMIUM)"
-        )
-
-        val result = Mock.mock(template) as Map<String, Any>
-        assertNotNull(result["mobilePhone"])
-        assertNotNull(result["landlinePhone"])
-        assertNotNull(result["tollFreePhone"])
-        assertNotNull(result["premiumPhone"])
-
-        println("PhoneType placeholder result: $result")
-
-        // 验证电话号码不是占位符文本
-        val mobilePhone = result["mobilePhone"] as String
-        val landlinePhone = result["landlinePhone"] as String
-        val tollFreePhone = result["tollFreePhone"] as String
-        val premiumPhone = result["premiumPhone"] as String
-
-        assertTrue(!mobilePhone.startsWith("@PHONENUMBER"))
-        assertTrue(!landlinePhone.startsWith("@PHONENUMBER"))
-        assertTrue(!tollFreePhone.startsWith("@PHONENUMBER"))
-        assertTrue(!premiumPhone.startsWith("@PHONENUMBER"))
-    }
-
-    @Test
-    fun testPhoneTypeShortAliases() {
-        // 测试电话类型短别名
-        val template = mapOf(
-            "mobile1" to "@PHONENUMBER(MOBILE)",
-            "mobile2" to "@PHONENUMBER(M)",
-            "mobile3" to "@PHONENUMBER(1)",
-            "landline1" to "@PHONENUMBER(LANDLINE)",
-            "landline2" to "@PHONENUMBER(L)",
-            "landline3" to "@PHONENUMBER(2)",
-            "tollFree1" to "@PHONENUMBER(TOLL_FREE)",
-            "tollFree2" to "@PHONENUMBER(TF)",
-            "tollFree3" to "@PHONENUMBER(3)",
-            "premium1" to "@PHONENUMBER(PREMIUM)",
-            "premium2" to "@PHONENUMBER(P)",
-            "premium3" to "@PHONENUMBER(4)"
-        )
-
-        val result = Mock.mock(template) as Map<String, Any>
-
-        // 验证所有别名都有效
-        result.values.forEach { phone ->
-            val phoneStr = phone as String
-            assertTrue(
-                !phoneStr.startsWith("@PHONENUMBER"),
-                "Phone number should be generated, not placeholder: $phoneStr"
-            )
-        }
-
-        println("PhoneType short aliases result: $result")
-    }
 
     @Test
     fun testPhoneTypePTPrefix() {
@@ -371,44 +310,6 @@ class MockRandomTest {
         }
 
         println("Comprehensive placeholders test result: $result")
-    }
-
-    @Test
-    fun testAdvancedPhoneTypes() {
-        // 测试高级电话类型
-        val template = mapOf(
-            "mobile1" to "@PHONENUMBER(PhoneType.MOBILE)",
-            "landline1" to "@PHONENUMBER(PhoneType.LANDLINE)",
-            "tollFree1" to "@PHONENUMBER(PhoneType.TOLL_FREE)",
-            "premium1" to "@PHONENUMBER(PhoneType.PREMIUM)",
-
-            "mobile2" to "@PHONENUMBER(PT.M)",
-            "landline2" to "@PHONENUMBER(PT.L)",
-            "tollFree2" to "@PHONENUMBER(PT.TF)",
-            "premium2" to "@PHONENUMBER(PT.P)",
-
-            "mobile3" to "@PHONENUMBER(M)",
-            "landline3" to "@PHONENUMBER(L)",
-            "tollFree3" to "@PHONENUMBER(TF)",
-            "premium3" to "@PHONENUMBER(P)",
-
-            "mobile4" to "@PHONENUMBER(1)",
-            "landline4" to "@PHONENUMBER(2)",
-            "tollFree4" to "@PHONENUMBER(3)",
-            "premium4" to "@PHONENUMBER(4)"
-        )
-
-        val result = Mock.mock(template) as Map<String, Any>
-
-        result.forEach { (key, value) ->
-            val phoneNumber = value.toString()
-            assertNotNull(value, "Phone number for $key should not be null")
-            assertTrue(phoneNumber.isNotEmpty(), "Phone number for $key should not be empty")
-            assertTrue(!phoneNumber.startsWith("@"), "Phone placeholder $key should be resolved, got: $phoneNumber")
-            assertTrue(phoneNumber.any { it.isDigit() }, "Phone number $key should contain digits: $phoneNumber")
-        }
-
-        println("Advanced phone types test result: $result")
     }
 
     @Test

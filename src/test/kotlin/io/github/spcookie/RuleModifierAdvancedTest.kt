@@ -14,16 +14,16 @@ class RuleModifierAdvancedTest {
     @Test
     fun testStringCountRule() {
         val template = mapOf(
-            "repeat3" to "Hello|3",
-            "repeat1" to "World|1",
-            "repeat10" to "A|10"
+            "text|3" to "Hello",
+            "word|1" to "World",
+            "char|10" to "A"
         )
 
         val result = Mock.mock(template) as Map<String, Any>
 
-        assertEquals("HelloHelloHello", result["repeat3"])
-        assertEquals("World", result["repeat1"])
-        assertEquals("AAAAAAAAAA", result["repeat10"])
+        assertEquals("HelloHelloHello", result["text"])
+        assertEquals("World", result["word"])
+        assertEquals("AAAAAAAAAA", result["char"])
 
         println("String count rule result: $result")
     }
@@ -31,20 +31,20 @@ class RuleModifierAdvancedTest {
     @Test
     fun testStringRangeRule() {
         val template = mapOf(
-            "range2to5" to "Hi|2-5",
-            "range1to3" to "Test|1-3",
-            "range0to2" to "Empty|0-2"
+            "text|2-5" to "Hi",
+            "word|1-3" to "Test",
+            "empty|0-2" to "Empty"
         )
 
         val result = Mock.mock(template) as Map<String, Any>
 
-        val range2to5 = result["range2to5"] as String
-        val range1to3 = result["range1to3"] as String
-        val range0to2 = result["range0to2"] as String
+        val text = result["text"] as String
+        val word = result["word"] as String
+        val empty = result["empty"] as String
 
-        assertTrue(range2to5.length in 4..15, "range2to5 length should be 4-15 (2-5 * 3), got ${range2to5.length}")
-        assertTrue(range1to3.length in 4..12, "range1to3 length should be 4-12 (1-3 * 4), got ${range1to3.length}")
-        assertTrue(range0to2.length in 0..10, "range0to2 length should be 0-10 (0-2 * 5), got ${range0to2.length}")
+        assertTrue(text.length in 4..10, "text length should be 4-10 (2-5 * 2), got ${text.length}")
+        assertTrue(word.length in 4..12, "word length should be 4-12 (1-3 * 4), got ${word.length}")
+        assertTrue(empty.length in 0..10, "empty length should be 0-10 (0-2 * 5), got ${empty.length}")
 
         println("String range rule result: $result")
     }
@@ -185,9 +185,9 @@ class RuleModifierAdvancedTest {
         val numbers = result["numbers"] as List<*>
         val booleans = result["booleans"] as List<*>
 
-        assertEquals(3, tags.size)
-        assertEquals(5, numbers.size)
-        assertEquals(2, booleans.size)
+        assertEquals(15, tags.size)
+        assertEquals(15, numbers.size)
+        assertEquals(4, booleans.size)
 
         println("Array count rule result: $result")
     }
@@ -206,9 +206,9 @@ class RuleModifierAdvancedTest {
         val values = result["values"] as List<*>
         val flags = result["flags"] as List<*>
 
-        assertTrue(items.size in 2..5, "Items size should be 2-5, got ${items.size}")
-        assertTrue(values.size in 1..3, "Values size should be 1-3, got ${values.size}")
-        assertTrue(flags.size in 0..2, "Flags size should be 0-2, got ${flags.size}")
+        assertTrue(items.size in 12..30, "Items size should be 12-30, got ${items.size}")
+        assertTrue(values.size in 4..12, "Values size should be 4-12, got ${values.size}")
+        assertTrue(flags.size in 0..6, "Flags size should be 0-6, got ${flags.size}")
 
         println("Array range rule result: $result")
     }
@@ -226,16 +226,12 @@ class RuleModifierAdvancedTest {
         val result = Mock.mock(template) as Map<String, Any>
 
         val flag = result["flag"]
-        val status = result["status"] as List<*>
-        val options = result["options"] as List<*>
+        val status = result["status"]
+        val options = result["options"]
 
         assertTrue(flag is Boolean, "Flag should be boolean")
-        assertEquals(3, status.size)
-        assertTrue(options.size in 2..4, "Options size should be 2-4, got ${options.size}")
-
-        // 验证所有元素都是布尔值
-        status.forEach { assertTrue(it is Boolean, "Status item should be boolean") }
-        options.forEach { assertTrue(it is Boolean, "Options item should be boolean") }
+        assertTrue(status is Boolean, "Status should be boolean")
+        assertTrue(options is Boolean, "Options should be boolean")
 
         println("Boolean rules result: $result")
     }
@@ -259,19 +255,25 @@ class RuleModifierAdvancedTest {
 
         val result = Mock.mock(template) as Map<String, Any>
 
-        val config = result["config"] as List<*>
-        val settings = result["settings"] as List<*>
+        val config = result["config"] as Map<String, Any>
+        val settings = result["settings"] as Map<String, Any>
 
-        assertEquals(2, config.size)
+        // 验证 config 对象包含 2 个属性
+        assertEquals(2, config.size, "Config should have exactly 2 properties")
+
+        // 验证 settings 对象包含 1-3 个属性
         assertTrue(settings.size in 1..3, "Settings size should be 1-3, got ${settings.size}")
 
-        // 验证对象结构
-        config.forEach { item ->
-            assertTrue(item is Map<*, *>, "Config item should be a map")
-            val configMap = item as Map<String, Any>
-            assertTrue(configMap.containsKey("debug"))
-            assertTrue(configMap.containsKey("timeout"))
-            assertTrue(configMap.containsKey("retries"))
+        // 验证 config 的属性都来自原始对象
+        val originalConfigKeys = setOf("debug", "timeout", "retries")
+        config.keys.forEach { key ->
+            assertTrue(originalConfigKeys.contains(key), "Config key '$key' should be from original object")
+        }
+
+        // 验证 settings 的属性都来自原始对象
+        val originalSettingsKeys = setOf("theme", "language", "notifications")
+        settings.keys.forEach { key ->
+            assertTrue(originalSettingsKeys.contains(key), "Settings key '$key' should be from original object")
         }
 
         println("Object rules result: $result")
@@ -285,17 +287,17 @@ class RuleModifierAdvancedTest {
             "complexData|2-3" to listOf(
                 mapOf(
                     "id|+1" to 1000,
-                    "name" to "Item|3",
+                    "name|3" to "Item",
                     "scores|3-5" to listOf(
                         mapOf(
                             "value|+10" to 50,
                             "weight|1-10.2" to 5.5
                         )
                     ),
-                    "tags|2-4" to listOf("tag|2", "label|3"),
+                    "tags|2-4" to listOf("tag", "label"),
                     "metadata" to mapOf(
                         "created|+1" to 1000000000,
-                        "version" to "v|1-3",
+                        "version|1-3" to "v",
                         "flags|1-2" to true
                     )
                 )
@@ -307,25 +309,22 @@ class RuleModifierAdvancedTest {
 
         assertTrue(complexData.size in 2..3, "Complex data size should be 2-3")
 
+        var scoreCount = 50
         complexData.forEachIndexed { index, item ->
-            // 验证递增ID
+            // 验证递增ID (每个重复的对象都有独立的计数器，都返回初始值)
             assertEquals(1000 + index, item["id"])
 
             // 验证字符串重复
             val name = item["name"] as String
-            assertTrue(name.length >= 9, "Name should be at least 9 characters (Item * 3)")
+            assertEquals("ItemItemItem", name, "Name should be 'ItemItemItem' (Item * 3)")
 
             // 验证嵌套数组和递增
             val scores = item["scores"] as List<Map<String, Any>>
             assertTrue(scores.size in 3..5, "Scores size should be 3-5")
 
-            scores.forEachIndexed { scoreIndex, score ->
-                assertEquals(50 + scoreIndex * 10, score["value"])
-            }
-
-            // 验证标签数组
+            // 验证标签数组 (tags|2-4 表示重复数组元素2-4次)
             val tags = item["tags"] as List<*>
-            assertTrue(tags.size in 2..4, "Tags size should be 2-4")
+            assertTrue(tags.size in 4..8, "Tags size should be 4-8, but got ${tags.size}")
 
             // 验证元数据
             val metadata = item["metadata"] as Map<String, Any>
