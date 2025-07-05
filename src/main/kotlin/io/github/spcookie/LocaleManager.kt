@@ -53,14 +53,14 @@ object LocaleManager {
         try {
             val inputStream = this::class.java.getResourceAsStream(resourceName)
             if (inputStream != null) {
-                properties.load(inputStream)
-                inputStream.close()
+                inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
+                    properties.load(reader)
+                }
             } else {
                 // Fallback to default properties if specific locale not found
                 val defaultStream = this::class.java.getResourceAsStream("/messages.properties")
-                if (defaultStream != null) {
-                    properties.load(defaultStream)
-                    defaultStream.close()
+                defaultStream?.bufferedReader(Charsets.UTF_8)?.use { reader ->
+                    properties.load(reader)
                 }
             }
         } catch (e: Exception) {
