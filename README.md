@@ -515,36 +515,6 @@ cd mock4k
 ./gradlew dokkaHtml
 ```
 
-#### 常见问题
-
-**编译错误**:
-
-```bash
-# 清理构建缓存
-./gradlew clean
-
-# 刷新依赖
-./gradlew --refresh-dependencies
-```
-
-**测试失败**:
-
-```bash
-# 查看详细测试报告
-open build/reports/tests/test/index.html
-
-# 运行单个失败的测试
-./gradlew test --tests "FailedTestClass.failedTestMethod"
-```
-
-**内存问题**:
-
-```bash
-# 增加 JVM 内存
-export GRADLE_OPTS="-Xmx2g -XX:MaxMetaspaceSize=512m"
-./gradlew build
-```
-
 ## 🤝 贡献
 
 欢迎贡献！请随时提交 Pull Request。
