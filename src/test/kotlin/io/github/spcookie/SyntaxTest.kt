@@ -1,6 +1,5 @@
 package io.github.spcookie
 
-import io.github.spcookie.Mock.mock
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.DisplayName
@@ -23,7 +22,7 @@ class SyntaxTest {
             val template = mapOf(
                 "name|3" to "hello"
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
 
             assertEquals("hellohellohello", result["name"])
         }
@@ -34,7 +33,7 @@ class SyntaxTest {
             val template = mapOf(
                 "name|2-4" to "hi"
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
             val value = result["name"] as String
             assertTrue(value.length in 4..8) // "hi" repeated 2-4 times
             assertTrue(value.startsWith("hi"))
@@ -51,7 +50,7 @@ class SyntaxTest {
             val template = mapOf(
                 "age|18-65" to 0
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
             val age = result["age"] as Int
             assertTrue(age in 18..65)
         }
@@ -62,7 +61,7 @@ class SyntaxTest {
             val template = mapOf(
                 "price|10-20.2-4" to 0.0
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
             val price = result["price"] as Double
             assertTrue(price >= 10.0 && price <= 20.9999)
         }
@@ -82,7 +81,7 @@ class SyntaxTest {
             // Generate multiple times to ensure randomness
             val results = mutableSetOf<Boolean>()
             repeat(20) {
-                val result = mock(template) as Map<String, Any>
+                val result = Mock.mock(template) as Map<String, Any>
                 results.add(result["isActive"] as Boolean)
             }
 
@@ -101,7 +100,7 @@ class SyntaxTest {
             var trueCount = 0
             val totalTests = 100
             repeat(totalTests) {
-                val result = mock(template) as Map<String, Any>
+                val result = Mock.mock(template) as Map<String, Any>
                 if (result["isVip"] as Boolean) trueCount++
             }
 
@@ -126,7 +125,7 @@ class SyntaxTest {
                     "phone" to "@phone"
                 )
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
             val user = result["user"] as Map<String, Any>
             assertEquals(2, user.size)
         }
@@ -142,7 +141,7 @@ class SyntaxTest {
                     "cache" to false
                 )
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
             val config = result["config"] as Map<String, Any>
             assertTrue(config.size in 1..3)
         }
@@ -155,10 +154,10 @@ class SyntaxTest {
         @Test
         @DisplayName("Array pick one rule: 'name|1': array")
         fun testArrayPickOne() {
-            val template = mapOf(
+            val template: Map<String, *> = mapOf(
                 "color|1" to listOf("red", "green", "blue", "yellow")
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template)
             val color = result["color"] as String
             assertTrue(color in listOf("red", "green", "blue", "yellow"))
         }
@@ -176,7 +175,7 @@ class SyntaxTest {
 
             // Generate multiple times to test sequential picking
             val results = mutableListOf<String>()
-            val result = mock(template) as Map<*, *>
+            val result = Mock.mock(template) as Map<*, *>
             for (item in result["list"] as List<*>) {
                 results.add((item as Map<*, *>)["status"] as String)
             }
@@ -195,7 +194,7 @@ class SyntaxTest {
             val template = mapOf(
                 "tags|2" to listOf("kotlin", "java")
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
             val tags = result["tags"] as List<String>
             assertEquals(4, tags.size) // 2 repetitions of 2 elements
             assertTrue(tags.all { it in listOf("kotlin", "java") })
@@ -207,7 +206,7 @@ class SyntaxTest {
             val template = mapOf(
                 "items|1-3" to listOf("item1", "item2")
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
             val items = result["items"] as List<String>
             assertTrue(items.size in 2..6) // 1-3 repetitions of 2 elements
             assertTrue(items.all { it in listOf("item1", "item2") })
@@ -224,7 +223,7 @@ class SyntaxTest {
             val template = mapOf(
                 "count|5-10" to 0
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
             val count = result["count"] as Int
             assertTrue(count in 5..10)
         }
@@ -235,7 +234,7 @@ class SyntaxTest {
             val template = mapOf(
                 "text|3" to "abc"
             )
-            val result = mock(template) as Map<String, Any>
+            val result = Mock.mock(template) as Map<String, Any>
             assertEquals("abcabcabc", result["text"])
         }
 
@@ -251,7 +250,7 @@ class SyntaxTest {
             )
 
             val results = mutableListOf<Int>()
-            val result = mock(template) as Map<*, *>
+            val result = Mock.mock(template) as Map<*, *>
             for (item in result["list"] as List<*>) {
                 results.add((item as Map<*, *>)["id"] as Int)
             }

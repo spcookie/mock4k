@@ -19,7 +19,7 @@ internal class RuleExecutor {
         engine: MockEngine,
         context: ExecutionContext = ExecutionContext()
     ): Any? {
-        val rule = parsedRule.rule ?: return engine.generate(value, context.createChildContext(parsedRule.name))
+        val rule = parsedRule.rule ?: return engine.generate(value, context)
 
         return if (rule.validate()) {
             when (rule) {
@@ -143,7 +143,10 @@ internal class RuleExecutor {
                     val keyStr = key.toString()
                     val originalValue = value[key]
                     val childContext = context.createChildContext(keyStr)
-                    result[keyStr] = originalValue?.let { engine.generate(it, childContext) } ?: ""
+                    val generatedValue = originalValue?.let { engine.generate(it, childContext) } ?: ""
+                    result[keyStr] = generatedValue
+                    // Store the generated value in context for future reference
+                    context.storeResolvedValue(keyStr, generatedValue)
                 }
                 result
             }

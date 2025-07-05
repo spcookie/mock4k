@@ -18,7 +18,7 @@ object Mock {
     /**
      * Singleton MockEngine instance to maintain state across calls
      */
-    private val mockEngine = MockEngine()
+    internal val mockEngine = MockEngine()
 
     /**
      * Generate mock data based on template
@@ -26,19 +26,41 @@ object Mock {
      * @param template The data template
      * @return Generated mock data
      */
-    fun mock(template: Any): Any? {
-        return mockEngine.generate(template)
+    fun g(template: Any): Any {
+        return mockEngine.generate(template)!!
     }
 
-    /**
-     * Generate mock data based on template map
-     *
-     * @param template The data template as map
-     * @return Generated mock data
-     */
-    @Suppress("UNCHECKED_CAST")
-    fun mock(template: Map<String, Any>): Map<String, Any?> {
-        return mockEngine.generate(template) as Map<String, Any?>
-    }
+}
 
+/**
+ * Generate mock data based on template map
+ *
+ * @param template The data template as map
+ * @return Generated mock data
+ */
+@Suppress("UNCHECKED_CAST")
+fun Mock.mock(template: Map<String, *>): Map<String, *> {
+    return g(template as Any) as Map<String, *>
+}
+
+/**
+ * Generate mock data based on template list
+ *
+ * @param template The data template as map
+ * @return Generated mock data
+ */
+@Suppress("UNCHECKED_CAST")
+fun Mock.mock(template: List<*>): List<*> {
+    return g(template as Any) as List<*>
+}
+
+/**
+ * Generate mock data based on template string
+ *
+ * @param template The data template as map
+ * @return Generated mock data
+ */
+@Suppress("UNCHECKED_CAST")
+fun Mock.mock(template: String): String {
+    return g(template as Any) as String
 }

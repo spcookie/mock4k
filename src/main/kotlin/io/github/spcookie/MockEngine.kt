@@ -10,6 +10,18 @@ internal class MockEngine() {
     companion object {
         private val ruleParser = RuleParser()
         private val placeholderResolver = PlaceholderResolver()
+        private val regexResolver = RegexResolver()
+    }
+
+    /**
+     * Resolve string template by first handling regex patterns, then placeholders
+     */
+    private fun resolveString(template: String, context: ExecutionContext): String {
+        // First, handle regex patterns
+        val regexResult = regexResolver.resolveRegexPatterns(template)
+
+        // Then handle @placeholder syntax
+        return placeholderResolver.resolve(regexResult, context)
     }
 
     /**
@@ -23,7 +35,7 @@ internal class MockEngine() {
         return when (template) {
             is Map<*, *> -> generateFromMap(template as Map<String, Any?>, executionContext)
             is List<*> -> generateFromList(template, executionContext)
-            is String -> placeholderResolver.resolve(template)
+            is String -> resolveString(template, executionContext)
             else -> template
         }
     }
@@ -40,6 +52,7 @@ internal class MockEngine() {
                     ParsedRule(key, null)
                 }
                 result[parsedRule.name] = null
+                context.storeResolvedValue(parsedRule.name, null)
                 return@forEach
             }
             
@@ -53,6 +66,9 @@ internal class MockEngine() {
             val childContext = context.createChildContext(parsedRule.name)
             val generatedValue = ruleExecutor.execute(parsedRule, value, this, childContext)
             result[parsedRule.name] = generatedValue
+
+            // Store the resolved value in context for future reference
+            context.storeResolvedValue(parsedRule.name, generatedValue)
         }
 
         return result
