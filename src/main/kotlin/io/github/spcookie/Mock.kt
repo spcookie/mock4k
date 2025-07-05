@@ -49,7 +49,7 @@ fun Mock.mock(template: Map<String, *>): Map<String, *> {
 /**
  * Generate mock data based on template list
  *
- * @param template The data template as map
+ * @param template The data template as list
  * @return Generated mock data
  */
 @Suppress("UNCHECKED_CAST")
@@ -60,10 +60,9 @@ fun Mock.mock(template: List<*>): List<*> {
 /**
  * Generate mock data based on template string
  *
- * @param template The data template as map
+ * @param template The data template as string
  * @return Generated mock data
  */
-@Suppress("UNCHECKED_CAST")
-fun Mock.mock(template: String): String {
-    return g(template as Any) as String
+fun Mock.mock(template: String): Any {
+    return g(template as Any)
 }

@@ -10,16 +10,29 @@ import kotlin.reflect.full.memberFunctions
  */
 internal class PlaceholderResolver {
 
-    private val random = MockRandom
+    companion object {
+        /**
+         * Pattern for matching placeholder syntax: @methodName or @methodName(params)
+         * Groups: 1 = method name, 2 = parameters (optional)
+         */
+        private val PLACEHOLDER_PATTERN = Regex("@([a-zA-Z][a-zA-Z0-9]*(?:\\.[a-zA-Z0-9]+)*)(?:\\(([^)]*)\\))?")
 
-    private val placeholderPattern = Regex("@([a-zA-Z][a-zA-Z0-9]*(?:\\.[a-zA-Z0-9]+)*)(?:\\(([^)]*)\\))?")
+        /**
+         * Pattern for matching a single placeholder that spans the entire string
+         * Used to determine if we should preserve the original type or convert to string
+         */
+        private val SINGLE_PLACEHOLDER_PATTERN =
+            Regex("^@([a-zA-Z][a-zA-Z0-9]*(?:\\.[a-zA-Z0-9]+)*)(?:\\(([^)]*)\\))?$")
+    }
+
+    private val random = MockRandom
 
     /**
      * Resolve placeholders in a string
      */
     fun resolve(template: String, context: ExecutionContext? = null): String {
         // Handle @placeholder syntax
-        return placeholderPattern.findAll(template).fold(template) { acc, match ->
+        return PLACEHOLDER_PATTERN.findAll(template).fold(template) { acc, match ->
             val fullMatch = match.value
             val methodName = match.groupValues[1]
             val params = match.groupValues.getOrNull(2) ?: ""
@@ -27,6 +40,36 @@ internal class PlaceholderResolver {
             val resolved = resolvePlaceholder(methodName, params, fullMatch, context)
             acc.replace(fullMatch, resolved.toString())
         }
+    }
+
+    /**
+     * Resolve string template with smart type detection
+     * Determines whether to return original type (for single placeholder) or string (for multiple parts)
+     */
+    fun resolveStringTemplate(template: String, context: ExecutionContext? = null): Any {
+        // Check if the template is a single placeholder
+        val match = SINGLE_PLACEHOLDER_PATTERN.matchEntire(template.trim())
+
+        return if (match != null) {
+            // Single placeholder - preserve original type
+            resolveSinglePlaceholder(template, context)
+        } else {
+            // Template with multiple parts - return as string
+            resolve(template, context)
+        }
+    }
+
+    /**
+     * Resolve a single placeholder while preserving its original type
+     */
+    fun resolveSinglePlaceholder(template: String, context: ExecutionContext? = null): Any {
+        val match = PLACEHOLDER_PATTERN.find(template)
+        if (match != null) {
+            val methodName = match.groupValues[1]
+            val params = match.groupValues.getOrNull(2) ?: ""
+            return resolvePlaceholder(methodName, params, match.value, context)
+        }
+        return template
     }
 
 
@@ -45,8 +88,14 @@ internal class PlaceholderResolver {
                 }
             }
 
-            // If not a property reference, try built-in placeholders
+            // Second, try custom placeholders
             val lowercaseMethodName = methodName.lowercase()
+            val customResult = resolveExtendedPlaceholder(lowercaseMethodName, params, placeholder)
+            if (customResult != placeholder) {
+                return customResult
+            }
+
+            // Finally, try built-in placeholders
             val result = if (params.isNotEmpty()) {
                 val paramList = parseParams(params)
                 callMethodWithParams(lowercaseMethodName, paramList, placeholder)
@@ -70,6 +119,32 @@ internal class PlaceholderResolver {
         } else {
             // Relative path reference (within current context)
             context.getResolvedValue(propertyPath)
+        }
+    }
+
+    /**
+     * Resolve custom placeholder
+     */
+    private fun resolveExtendedPlaceholder(methodName: String, params: String, placeholder: String): Any {
+        return try {
+            val lowerMethodName = methodName.lowercase()
+            if (params.isNotEmpty()) {
+                // Try custom placeholder with parameters
+                val customGenerator = random.getExtendedWithParams(lowerMethodName)
+                if (customGenerator != null) {
+                    val paramList = parseParams(params)
+                    return customGenerator(paramList)
+                }
+            } else {
+                // Try custom placeholder without parameters
+                val customGenerator = random.getExtended(lowerMethodName)
+                if (customGenerator != null) {
+                    return customGenerator()
+                }
+            }
+            placeholder
+        } catch (_: Exception) {
+            placeholder
         }
     }
 

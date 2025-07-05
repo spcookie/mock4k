@@ -15,6 +15,16 @@ object MockRandom {
 
     private val random = Random.Default
 
+    /**
+     * Registry for extended placeholder generators
+     */
+    private val extended = mutableMapOf<String, () -> Any>()
+
+    /**
+     * Registry for extended placeholder generators with parameters
+     */
+    private val extendedWithParams = mutableMapOf<String, (List<Any>) -> Any>()
+
     // Basic types
 
     /**
@@ -984,6 +994,142 @@ object MockRandom {
         LANDLINE("L"),   // Fixed line phone
         TOLL_FREE("TF"),  // Toll-free numbers
         PREMIUM("P")    // Premium rate numbers
+    }
+
+    // Extension methods
+
+    /**
+     * Extend MockRandom with custom placeholder generators
+     *
+     * @param placeholders Map of placeholder name to generator function
+     * @return MockRandom instance for chaining
+     */
+    fun extend(placeholders: Map<String, () -> Any>): MockRandom {
+        synchronized(this) {
+            placeholders.forEach { (key, value) ->
+                extended[key.lowercase()] = value
+            }
+        }
+        return this
+    }
+
+    /**
+     * Extend MockRandom with custom placeholder generators that accept parameters
+     *
+     * @param placeholders Map of placeholder name to generator function with parameters
+     * @return MockRandom instance for chaining
+     */
+    fun extendWithParams(placeholders: Map<String, (List<Any>) -> Any>): MockRandom {
+        synchronized(this) {
+            placeholders.forEach { (key, value) ->
+                extendedWithParams[key.lowercase()] = value
+            }
+        }
+        return this
+    }
+
+    /**
+     * Register a single custom placeholder generator
+     *
+     * @param name Placeholder name
+     * @param generator Generator function
+     * @return MockRandom instance for chaining
+     */
+    fun extend(name: String, generator: () -> Any): MockRandom {
+        synchronized(this) {
+            extended[name.lowercase()] = generator
+        }
+        return this
+    }
+
+    /**
+     * Register a single custom placeholder generator with parameters
+     *
+     * @param name Placeholder name
+     * @param generator Generator function that accepts parameters
+     * @return MockRandom instance for chaining
+     */
+    fun extendWithParams(name: String, generator: (List<Any>) -> Any): MockRandom {
+        synchronized(this) {
+            extendedWithParams[name.lowercase()] = generator
+        }
+        return this
+    }
+
+    /**
+     * Get extended placeholder generator by name
+     *
+     * @param name Placeholder name
+     * @return Generator function or null if not found
+     */
+    internal fun getExtended(name: String): (() -> Any)? {
+        return synchronized(this) {
+            extended[name.lowercase()]
+        }
+    }
+
+    /**
+     * Get extended placeholder generator with parameters by name
+     *
+     * @param name Placeholder name
+     * @return Generator function or null if not found
+     */
+    internal fun getExtendedWithParams(name: String): ((List<Any>) -> Any)? {
+        return synchronized(this) {
+            extendedWithParams[name.lowercase()]
+        }
+    }
+
+    /**
+     * Check if an extended placeholder exists
+     *
+     * @param name Placeholder name
+     * @return true if placeholder exists, false otherwise
+     */
+    fun hasExtended(name: String): Boolean {
+        return synchronized(this) {
+            val lowerName = name.lowercase()
+            extended.containsKey(lowerName) || extendedWithParams.containsKey(lowerName)
+        }
+    }
+
+    /**
+     * Remove an extended placeholder
+     *
+     * @param name Placeholder name
+     * @return MockRandom instance for chaining
+     */
+    fun removeExtended(name: String): MockRandom {
+        synchronized(this) {
+            val lowerName = name.lowercase()
+            extended.remove(lowerName)
+            extendedWithParams.remove(lowerName)
+        }
+        return this
+    }
+
+    /**
+     * Clear all extended placeholders
+     *
+     * @return MockRandom instance for chaining
+     */
+    fun clearExtended(): MockRandom {
+        synchronized(this) {
+            extended.clear()
+            extendedWithParams.clear()
+        }
+        return this
+    }
+
+    /**
+     * Get all registered extended placeholder names
+     *
+     * @return Set of placeholder names
+     */
+    fun getExtendedNames(): Set<String> {
+        return synchronized(this) {
+            extended.keys + extendedWithParams.keys
+        }
     }
 
 }

@@ -19,12 +19,12 @@ internal class MockEngine() {
     /**
      * Resolve string template by first handling regex patterns, then placeholders
      */
-    private fun resolveString(template: String, context: ExecutionContext): String {
+    private fun resolveString(template: String, context: ExecutionContext): Any {
         // First, handle regex patterns
         val regexResult = regexResolver.resolveRegexPatterns(template)
 
-        // Then handle @placeholder syntax
-        return placeholderResolver.resolve(regexResult, context)
+        // Use PlaceholderResolver to handle both single and multiple placeholder resolution
+        return placeholderResolver.resolveStringTemplate(regexResult, context)
     }
 
     /**
@@ -93,7 +93,6 @@ internal class MockEngine() {
 
     private fun generateFromList(template: List<*>, context: ExecutionContext): List<Any?> {
         return template.mapIndexed { index, item ->
-//            val childContext = context.createChildContext("[$index]")
             generate(item ?: "", context)
         }
     }
