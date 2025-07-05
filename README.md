@@ -10,7 +10,6 @@
 [![GitHub issues](https://img.shields.io/github/issues/spcookie/mock4k.svg)](https://github.com/spcookie/mock4k/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/spcookie/mock4k.svg)](https://github.com/spcookie/mock4k/pulls)
 [![Codecov](https://img.shields.io/codecov/c/github/spcookie/mock4k.svg)](https://codecov.io/gh/spcookie/mock4k)
-[![Maven Central Downloads](https://img.shields.io/maven-central/dt/io.github.spcookie/mock4k.svg)](https://search.maven.org/artifact/io.github.spcookie/mock4k)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://spcookie.github.io/mock4k/)
 
 一个强大的 Kotlin 和 Java 模拟数据生成库。
@@ -45,7 +44,7 @@
 
 ```kotlin
 dependencies {
-    implementation("io.github.spcookie:mock4k:1.0.0")
+    implementation("io.github.spcookie:mock4k:1.1.1")
 }
 ```
 
@@ -53,7 +52,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'io.github.spcookie:mock4k:1.0.0'
+    implementation 'io.github.spcookie:mock4k:1.1.1'
 }
 ```
 
@@ -63,7 +62,7 @@ dependencies {
 <dependency>
     <groupId>io.github.spcookie</groupId>
     <artifactId>mock4k</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 
@@ -86,7 +85,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.spcookie:mock4k:1.0.0")
+    implementation("io.github.spcookie:mock4k:1.1.1")
 }
 ```
 
@@ -105,7 +104,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.spcookie:mock4k:1.0.0'
+    implementation 'io.github.spcookie:mock4k:1.1.1'
 }
 ```
 
@@ -124,7 +123,7 @@ Add the repository to your `pom.xml`:
 <dependency>
     <groupId>io.github.spcookie</groupId>
     <artifactId>mock4k</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.1</version>
 </dependency>
 ```
 
@@ -165,10 +164,6 @@ fun main() {
     val email = Mock.mock("@email")
     println("邮箱: $email")
 
-    // 数组规则
-    val array = Mock.mock("@array(5, @string(3,10))")
-    println("数组: $array")
-
     // 复杂模板
     val user = Mock.mock("""
         {
@@ -187,9 +182,9 @@ fun main() {
     println("随机整数: $randomInt, 随机字符串: $randomString")
     
     // 国际化电话号码生成
-    val mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE)
-    val landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE)
-    val tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE)
+    val mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE.alias)
+    val landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE.alias)
+    val tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE.alias)
     println("移动电话: $mobilePhone")
     println("固定电话: $landlinePhone")
     println("免费电话: $tollFreePhone")
@@ -228,10 +223,6 @@ public class JavaExample {
         String email = Mock.mock("@email");
         System.out.println("邮箱: " + email);
 
-        // 数组规则
-        String array = Mock.mock("@array(5, @string(3,10))");
-        System.out.println("数组: " + array);
-
         // 复杂模板
         String user = Mock.mock(
             "{" +
@@ -250,9 +241,9 @@ public class JavaExample {
         System.out.println("随机整数: " + randomInt + ", 随机字符串: " + randomString);
         
         // 国际化电话号码生成
-        String mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE);
-        String landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE);
-        String tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE);
+        String mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE.alias);
+        String landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE.alias);
+        String tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE.alias);
         System.out.println("移动电话: " + mobilePhone);
         System.out.println("固定电话: " + landlinePhone);
         System.out.println("免费电话: " + tollFreePhone);
@@ -313,10 +304,10 @@ public class JavaExample {
 
 ### 正则表达式生成
 
-| 规则                    | 描述                | 示例                                    |
-|-----------------------|-------------------|---------------------------------------|
-| `/pattern/`           | 根据正则表达式模式生成字符串    | `/[a-z]{3}\d{2}/` → `"abc12"` |
-| `/pattern/`           | 支持各种正则表达式模式       | `/\d{4}-\d{2}-\d{2}/` → `"2023-12-25"` |
+| 规则          | 描述             | 示例                                     |
+|-------------|----------------|----------------------------------------|
+| `/pattern/` | 根据正则表达式模式生成字符串 | `/[a-z]{3}\d{2}/` → `"abc12"`          |
+| `/pattern/` | 支持各种正则表达式模式    | `/\d{4}-\d{2}-\d{2}/` → `"2023-12-25"` |
 
 ### 文本生成
 
@@ -354,12 +345,10 @@ public class JavaExample {
 | `@dataimage`       | 随机数据图片URL      | `"data:image/svg+xml;base64,..."`       |
 | `@dataimage(size)` | 指定尺寸的随机数据图片URL | `@dataimage("100x100")`                 |
 
-### 数组和集合
+### 集合
 
 | 规则                           | 描述                  | 示例                                  |
 |------------------------------|---------------------|-------------------------------------|
-| `@array(count, template)`    | 使用指定数量和模板生成数组       | `@array(3, @string(5))`             |
-| `@array(min, max, template)` | 生成数量在最小值和最大值之间的随机数组 | `@array(1,5, @integer(1,100))`      |
 | `@range(start, stop)`        | 生成数字范围数组            | `@range(1,10)` → `[1,2,3...10]`     |
 | `@range(start, stop, step)`  | 生成指定步长的数字范围数组       | `@range(0,10,2)` → `[0,2,4,6,8,10]` |
 
@@ -368,15 +357,10 @@ public class JavaExample {
 | 规则                           | 描述          | 示例输出                           |
 |------------------------------|-------------|--------------------------------|
 | `@phonenumber`               | 随机电话号码      | `"555-123-4567"`               |
-| `@phonenumber(format)`       | 指定格式的随机电话号码 | `@phonenumber("###-###-####")` |
-| `@phonenumber(PT.M)`         | 移动电话号码      | `"134-5678-9012"`              |
-| `@phonenumber(PT.L)`         | 固定电话号码      | `"010-1234-5678"`              |
-| `@phonenumber(PT.TF)`        | 免费电话号码      | `"800-123-4567"`               |
-| `@phonenumber(PT.P)`         | 付费电话号码      | `"900-123-4567"`               |
-| `@phonenumber(PT.MOBILE)`    | 移动电话号码      | `"134-5678-9012"`              |
-| `@phonenumber(PT.LANDLINE)`  | 固定电话号码      | `"010-1234-5678"`              |
-| `@phonenumber(PT.TOLL_FREE)` | 免费电话号码      | `"800-123-4567"`               |
-| `@phonenumber(PT.PREMIUM)`   | 付费电话号码      | `"900-123-4567"`               |
+| `@phonenumber(m)`            | 移动电话号码      | `"134-5678-9012"`              |
+| `@phonenumber(l)`            | 固定电话号码      | `"010-1234-5678"`              |
+| `@phonenumber(tf)`           | 免费电话号码      | `"800-123-4567"`               |
+| `@phonenumber(p)`            | 付费电话号码      | `"900-123-4567"`               |
 
 ### 规则修饰符
 
@@ -386,74 +370,88 @@ public class JavaExample {
 
 #### 基本语法格式
 
-| 格式     | 描述                         | 适用类型         |
-|--------|----------------------------|--------------|
-| `'name | min-max': value`           | 重复次数范围       | String, Array, Object |
-| `'name | count': value`             | 重复指定次数       | String, Array, Object |
-| `'name | min-max.dmin-dmax': value` | 浮点数范围（可变小数位） | Number |
-| `'name | min-max.dcount': value`    | 浮点数范围（固定小数位） | Number |
-| `'name | count.dmin-dmax': value`   | 浮点数（可变小数位）   | Number |
-| `'name | count.dcount': value`      | 浮点数（固定小数位）   | Number |
-| `'name | +step': value`             | 递增规则         | Number |
+| 格式                                 | 描述               | 适用类型                                   |
+|------------------------------------|------------------|----------------------------------------|
+| `'name\|min-max': value`           | 重复次数范围/数值范围/权重比例 | String, Array, Object, Number, Boolean |
+| `'name\|count': value`             | 重复指定次数/固定值/权重    | String, Array, Object, Boolean         |
+| `'name\|min-max.dmin-dmax': value` | 浮点数范围（可变小数位）     | Number                                 |
+| `'name\|min-max.dcount': value`    | 浮点数范围（固定小数位）     | Number                                 |
+| `'name\|count.dmin-dmax': value`   | 浮点数（可变小数位）       | Number                                 |
+| `'name\|count.dcount': value`      | 浮点数（固定小数位）       | Number                                 |
+| `'name\|+step': value`             | 递增规则/顺序选择        | Number, Array                          |
 
 #### 不同数据类型的修饰符行为
 
 ##### String 字符串
 
-| 修饰符       | 描述                           | 示例                | 结果   |
-|-----------|------------------------------|-------------------|------|
-| `min-max` | 通过重复字符串生成新字符串，重复次数在min-max之间 | `@string("Hello") | 2-4` | "HelloHello" 或 "HelloHelloHello" |
-| `count`   | 通过重复字符串生成新字符串，重复次数为count     | `@string("Hi")    | 3`   | "HiHiHi" |
+| 修饰符       | 描述                           | 示例                     | 结果                               |
+|-----------|------------------------------|------------------------|----------------------------------|
+| `min-max` | 通过重复字符串生成新字符串，重复次数在min-max之间 | `"text\|2-4": "Hello"` | "HelloHello" 或 "HelloHelloHello" |
+| `count`   | 通过重复字符串生成新字符串，重复次数为count     | `"text\|3": "Hi"`      | "HiHiHi"                         |
 
 ##### Number 数字
 
-| 修饰符                 | 描述                                  | 示例             | 结果        |
-|---------------------|-------------------------------------|----------------|-----------|
-| `+step`             | 属性值自动加step，生成递增数字                   | `@integer(100) | +1`       | 100, 101, 102... |
-| `min-max`           | 生成大于等于min、小于等于max的整数                | `@integer      | 1-100`    | 1-100之间的随机整数 |
-| `min-max.dmin-dmax` | 生成浮点数，整数部分在min-max间，小数位数在dmin-dmax间 | `@float        | 1-10.1-3` | 1.23 或 9.456 |
-| `min-max.dcount`    | 生成浮点数，整数部分在min-max间，小数位数固定为dcount   | `@float        | 1-10.2`   | 3.14 或 7.89 |
+| 修饰符                 | 描述                                  | 示例                        | 结果               |
+|---------------------|-------------------------------------|---------------------------|------------------|
+| `+step`             | 属性值自动加step，生成递增数字                   | `"id\|+1": 100`           | 100, 101, 102... |
+| `min-max`           | 生成大于等于min、小于等于max的整数                | `"age\|18-65": 0`         | 18-65之间的随机整数     |
+| `min-max.dmin-dmax` | 生成浮点数，整数部分在min-max间，小数位数在dmin-dmax间 | `"price\|10-20.2-4": 0.0` | 12.345 或 18.67   |
+| `min-max.dcount`    | 生成浮点数，整数部分在min-max间，小数位数固定为dcount   | `"price\|10-20.2": 0.0`   | 15.23 或 18.76    |
 
 ##### Boolean 布尔值
 
-| 修饰符       | 描述                               | 示例        | 结果   |
-|-----------|----------------------------------|-----------|------|
-| `min-max` | 随机生成布尔值，值为value的概率是min/(min+max) | `@boolean | 1-2` | true的概率为1/3 |
-| `count`   | 随机生成布尔值，值为value的概率是1/count       | `@boolean | 1`   | 固定返回value值 |
+| 修饰符       | 描述                               | 示例                  | 结果          |
+|-----------|----------------------------------|---------------------|-------------|
+| `min-max` | 随机生成布尔值，值为value的概率是min/(min+max) | `"flag\|1-3": true` | true的概率为1/4 |
+| `count`   | 随机生成布尔值，当count=1时固定返回value值      | `"flag\|1": true`   | 固定返回true    |
 
 ##### Array 数组
 
-| 修饰符       | 描述                      | 示例               | 结果   |
-|-----------|-------------------------|------------------|------|
-| `1`       | 从数组中随机选取1个元素            | `@array([1,2,3]) | 1`   | 1 或 2 或 3 |
-| `+1`      | 从数组中顺序选取1个元素            | `@array([1,2,3]) | +1`  | 按顺序返回1,2,3,1,2,3... |
-| `min-max` | 重复数组生成新数组，重复次数在min-max间 | `@array([1,2])   | 2-3` | [1,2,1,2] 或 [1,2,1,2,1,2] |
-| `count`   | 重复数组生成新数组，重复次数为count    | `@array([1,2])   | 2`   | [1,2,1,2] |
+| 修饰符       | 描述                      | 示例                                 | 结果                                            |
+|-----------|-------------------------|------------------------------------|-----------------------------------------------|
+| `1`       | 从数组中随机选取1个元素            | `"color\|1": ["red","blue"]`       | "red" 或 "blue"                                |
+| `+1`      | 从数组中顺序选取1个元素            | `"status\|+1": ["pending","done"]` | 按顺序返回pending,done,pending...                  |
+| `min-max` | 重复数组生成新数组，重复次数在min-max间 | `"items\|2-3": ["a","b"]`          | ["a","b","a","b"] 或 ["a","b","a","b","a","b"] |
+| `count`   | 重复数组生成新数组，重复次数为count    | `"tags\|2": ["java","kotlin"]`     | ["java","kotlin","java","kotlin"]             |
+
+##### Object 对象
+
+| 修饰符       | 描述                 | 示例                                                          | 结果                                             |
+|-----------|--------------------|-------------------------------------------------------------|------------------------------------------------|
+| `min-max` | 从对象中随机选取min-max个属性 | `"config\|1-2": {"debug":true,"timeout":5000}`              | {"debug":true} 或 {"debug":true,"timeout":5000} |
+| `count`   | 从对象中随机选取count个属性   | `"user\|2": {"name":"@name","age":"@age","email":"@email"}` | 包含2个随机属性的对象                                    |
 
 #### 使用示例
 
 ```kotlin
 // 字符串重复
-val template1 = Mock.mock("@string('Hello')|3") // "HelloHelloHello"
+val template1 = mapOf("text|3" to "Hello")
+val result1 = Mock.mock(template1) // {"text": "HelloHelloHello"}
 
 // 数字递增
-val template2 = Mock.mock("@integer(1000)|+1") // 1000, 1001, 1002...
+val template2 = mapOf(
+    "list|3" to listOf(
+        mapOf("id|+1" to 1000)
+    )
+)
+val result2 = Mock.mock(template2) // 生成id为1000, 1001, 1002的列表
 
 // 浮点数范围
-val template3 = Mock.mock("@float|1-10.2") // 3.14, 7.89等
+val template3 = mapOf("price|10-20.2" to 0.0)
+val result3 = Mock.mock(template3) // {"price": 15.23}
 
-// 数组重复
-val template4 = Mock.mock("@array(['a','b'])|2-3") // ["a","b","a","b"] 或更长
+// 数组选择
+val template4 = mapOf("color|1" to listOf("red", "green", "blue"))
+val result4 = Mock.mock(template4) // {"color": "red"} 或其他颜色
 
-// 复杂对象
-val user = Mock.mock("""
-{
-    "id|+1": 1000,
-    "name": "@name",
-    "tags|1-3": ["@word"],
-    "score|1-100.1-2": 1
-}
-""")
+// 复杂对象示例
+val complexTemplate = mapOf(
+    "id|+1" to 1000,
+    "name" to "@name",
+    "tags|1-3" to listOf("@word"),
+    "score|1-100.1-2" to 1.0
+)
+val user = Mock.mock(complexTemplate)
 ```
 
 ### 🌍 国际化支持
@@ -464,52 +462,52 @@ Mock4K 提供强大的国际化支持，能够根据不同的语言环境生成�
 
 Mock4K 支持 **44 种语言环境**，覆盖全球主要语言和地区：
 
-| 语言环境 | 语言代码 | Locale 代码 |
-|---------|---------|-------------|
-| 英语 | en | `Locale.ENGLISH` |
-| 中文 | zh | `Locale.CHINESE` |
-| 日语 | ja | `Locale.JAPANESE` |
-| 韩语 | ko | `Locale.KOREAN` |
-| 法语 | fr | `Locale.FRENCH` |
-| 德语 | de | `Locale.GERMAN` |
-| 西班牙语 | es | `Locale.forLanguageTag("es")` |
-| 意大利语 | it | `Locale.ITALIAN` |
-| 俄语 | ru | `Locale.forLanguageTag("ru")` |
-| 阿拉伯语 | ar | `Locale.forLanguageTag("ar")` |
-| 葡萄牙语 | pt | `Locale.forLanguageTag("pt")` |
-| 荷兰语 | nl | `Locale.forLanguageTag("nl")` |
-| 波兰语 | pl | `Locale.forLanguageTag("pl")` |
-| 土耳其语 | tr | `Locale.forLanguageTag("tr")` |
-| 瑞典语 | sv | `Locale.forLanguageTag("sv")` |
-| 挪威语 | no | `Locale.forLanguageTag("no")` |
-| 丹麦语 | da | `Locale.forLanguageTag("da")` |
-| 芬兰语 | fi | `Locale.forLanguageTag("fi")` |
-| 匈牙利语 | hu | `Locale.forLanguageTag("hu")` |
-| 捷克语 | cs | `Locale.forLanguageTag("cs")` |
-| 斯洛伐克语 | sk | `Locale.forLanguageTag("sk")` |
-| 罗马尼亚语 | ro | `Locale.forLanguageTag("ro")` |
-| 保加利亚语 | bg | `Locale.forLanguageTag("bg")` |
-| 克罗地亚语 | hr | `Locale.forLanguageTag("hr")` |
-| 塞尔维亚语 | sr | `Locale.forLanguageTag("sr")` |
-| 斯洛文尼亚语 | sl | `Locale.forLanguageTag("sl")` |
-| 波斯尼亚语 | bs | `Locale.forLanguageTag("bs")` |
-| 黑山语 | me | `Locale.forLanguageTag("me")` |
-| 马其顿语 | mk | `Locale.forLanguageTag("mk")` |
-| 阿尔巴尼亚语 | sq | `Locale.forLanguageTag("sq")` |
-| 希腊语 | el | `Locale.forLanguageTag("el")` |
-| 立陶宛语 | lt | `Locale.forLanguageTag("lt")` |
-| 拉脱维亚语 | lv | `Locale.forLanguageTag("lv")` |
-| 爱沙尼亚语 | et | `Locale.forLanguageTag("et")` |
-| 冰岛语 | is | `Locale.forLanguageTag("is")` |
-| 马耳他语 | mt | `Locale.forLanguageTag("mt")` |
-| 威尔士语 | cy | `Locale.forLanguageTag("cy")` |
-| 爱尔兰语 | ga | `Locale.forLanguageTag("ga")` |
-| 希伯来语 | he | `Locale.forLanguageTag("he")` |
-| 泰语 | th | `Locale.forLanguageTag("th")` |
-| 越南语 | vi | `Locale.forLanguageTag("vi")` |
-| 印尼语 | id | `Locale.forLanguageTag("id")` |
-| 马来语 | ms | `Locale.forLanguageTag("ms")` |
-| 乌克兰语 | uk | `Locale.forLanguageTag("uk")` |
+| 语言环境   | 语言代码 | Locale 代码                     |
+|--------|------|-------------------------------|
+| 英语     | en   | `Locale.ENGLISH`              |
+| 中文     | zh   | `Locale.CHINESE`              |
+| 日语     | ja   | `Locale.JAPANESE`             |
+| 韩语     | ko   | `Locale.KOREAN`               |
+| 法语     | fr   | `Locale.FRENCH`               |
+| 德语     | de   | `Locale.GERMAN`               |
+| 意大利语   | it   | `Locale.ITALIAN`              |
+| 西班牙语   | es   | `Locale.forLanguageTag("es")` |
+| 俄语     | ru   | `Locale.forLanguageTag("ru")` |
+| 阿拉伯语   | ar   | `Locale.forLanguageTag("ar")` |
+| 葡萄牙语   | pt   | `Locale.forLanguageTag("pt")` |
+| 荷兰语    | nl   | `Locale.forLanguageTag("nl")` |
+| 波兰语    | pl   | `Locale.forLanguageTag("pl")` |
+| 土耳其语   | tr   | `Locale.forLanguageTag("tr")` |
+| 瑞典语    | sv   | `Locale.forLanguageTag("sv")` |
+| 挪威语    | no   | `Locale.forLanguageTag("no")` |
+| 丹麦语    | da   | `Locale.forLanguageTag("da")` |
+| 芬兰语    | fi   | `Locale.forLanguageTag("fi")` |
+| 匈牙利语   | hu   | `Locale.forLanguageTag("hu")` |
+| 捷克语    | cs   | `Locale.forLanguageTag("cs")` |
+| 斯洛伐克语  | sk   | `Locale.forLanguageTag("sk")` |
+| 罗马尼亚语  | ro   | `Locale.forLanguageTag("ro")` |
+| 保加利亚语  | bg   | `Locale.forLanguageTag("bg")` |
+| 克罗地亚语  | hr   | `Locale.forLanguageTag("hr")` |
+| 塞尔维亚语  | sr   | `Locale.forLanguageTag("sr")` |
+| 斯洛文尼亚语 | sl   | `Locale.forLanguageTag("sl")` |
+| 波斯尼亚语  | bs   | `Locale.forLanguageTag("bs")` |
+| 黑山语    | me   | `Locale.forLanguageTag("me")` |
+| 马其顿语   | mk   | `Locale.forLanguageTag("mk")` |
+| 阿尔巴尼亚语 | sq   | `Locale.forLanguageTag("sq")` |
+| 希腊语    | el   | `Locale.forLanguageTag("el")` |
+| 立陶宛语   | lt   | `Locale.forLanguageTag("lt")` |
+| 拉脱维亚语  | lv   | `Locale.forLanguageTag("lv")` |
+| 爱沙尼亚语  | et   | `Locale.forLanguageTag("et")` |
+| 冰岛语    | is   | `Locale.forLanguageTag("is")` |
+| 马耳他语   | mt   | `Locale.forLanguageTag("mt")` |
+| 威尔士语   | cy   | `Locale.forLanguageTag("cy")` |
+| 爱尔兰语   | ga   | `Locale.forLanguageTag("ga")` |
+| 希伯来语   | he   | `Locale.forLanguageTag("he")` |
+| 泰语     | th   | `Locale.forLanguageTag("th")` |
+| 越南语    | vi   | `Locale.forLanguageTag("vi")` |
+| 印尼语    | id   | `Locale.forLanguageTag("id")` |
+| 马来语    | ms   | `Locale.forLanguageTag("ms")` |
+| 乌克兰语   | uk   | `Locale.forLanguageTag("uk")` |
 
 > **注意**: 所有语言环境都支持相同的数据类型，包括姓名、城市、公司、职业、街道名称、电话号码、邮箱域名、银行信息等。每种语言的数据都经过本地化处理，确保生成的内容符合当地的文化和语言习惯。
 
