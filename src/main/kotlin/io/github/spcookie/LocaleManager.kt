@@ -44,28 +44,60 @@ object LocaleManager {
         }
 
         val properties = Properties()
-        val resourceName = when (localeKey) {
-            "zh" -> "/messages_zh.properties"
-            "en" -> "/messages_en.properties"
-            else -> "/messages.properties" // default to English
-        }
-
+        
+        // Try to load specific locale file first
+        val resourceName = "/messages_$localeKey.properties"
+        var loaded = false
+        
         try {
             val inputStream = this::class.java.getResourceAsStream(resourceName)
             if (inputStream != null) {
                 inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
                     properties.load(reader)
                 }
-            } else {
-                // Fallback to default properties if specific locale not found
+                loaded = true
+            }
+        } catch (_: Exception) {
+            // Continue to fallback
+        }
+        
+        // If specific locale not found, try fallback order
+        if (!loaded) {
+            val fallbackOrder = when (localeKey) {
+                // For Chinese variants, try Chinese first
+                "zh-cn", "zh-tw", "zh-hk", "zh-sg" -> listOf("zh", "en")
+                // For English variants, try English first
+                "en-us", "en-gb", "en-ca", "en-au" -> listOf("en")
+                // For other languages, try English as fallback
+                else -> listOf("en")
+            }
+            
+            for (fallbackLang in fallbackOrder) {
+                try {
+                    val fallbackStream = this::class.java.getResourceAsStream("/messages_$fallbackLang.properties")
+                    if (fallbackStream != null) {
+                        fallbackStream.bufferedReader(Charsets.UTF_8).use { reader ->
+                            properties.load(reader)
+                        }
+                        loaded = true
+                        break
+                    }
+                } catch (_: Exception) {
+                    // Continue to next fallback
+                }
+            }
+        }
+        
+        // Final fallback to default properties
+        if (!loaded) {
+            try {
                 val defaultStream = this::class.java.getResourceAsStream("/messages.properties")
                 defaultStream?.bufferedReader(Charsets.UTF_8)?.use { reader ->
                     properties.load(reader)
                 }
+            } catch (e: Exception) {
+                println("Warning: Failed to load any locale data for $localeKey: ${e.message}")
             }
-        } catch (e: Exception) {
-            // If loading fails, use empty properties
-            println("Warning: Failed to load locale data for $localeKey: ${e.message}")
         }
 
         localeDataCache[localeKey] = properties
@@ -103,10 +135,32 @@ object LocaleManager {
      */
     fun isLocaleSupported(locale: Locale): Boolean {
         val localeKey = locale.language
-        return when (localeKey) {
-            "zh", "en" -> true
-            else -> false
-        }
+        return getSupportedLanguageCodes().contains(localeKey)
+    }
+
+    /**
+     * Get all supported language codes (ISO 639-1)
+     * @return set of supported language codes
+     */
+    fun getSupportedLanguageCodes(): Set<String> {
+        return setOf(
+            "aa", "ab", "ae", "af", "ak", "am", "an", "ar", "as", "av", "ay", "az",
+            "ba", "be", "bg", "bi", "bm", "bn", "bo", "br", "bs", "ca", "ce", "ch",
+            "co", "cr", "cs", "cu", "cv", "cy", "da", "de", "dv", "dz", "ee", "el",
+            "en", "eo", "es", "et", "eu", "fa", "ff", "fi", "fj", "fo", "fr", "fy",
+            "ga", "gd", "gl", "gn", "gu", "gv", "ha", "he", "hi", "ho", "hr", "ht",
+            "hu", "hy", "hz", "ia", "id", "ie", "ig", "ii", "ik", "io", "is", "it",
+            "iu", "ja", "jv", "ka", "kg", "ki", "kj", "kk", "kl", "km", "kn", "ko",
+            "kr", "ks", "ku", "kv", "kw", "ky", "la", "lb", "lg", "li", "ln", "lo",
+            "lt", "lu", "lv", "mg", "mh", "mi", "mk", "ml", "mn", "mo", "mr", "ms",
+            "mt", "my", "na", "nb", "nd", "ne", "ng", "nl", "nn", "no", "nr", "nv",
+            "ny", "oc", "oj", "om", "or", "os", "pa", "pi", "pl", "ps", "pt", "qu",
+            "rm", "rn", "ro", "ru", "rw", "sa", "sc", "sd", "se", "sg", "si", "sk",
+            "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw", "ta",
+            "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt", "tw",
+            "ty", "ug", "uk", "ur", "uz", "ve", "vi", "vo", "wa", "wo", "xh", "yi",
+            "yo", "za", "zh", "zu"
+        )
     }
 
     /**
@@ -114,9 +168,6 @@ object LocaleManager {
      * @return list of supported locales
      */
     fun getSupportedLocales(): List<Locale> {
-        return listOf(
-            Locale.ENGLISH,
-            Locale.CHINESE
-        )
+        return getSupportedLanguageCodes().map { Locale(it) }
     }
 }
