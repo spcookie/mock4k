@@ -18,6 +18,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     
+    // SLF4J logging framework - API only for library
+    implementation("org.slf4j:slf4j-api:2.0.9")
+    
+    // Logback for testing only
+    testImplementation("ch.qos.logback:logback-classic:1.4.11")
+    
     testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
