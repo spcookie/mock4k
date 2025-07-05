@@ -1,5 +1,7 @@
 package io.github.spcookie
 
+import org.slf4j.LoggerFactory
+
 /**
  * Core engine for mock data generation
  *
@@ -8,6 +10,7 @@ package io.github.spcookie
  */
 internal class MockEngine() {
 
+    private val logger = LoggerFactory.getLogger(MockEngine::class.java)
     private val ruleExecutor = RuleExecutor()
 
     companion object {
@@ -35,15 +38,21 @@ internal class MockEngine() {
         // For top-level calls, create a new execution context with unique instance ID
         // For nested calls, use the provided context
         val executionContext = context ?: ExecutionContext()
-        return when (template) {
+        logger.debug("Generating mock data for template type: {}", template::class.simpleName)
+        
+        val result = when (template) {
             is Map<*, *> -> generateFromMap(template as Map<String, Any?>, executionContext)
             is List<*> -> generateFromList(template, executionContext)
             is String -> resolveString(template, executionContext)
             else -> template
         }
+        
+        logger.debug("Mock data generation completed for template type: {}", template::class.simpleName)
+        return result
     }
 
     private fun generateFromMap(template: Map<String, Any?>, context: ExecutionContext): Map<String, Any?> {
+        logger.debug("Generating map with {} keys", template.size)
         val result = mutableMapOf<String, Any?>()
 
         template.forEach { (key, value) ->
@@ -92,6 +101,7 @@ internal class MockEngine() {
     }
 
     private fun generateFromList(template: List<*>, context: ExecutionContext): List<Any?> {
+        logger.debug("Generating list with {} items", template.size)
         return template.mapIndexed { index, item ->
             generate(item ?: "", context)
         }

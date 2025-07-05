@@ -1,5 +1,6 @@
 package io.github.spcookie
 
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object LocaleManager {
 
+    private val logger = LoggerFactory.getLogger(LocaleManager::class.java)
     private var currentLocale: Locale = Locale.getDefault()
     private val localeDataCache = ConcurrentHashMap<String, Properties>()
 
@@ -20,6 +22,7 @@ object LocaleManager {
      * @param locale locale to set
      */
     fun setLocale(locale: Locale) {
+        logger.info("Setting locale from {} to {}", currentLocale, locale)
         currentLocale = locale
     }
 
@@ -38,8 +41,10 @@ object LocaleManager {
      */
     fun loadLocaleData(locale: Locale = currentLocale): Properties {
         val localeKey = locale.language
+        logger.debug("Loading locale data for: {}", localeKey)
 
         if (localeDataCache.containsKey(localeKey)) {
+            logger.debug("Locale data found in cache for: {}", localeKey)
             return localeDataCache[localeKey]!!
         }
 
@@ -56,9 +61,12 @@ object LocaleManager {
                     properties.load(reader)
                 }
                 loaded = true
+                logger.debug("Successfully loaded locale data from: {}", resourceName)
+            } else {
+                logger.debug("Locale resource not found: {}", resourceName)
             }
-        } catch (_: Exception) {
-            // Continue to fallback
+        } catch (e: Exception) {
+            logger.warn("Failed to load locale resource {}: {}", resourceName, e.message)
         }
         
         // If specific locale not found, try fallback order
@@ -74,16 +82,18 @@ object LocaleManager {
             
             for (fallbackLang in fallbackOrder) {
                 try {
-                    val fallbackStream = this::class.java.getResourceAsStream("/messages_$fallbackLang.properties")
+                    val fallbackResource = "/messages_$fallbackLang.properties"
+                    val fallbackStream = this::class.java.getResourceAsStream(fallbackResource)
                     if (fallbackStream != null) {
                         fallbackStream.bufferedReader(Charsets.UTF_8).use { reader ->
                             properties.load(reader)
                         }
                         loaded = true
+                        logger.info("Loaded fallback locale data from: {} for requested locale: {}", fallbackResource, localeKey)
                         break
                     }
-                } catch (_: Exception) {
-                    // Continue to next fallback
+                } catch (e: Exception) {
+                    logger.warn("Failed to load fallback locale {}: {}", fallbackLang, e.message)
                 }
             }
         }
@@ -95,12 +105,14 @@ object LocaleManager {
                 defaultStream?.bufferedReader(Charsets.UTF_8)?.use { reader ->
                     properties.load(reader)
                 }
+                logger.info("Loaded default locale data for: {}", localeKey)
             } catch (e: Exception) {
-                println("Warning: Failed to load any locale data for $localeKey: ${e.message}")
+                logger.error("Failed to load any locale data for {}: {}", localeKey, e.message)
             }
         }
 
         localeDataCache[localeKey] = properties
+        logger.debug("Cached locale data for: {} with {} properties", localeKey, properties.size)
         return properties
     }
 
@@ -125,6 +137,7 @@ object LocaleManager {
      * Useful for testing or when locale resources are updated
      */
     fun clearCache() {
+        logger.info("Clearing locale data cache, {} entries removed", localeDataCache.size)
         localeDataCache.clear()
     }
 

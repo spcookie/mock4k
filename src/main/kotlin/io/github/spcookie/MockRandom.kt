@@ -1,5 +1,6 @@
 package io.github.spcookie
 
+import org.slf4j.LoggerFactory
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.random.Random
@@ -13,6 +14,7 @@ import kotlin.random.Random
  */
 object MockRandom {
 
+    private val logger = LoggerFactory.getLogger(MockRandom::class.java)
     private val random = Random.Default
 
     /**
@@ -792,7 +794,10 @@ object MockRandom {
      * @return list of data
      */
     private fun getDataList(key: String): List<String> {
-        return LocaleManager.getDataList(key)
+        logger.debug("Requesting data list for key: {}", key)
+        val dataList = LocaleManager.getDataList(key)
+        logger.debug("Retrieved {} items for key: {}", dataList.size, key)
+        return dataList
     }
 
     // Locale-based data generation methods
