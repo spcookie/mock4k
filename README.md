@@ -32,7 +32,7 @@
 - 🎯 **易于使用**: 简单的 API 用于生成模拟数据
 - 🔧 **灵活规则**: 支持各种数据类型和自定义规则
 - 🌐 **多语言**: 同时支持 Kotlin 和 Java
-- 🌍 **国际化支持**: 内置 i18n 功能，支持多语言环境和地区化数据生成
+- 🌍 **国际化支持**: 支持 44 种语言环境，覆盖全球主要语言和地区，提供本地化的姓名、地址、公司、电话号码等数据生成
 - 📊 **丰富数据类型**: 数字、字符串、布尔值、数组和复杂对象
 - 🎲 **随机生成**: 内置随机数据生成器
 - 📝 **模板支持**: 基于占位符的模板系统
@@ -456,24 +456,161 @@ val user = Mock.mock("""
 """)
 ```
 
-### 国际化支持
+### 🌍 国际化支持
 
-通过 `MockRandom.setLocale()` 方法可以设置语言环境，支持的功能包括：
+Mock4K 提供强大的国际化支持，能够根据不同的语言环境生成本地化的模拟数据。通过 `MockRandom.setLocale()` 和 `LocaleManager` 可以轻松切换语言环境。
 
-- **姓名生成**: 根据不同语言环境生成本地化姓名
-- **地址信息**: 城市、省份、街道名称等
-- **公司名称**: 本地化的公司名称
-- **职业名称**: 本地化的职业描述
-- **电话号码**: 根据地区生成符合当地格式的电话号码
+#### 支持的语言环境
+
+Mock4K 支持 **44 种语言环境**，覆盖全球主要语言和地区：
+
+| 语言环境 | 语言代码 | Locale 代码 |
+|---------|---------|-------------|
+| 英语 | en | `Locale.ENGLISH` |
+| 中文 | zh | `Locale.CHINESE` |
+| 日语 | ja | `Locale.JAPANESE` |
+| 韩语 | ko | `Locale.KOREAN` |
+| 法语 | fr | `Locale.FRENCH` |
+| 德语 | de | `Locale.GERMAN` |
+| 西班牙语 | es | `Locale.forLanguageTag("es")` |
+| 意大利语 | it | `Locale.ITALIAN` |
+| 俄语 | ru | `Locale.forLanguageTag("ru")` |
+| 阿拉伯语 | ar | `Locale.forLanguageTag("ar")` |
+| 葡萄牙语 | pt | `Locale.forLanguageTag("pt")` |
+| 荷兰语 | nl | `Locale.forLanguageTag("nl")` |
+| 波兰语 | pl | `Locale.forLanguageTag("pl")` |
+| 土耳其语 | tr | `Locale.forLanguageTag("tr")` |
+| 瑞典语 | sv | `Locale.forLanguageTag("sv")` |
+| 挪威语 | no | `Locale.forLanguageTag("no")` |
+| 丹麦语 | da | `Locale.forLanguageTag("da")` |
+| 芬兰语 | fi | `Locale.forLanguageTag("fi")` |
+| 匈牙利语 | hu | `Locale.forLanguageTag("hu")` |
+| 捷克语 | cs | `Locale.forLanguageTag("cs")` |
+| 斯洛伐克语 | sk | `Locale.forLanguageTag("sk")` |
+| 罗马尼亚语 | ro | `Locale.forLanguageTag("ro")` |
+| 保加利亚语 | bg | `Locale.forLanguageTag("bg")` |
+| 克罗地亚语 | hr | `Locale.forLanguageTag("hr")` |
+| 塞尔维亚语 | sr | `Locale.forLanguageTag("sr")` |
+| 斯洛文尼亚语 | sl | `Locale.forLanguageTag("sl")` |
+| 波斯尼亚语 | bs | `Locale.forLanguageTag("bs")` |
+| 黑山语 | me | `Locale.forLanguageTag("me")` |
+| 马其顿语 | mk | `Locale.forLanguageTag("mk")` |
+| 阿尔巴尼亚语 | sq | `Locale.forLanguageTag("sq")` |
+| 希腊语 | el | `Locale.forLanguageTag("el")` |
+| 立陶宛语 | lt | `Locale.forLanguageTag("lt")` |
+| 拉脱维亚语 | lv | `Locale.forLanguageTag("lv")` |
+| 爱沙尼亚语 | et | `Locale.forLanguageTag("et")` |
+| 冰岛语 | is | `Locale.forLanguageTag("is")` |
+| 马耳他语 | mt | `Locale.forLanguageTag("mt")` |
+| 威尔士语 | cy | `Locale.forLanguageTag("cy")` |
+| 爱尔兰语 | ga | `Locale.forLanguageTag("ga")` |
+| 希伯来语 | he | `Locale.forLanguageTag("he")` |
+| 泰语 | th | `Locale.forLanguageTag("th")` |
+| 越南语 | vi | `Locale.forLanguageTag("vi")` |
+| 印尼语 | id | `Locale.forLanguageTag("id")` |
+| 马来语 | ms | `Locale.forLanguageTag("ms")` |
+| 乌克兰语 | uk | `Locale.forLanguageTag("uk")` |
+
+> **注意**: 所有语言环境都支持相同的数据类型，包括姓名、城市、公司、职业、街道名称、电话号码、邮箱域名、银行信息等。每种语言的数据都经过本地化处理，确保生成的内容符合当地的文化和语言习惯。
+
+#### 国际化功能特性
+
+- **姓名生成**: 根据不同语言环境生成符合当地命名习惯的姓名
+- **地址信息**: 城市、省份、街道名称等地理位置信息
+- **公司名称**: 本地化的公司名称和企业信息
+- **职业名称**: 符合当地文化的职业描述
+- **电话号码**: 根据地区生成符合当地格式和规则的电话号码
+- **文本内容**: 单词、句子、段落等文本内容的本地化
+- **语言环境检测**: 自动检测和验证支持的语言环境
+
+#### 基本使用示例
 
 ```kotlin
+import io.github.spcookie.MockRandom
+import io.github.spcookie.LocaleManager
+import java.util.Locale
+
 // 设置为英文环境
 MockRandom.setLocale(Locale.ENGLISH)
 val englishName = MockRandom.name() // "John Smith"
+val englishCity = MockRandom.city() // "New York"
+val englishCompany = MockRandom.company() // "Tech Corp"
 
 // 设置为中文环境
 MockRandom.setLocale(Locale.CHINESE)
 val chineseName = MockRandom.name() // "张三"
+val chineseCity = MockRandom.city() // "北京"
+val chineseCompany = MockRandom.company() // "科技有限公司"
+
+// 设置为日文环境
+MockRandom.setLocale(Locale.JAPANESE)
+val japaneseName = MockRandom.name() // "田中太郎"
+val japaneseCity = MockRandom.city() // "東京"
+
+// 检查语言环境支持
+val isSupported = LocaleManager.isLocaleSupported(Locale.FRENCH)
+val supportedLocales = LocaleManager.getSupportedLocales()
+```
+
+#### 电话号码国际化
+
+不同语言环境下的电话号码格式会自动适配当地的号码规则：
+
+```kotlin
+// 中文环境 - 中国电话号码格式
+MockRandom.setLocale(Locale.CHINESE)
+val chinesePhone = MockRandom.phoneNumber() // "138-1234-5678"
+val chineseMobile = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE) // "134-5678-9012"
+val chineseLandline = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE) // "010-1234-5678"
+
+// 英文环境 - 美国电话号码格式
+MockRandom.setLocale(Locale.ENGLISH)
+val usPhone = MockRandom.phoneNumber() // "555-123-4567"
+val usMobile = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE) // "555-987-6543"
+val usTollFree = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE) // "800-123-4567"
+```
+
+#### 模板中的国际化
+
+在模板中使用占位符时，会自动根据当前语言环境生成对应的本地化数据：
+
+```kotlin
+// 设置语言环境
+MockRandom.setLocale(Locale.CHINESE)
+
+val template = mapOf(
+    "用户信息" to mapOf(
+        "姓名" to "@NAME",
+        "城市" to "@CITY",
+        "公司" to "@COMPANY",
+        "职业" to "@PROFESSION",
+        "电话" to "@PHONENUMBER(PT.M)",
+        "地址" to "@PROVINCE @CITY @STREETNAME"
+    )
+)
+
+val result = Mock.mock(template)
+// 生成的数据将全部是中文本地化内容
+```
+
+
+#### LocaleManager 高级功能
+
+```kotlin
+// 获取当前语言环境
+val currentLocale = LocaleManager.getCurrentLocale()
+
+// 获取所有支持的语言环境
+val supportedLocales = LocaleManager.getSupportedLocales()
+println("支持的语言环境: $supportedLocales")
+
+// 检查特定语言环境是否支持
+val isFrenchSupported = LocaleManager.isLocaleSupported(Locale.FRENCH)
+val isChineseSupported = LocaleManager.isLocaleSupported(Locale.CHINESE)
+
+// 获取特定类型的本地化数据
+val chineseWords = LocaleManager.getDataList("words")
+val chineseCities = LocaleManager.getDataList("cities")
 ```
 
 ## 🛠️ 开发
@@ -482,23 +619,20 @@ val chineseName = MockRandom.name() // "张三"
 
 ```
 src/
-└── main/
-    ├── kotlin/io/github/spcookie/
-    │   ├── ExecutionContext.kt    # 执行上下文管理
-    │   ├── LocaleManager.kt       # 国际化管理器
-    │   ├── Mock.kt                # 主要模拟引擎
-    │   ├── MockEngine.kt          # 模拟引擎实现
-    │   ├── MockRandom.kt          # 随机数据生成器
-    │   ├── ParsedRule.kt          # 规则解析数据结构
-    │   ├── PlaceholderResolver.kt # 占位符解析逻辑
-    │   ├── Rule.kt                # 规则定义
-    │   ├── RuleExecutor.kt        # 规则执行引擎
-    │   ├── RuleParser.kt          # 规则解析逻辑
-    │   └── package-info.kt        # 包信息文档
-    └── resources/
-        ├── messages.properties    # 默认国际化资源
-        ├── messages_en.properties # 英文国际化资源
-        └── messages_zh.properties # 中文国际化资源
+├── main/
+│   ├── kotlin/io/github/spcookie/
+│   │   ├── ExecutionContext.kt    # 执行上下文管理
+│   │   ├── LocaleManager.kt       # 国际化管理器
+│   │   ├── Mock.kt                # 主要Mock对象
+│   │   ├── MockEngine.kt          # Mock引擎实现
+│   │   ├── MockRandom.kt          # 随机数据生成器
+│   │   ├── ParsedRule.kt          # 规则解析数据结构
+│   │   ├── PlaceholderResolver.kt # 占位符解析逻辑
+│   │   ├── RegexResolver.kt       # 正则表达式解析器
+│   │   ├── Rule.kt                # 规则定义
+│   │   ├── RuleExecutor.kt        # 规则执行引擎
+│   │   ├── RuleParser.kt          # 规则解析逻辑
+│   │   └── package.kt             # 包信息文档
 ```
 
 核心组件说明：
@@ -509,10 +643,12 @@ src/
 - **RuleParser.kt**: 规则解析器，负责解析占位符规则
 - **RuleExecutor.kt**: 规则执行器，负责执行解析后的规则
 - **PlaceholderResolver.kt**: 占位符解析器，处理模板中的占位符，支持属性引用
+- **RegexResolver.kt**: 正则表达式解析器，专门处理正则表达式模式的解析和生成
 - **ExecutionContext.kt**: 执行上下文管理器，提供线程安全的执行环境
 - **LocaleManager.kt**: 国际化管理器，支持多语言环境和属性文件加载优化
 - **ParsedRule.kt**: 规则解析结果的数据结构
 - **Rule.kt**: 规则定义和相关枚举，支持正则表达式和自定义占位符
+- **package.kt**: 包信息文档，包含包级别的文档和元数据
 
 ### 开发环境设置
 
