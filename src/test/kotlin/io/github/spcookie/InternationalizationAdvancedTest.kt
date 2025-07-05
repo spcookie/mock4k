@@ -46,16 +46,16 @@ class InternationalizationAdvancedTest {
 
         supportedLocales.forEach { (locale, localeName) ->
             MockRandom.setLocale(locale)
-            assertEquals(locale, MockRandom.getCurrentLocale(), "Locale should be set to $localeName")
+            assertEquals(locale, MockRandom.getCurrentLocale(), "语言环境应该设置为 $localeName")
 
             // 测试基本功能在每个语言环境下都能工作
             val name = MockRandom.name()
             val word = MockRandom.word()
 
-            assertNotNull(name, "Name should not be null for $localeName")
-            assertNotNull(word, "Word should not be null for $localeName")
-            assertTrue(name.isNotEmpty(), "Name should not be empty for $localeName")
-            assertTrue(word.isNotEmpty(), "Word should not be empty for $localeName")
+            assertNotNull(name, "$localeName 的姓名不应为 null")
+            assertNotNull(word, "$localeName 的单词不应为 null")
+            assertTrue(name.isNotEmpty(), "$localeName 的姓名不应为空")
+            assertTrue(word.isNotEmpty(), "$localeName 的单词不应为空")
 
             println("$localeName - Name: $name, Word: $word")
         }
@@ -95,13 +95,13 @@ class InternationalizationAdvancedTest {
         result.forEach { (key, value) ->
             when (value) {
                 is String -> {
-                    assertNotNull(value, "$key should not be null")
-                    assertTrue(value.isNotEmpty(), "$key should not be empty")
-                    assertFalse(value.startsWith("@"), "$key placeholder should be resolved")
+                    assertNotNull(value, "$key 不应为 null")
+                    assertTrue(value.isNotEmpty(), "$key 不应为空")
+                    assertFalse(value.startsWith("@"), "$key 占位符应该被解析")
                 }
 
                 is List<*> -> {
-                    assertTrue(value.isNotEmpty(), "$key list should not be empty")
+                    assertTrue(value.isNotEmpty(), "$key 列表不应为空")
                 }
             }
             println("中文 $key: $value")
@@ -173,13 +173,13 @@ class InternationalizationAdvancedTest {
         result.forEach { (key, value) ->
             when (value) {
                 is String -> {
-                    assertNotNull(value, "$key should not be null")
-                    assertTrue(value.isNotEmpty(), "$key should not be empty")
-                    assertFalse(value.startsWith("@"), "$key placeholder should be resolved")
+                    assertNotNull(value, "$key 不应为 null")
+                    assertTrue(value.isNotEmpty(), "$key 不应为空")
+                    assertFalse(value.startsWith("@"), "$key 占位符应该被解析")
                 }
 
                 is List<*> -> {
-                    assertTrue(value.isNotEmpty(), "$key list should not be empty")
+                    assertTrue(value.isNotEmpty(), "$key 列表不应为空")
                 }
             }
             println("日本語 $key: $value")
@@ -214,13 +214,13 @@ class InternationalizationAdvancedTest {
         result.forEach { (key, value) ->
             when (value) {
                 is String -> {
-                    assertNotNull(value, "$key should not be null")
-                    assertTrue(value.isNotEmpty(), "$key should not be empty")
-                    assertFalse(value.startsWith("@"), "$key placeholder should be resolved")
+                    assertNotNull(value, "$key 不应为 null")
+                    assertTrue(value.isNotEmpty(), "$key 不应为空")
+                    assertFalse(value.startsWith("@"), "$key 占位符应该被解析")
                 }
 
                 is List<*> -> {
-                    assertTrue(value.isNotEmpty(), "$key list should not be empty")
+                    assertTrue(value.isNotEmpty(), "$key 列表不应为空")
                 }
             }
             println("한국어 $key: $value")
@@ -255,9 +255,9 @@ class InternationalizationAdvancedTest {
 
             result.forEach { (key, value) ->
                 val valueStr = value.toString()
-                assertNotNull(value, "$localeName $key should not be null")
-                assertTrue(valueStr.isNotEmpty(), "$localeName $key should not be empty")
-                assertFalse(valueStr.startsWith("@"), "$localeName $key placeholder should be resolved")
+                assertNotNull(value, "$localeName $key 不应为 null")
+                assertTrue(valueStr.isNotEmpty(), "$localeName $key 不应为空")
+                assertFalse(valueStr.startsWith("@"), "$localeName $key 占位符应该被解析")
                 println("$localeName $key: $valueStr")
             }
         }
@@ -298,7 +298,7 @@ class InternationalizationAdvancedTest {
         val cities = results.values.map { it["city"] as String }.distinct()
 
         // 至少应该有一些不同的值
-        assertTrue(names.size > 1 || cities.size > 1, "Different locales should generate different data")
+        assertTrue(names.size > 1 || cities.size > 1, "不同的语言环境应该生成不同的数据")
     }
 
     // ==================== 多语言混合测试 ====================
@@ -347,14 +347,14 @@ class InternationalizationAdvancedTest {
             japaneseResult to "Japanese"
         ).forEach { (result, language) ->
             val users = result["users"] as List<Map<String, Any>>
-            assertEquals(5, users.size, "$language should have 5 users")
+            assertEquals(5, users.size, "$language 应该有5个用户")
 
             users.forEach { user ->
                 val profiles = user["profiles"] as Map<String, Map<String, Any>>
                 profiles.forEach { (profileLang, profile) ->
-                    assertNotNull(profile["name"], "$language $profileLang name should not be null")
-                    assertNotNull(profile["city"], "$language $profileLang city should not be null")
-                    assertNotNull(profile["company"], "$language $profileLang company should not be null")
+                    assertNotNull(profile["name"], "$language $profileLang 姓名不应为 null")
+                    assertNotNull(profile["city"], "$language $profileLang 城市不应为 null")
+                    assertNotNull(profile["company"], "$language $profileLang 公司不应为 null")
                 }
             }
 
@@ -369,17 +369,17 @@ class InternationalizationAdvancedTest {
         // 测试中文特定功能
         MockRandom.setLocale(Locale.CHINESE)
         val chineseWords = MockRandom.words(10)
-        assertTrue(chineseWords.isNotEmpty(), "Chinese words should not be empty")
+        assertTrue(chineseWords.isNotEmpty(), "中文词汇不应为空")
 
         // 测试英文特定功能
         MockRandom.setLocale(Locale.ENGLISH)
         val englishWords = MockRandom.words(10)
-        assertTrue(englishWords.isNotEmpty(), "English words should not be empty")
+        assertTrue(englishWords.isNotEmpty(), "英文词汇不应为空")
 
         // 测试日文特定功能
         MockRandom.setLocale(Locale.JAPANESE)
         val japaneseWords = MockRandom.words(10)
-        assertTrue(japaneseWords.isNotEmpty(), "Japanese words should not be empty")
+        assertTrue(japaneseWords.isNotEmpty(), "日文词汇不应为空")
 
         println("Chinese words: $chineseWords")
         println("English words: $englishWords")
@@ -388,7 +388,7 @@ class InternationalizationAdvancedTest {
         // 验证不同语言的词汇确实不同
         val allWords = chineseWords + englishWords + japaneseWords
         val uniqueWords = allWords.distinct()
-        assertTrue(uniqueWords.size > allWords.size * 0.5, "Different locales should generate diverse words")
+        assertTrue(uniqueWords.size > allWords.size * 0.5, "不同语言环境应该生成多样化的词汇")
     }
 
     // ==================== 语言环境错误处理测试 ====================
@@ -409,12 +409,12 @@ class InternationalizationAdvancedTest {
             val name = MockRandom.name()
             val word = MockRandom.word()
 
-            assertNotNull(name, "Name should not be null even for unsupported locale")
-            assertNotNull(word, "Word should not be null even for unsupported locale")
-            assertTrue(name.isNotEmpty(), "Name should not be empty even for unsupported locale")
-            assertTrue(word.isNotEmpty(), "Word should not be empty even for unsupported locale")
+            assertNotNull(name, "即使是不支持的语言环境，姓名也不应为 null")
+            assertNotNull(word, "即使是不支持的语言环境，单词也不应为 null")
+            assertTrue(name.isNotEmpty(), "即使是不支持的语言环境，姓名也不应为空")
+            assertTrue(word.isNotEmpty(), "即使是不支持的语言环境，单词也不应为空")
 
-            println("Unsupported locale ${locale.toLanguageTag()} - Name: $name, Word: $word")
+            println("不支持的语言环境 ${locale.toLanguageTag()} - 姓名: $name, 单词: $word")
         }
     }
 
@@ -446,8 +446,8 @@ class InternationalizationAdvancedTest {
             val endTime = System.currentTimeMillis()
             val duration = endTime - startTime
 
-            println("${locale.displayName} performance: ${duration}ms for 500 operations")
-            assertTrue(duration < 5000, "Performance should be acceptable for ${locale.displayName}")
+            println("${locale.displayName} 性能: ${duration}ms 执行500次操作")
+            assertTrue(duration < 5000, "${locale.displayName} 的性能应该是可接受的")
         }
     }
 }

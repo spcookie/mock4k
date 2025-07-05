@@ -16,13 +16,13 @@ class PlaceholderEnhancementTest {
 
         val result = Mock.mock(template) as Map<String, Any?>
 
-        // Verify that properties are generated
+        // 验证属性已生成
         assertNotNull(result["first"])
         assertNotNull(result["middle"])
         assertNotNull(result["last"])
         assertNotNull(result["full"])
 
-        // Verify that full name references the generated first, middle, last names
+        // 验证全名引用了生成的名、中间名、姓
         val fullName = result["full"] as String
         val firstName = result["first"] as String
         val middleName = result["middle"] as String
@@ -49,13 +49,13 @@ class PlaceholderEnhancementTest {
         val result = Mock.mock(template) as Map<String, Any?>
         val nameObj = result["name"] as Map<String, Any?>
 
-        // Verify that properties are generated
+        // 验证属性已生成
         assertNotNull(nameObj["first"])
         assertNotNull(nameObj["middle"])
         assertNotNull(nameObj["last"])
         assertNotNull(nameObj["full"])
 
-        // Verify that full name references the generated first, middle, last names
+        // 验证全名引用了生成的名、中间名、姓
         val fullName = nameObj["full"] as String
         val firstName = nameObj["first"] as String
         val middleName = nameObj["middle"] as String
@@ -93,16 +93,16 @@ class PlaceholderEnhancementTest {
         val displayName = profileObj["displayName"] as String
         val username = profileObj["username"] as String
 
-        // Debug output
+        // 调试输出
         println("firstName: $firstName")
         println("lastName: $lastName")
         println("displayName: $displayName")
         println("username: $username")
 
-        // Verify absolute path references work
-        assertTrue(displayName.contains(firstName), "displayName '$displayName' should contain firstName '$firstName'")
-        assertTrue(displayName.contains(lastName), "displayName '$displayName' should contain lastName '$lastName'")
-        assertTrue(username.contains(firstName), "username '$username' should contain firstName '$firstName'")
+        // 验证绝对路径引用有效
+        assertTrue(displayName.contains(firstName), "显示名称 '$displayName' 应该包含名字 '$firstName'")
+        assertTrue(displayName.contains(lastName), "显示名称 '$displayName' 应该包含姓氏 '$lastName'")
+        assertTrue(username.contains(firstName), "用户名 '$username' 应该包含名字 '$firstName'")
 
 
     }
@@ -123,7 +123,7 @@ class PlaceholderEnhancementTest {
         val email = result["email"] as String
         val summary = result["summary"] as String
 
-        // Verify that summary contains references to other properties
+        // 验证摘要包含对其他属性的引用
         assertTrue(summary.contains(name))
         assertTrue(summary.contains(id.toString()))
         assertTrue(summary.contains(email))
@@ -135,7 +135,7 @@ class PlaceholderEnhancementTest {
     fun testFallbackToBuiltinPlaceholders() {
         val template = mapOf(
             "name" to "@FIRST",
-            "randomData" to "@NONEXISTENT_PROPERTY @LAST" // Should fall back to @LAST placeholder
+            "randomData" to "@NONEXISTENT_PROPERTY @LAST" // 应该回退到 @LAST 占位符
         )
 
         val result = Mock.mock(template) as Map<String, Any?>
@@ -144,9 +144,9 @@ class PlaceholderEnhancementTest {
         assertNotNull(result["randomData"])
 
         val randomData = result["randomData"] as String
-        // Should contain the fallback @LAST value but not resolve @NONEXISTENT_PROPERTY
+        // 应该包含回退的 @LAST 值但不解析 @NONEXISTENT_PROPERTY
         assertTrue(randomData.contains("@NONEXISTENT_PROPERTY"))
-        assertFalse(randomData.contains("@LAST")) // @LAST should be resolved
+        assertFalse(randomData.contains("@LAST")) // @LAST 应该被解析
 
 
     }
@@ -165,7 +165,7 @@ class PlaceholderEnhancementTest {
         val username = result["username"] as String
         val email = result["email"] as String
 
-        // Verify email contains both username and domain
+        // 验证邮箱包含用户名和域名
         assertTrue(email.contains(username))
         assertTrue(email.contains(domain))
         assertTrue(email.contains("@"))

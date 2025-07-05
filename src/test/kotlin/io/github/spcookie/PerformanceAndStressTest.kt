@@ -28,7 +28,7 @@ class PerformanceAndStressTest {
         val executionTime = measureTimeMillis {
             repeat(iterations) {
                 val result = Mock.mock(template)
-                assertNotNull(result, "Result should not be null")
+                assertNotNull(result, "结果不应为null")
             }
         }
 
@@ -43,7 +43,7 @@ class PerformanceAndStressTest {
         )
 
         // 性能断言 - 平均每次调用应该在合理时间内完成
-        assertTrue(avgTimePerCall < 10.0, "Average time per call should be less than 10ms, got ${avgTimePerCall}ms")
+        assertTrue(avgTimePerCall < 10.0, "每次调用的平均时间应该少于10ms，实际为 ${avgTimePerCall}ms")
     }
 
     @Test
@@ -88,7 +88,7 @@ class PerformanceAndStressTest {
             repeat(iterations) {
                 val result = Mock.mock(template) as Map<String, Any>
                 val users = result["users"] as List<*>
-                assertEquals(50, users.size, "Should have 50 users")
+                assertEquals(50, users.size, "应该有50个用户")
             }
         }
 
@@ -105,7 +105,7 @@ class PerformanceAndStressTest {
         // 复杂模板的性能断言
         assertTrue(
             avgTimePerCall < 1000.0,
-            "Average time per complex call should be less than 1000ms, got ${avgTimePerCall}ms"
+            "复杂调用的平均时间应该少于1000ms，实际为 ${avgTimePerCall}ms"
         )
     }
 
@@ -131,21 +131,21 @@ class PerformanceAndStressTest {
             val executionTime = measureTimeMillis {
                 val result = Mock.mock(template) as Map<String, Any>
                 val items = result["items"] as List<*>
-                assertEquals(size, items.size, "Should have $size items")
+                assertEquals(size, items.size, "应该有 $size 个项目")
 
                 // 验证前几个元素的结构
                 val firstItem = items[0] as Map<String, Any>
-                assertNotNull(firstItem["id"], "Item should have id")
-                assertNotNull(firstItem["name"], "Item should have name")
-                assertNotNull(firstItem["value"], "Item should have value")
-                assertNotNull(firstItem["active"], "Item should have active")
+                assertNotNull(firstItem["id"], "项目应该有id")
+                assertNotNull(firstItem["name"], "项目应该有name")
+                assertNotNull(firstItem["value"], "项目应该有value")
+                assertNotNull(firstItem["active"], "项目应该有active")
             }
 
             val timePerItem = executionTime.toDouble() / size
             println("Large array ($size items): ${executionTime}ms (${String.format("%.3f", timePerItem)}ms per item)")
 
             // 性能断言 - 每个项目的生成时间应该合理
-            assertTrue(timePerItem < 5.0, "Time per item should be less than 5ms for size $size, got ${timePerItem}ms")
+            assertTrue(timePerItem < 5.0, "大小为 $size 时每个项目的时间应该少于5ms，实际为 ${timePerItem}ms")
         }
     }
 
@@ -174,7 +174,7 @@ class PerformanceAndStressTest {
 
             val executionTime = measureTimeMillis {
                 val result = Mock.mock(template) as Map<String, Any>
-                assertNotNull(result["nested"], "Nested structure should not be null")
+                assertNotNull(result["nested"], "嵌套结构不应为null")
 
                 // 验证嵌套结构的深度
                 var current: Any = result["nested"]!!
@@ -184,7 +184,7 @@ class PerformanceAndStressTest {
                     current = current["level${depth - actualDepth + 1}"]!!
                     if (actualDepth >= depth) break
                 }
-                assertTrue(actualDepth > 0, "Should have some nesting depth")
+                assertTrue(actualDepth > 0, "应该有一定的嵌套深度")
             }
 
             println("Deep nesting (depth $depth): ${executionTime}ms")
@@ -192,7 +192,7 @@ class PerformanceAndStressTest {
             // 性能断言 - 深度嵌套不应该导致指数级性能下降
             assertTrue(
                 executionTime < 5000,
-                "Deep nesting (depth $depth) should complete within 5 seconds, took ${executionTime}ms"
+                "深度嵌套（深度 $depth）应该在5秒内完成，实际用时 ${executionTime}ms"
             )
         }
     }
@@ -229,7 +229,7 @@ class PerformanceAndStressTest {
                     val threadStartTime = System.currentTimeMillis()
                     repeat(iterationsPerThread) {
                         val result = Mock.mock(template)
-                        assertNotNull(result, "Result should not be null")
+                        assertNotNull(result, "结果不应为null")
                     }
                     val threadEndTime = System.currentTimeMillis()
                     synchronized(results) {
@@ -260,7 +260,7 @@ class PerformanceAndStressTest {
             // 性能断言
             assertTrue(
                 operationsPerSecond > 10.0,
-                "Should achieve at least 10 operations per second with $threadCount threads"
+                "使用 $threadCount 个线程应该至少达到每秒10次操作"
             )
         }
     }
@@ -298,25 +298,25 @@ class PerformanceAndStressTest {
                 // 每10次迭代进行一次验证
                 if (iteration % 10 == 0) {
                     val largeData = result["largeData"] as Map<String, Any>
-                    assertNotNull(largeData["bigString"], "Big string should not be null")
-                    assertNotNull(largeData["manyNumbers"], "Many numbers should not be null")
-                    assertNotNull(largeData["nestedObjects"], "Nested objects should not be null")
+                    assertNotNull(largeData["bigString"], "大字符串不应为null")
+                    assertNotNull(largeData["manyNumbers"], "多个数字不应为null")
+                    assertNotNull(largeData["nestedObjects"], "嵌套对象不应为null")
 
                     val bigString = largeData["bigString"] as String
-                    assertTrue(bigString.length >= 100, "Big string should be reasonably large")
+                    assertTrue(bigString.length >= 100, "大字符串应该有合理的长度")
 
                     val manyNumbers = largeData["manyNumbers"] as List<*>
-                    assertEquals(100, manyNumbers.size, "Should have 100 numbers")
+                    assertEquals(100, manyNumbers.size, "应该有100个数字")
 
                     val nestedObjects = largeData["nestedObjects"] as List<*>
-                    assertEquals(50, nestedObjects.size, "Should have 50 nested objects")
+                    assertEquals(50, nestedObjects.size, "应该有50个嵌套对象")
 
                     println("Memory stress iteration $iteration completed")
                 }
             }
         }
 
-        assertEquals(iterations, results.size, "Should have $iterations results")
+        assertEquals(iterations, results.size, "应该有 $iterations 个结果")
 
         val avgTimePerIteration = executionTime.toDouble() / iterations
         println(
@@ -329,7 +329,7 @@ class PerformanceAndStressTest {
         )
 
         // 性能断言
-        assertTrue(avgTimePerIteration < 500.0, "Average time per memory stress iteration should be less than 500ms")
+        assertTrue(avgTimePerIteration < 500.0, "内存压力测试每次迭代的平均时间应该少于500ms")
     }
 
     // ==================== 占位符性能测试 ====================
@@ -362,9 +362,9 @@ class PerformanceAndStressTest {
 
                     // 验证所有占位符都被解析
                     result.forEach { (key, value) ->
-                        assertNotNull(value, "$key should not be null")
+                        assertNotNull(value, "$key 不应为null")
                         val valueStr = value.toString()
-                        assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved: $valueStr")
+                        assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析: $valueStr")
                     }
                 }
             }
@@ -377,7 +377,7 @@ class PerformanceAndStressTest {
             println("  Avg per placeholder: ${String.format("%.3f", avgTimePerPlaceholder)}ms")
 
             // 性能断言
-            assertTrue(avgTimePerPlaceholder < 1.0, "Average time per $category placeholder should be less than 1ms")
+            assertTrue(avgTimePerPlaceholder < 1.0, "$category 占位符的平均时间应该少于1ms")
         }
     }
 
@@ -413,7 +413,7 @@ class PerformanceAndStressTest {
                 repeat(iterations) {
                     templates.forEach { (ruleName, template) ->
                         val result = Mock.mock(mapOf("test" to template))
-                        assertNotNull(result, "Result for $ruleName should not be null")
+                        assertNotNull(result, "$ruleName 的结果不应为null")
                     }
                 }
             }
@@ -431,7 +431,7 @@ class PerformanceAndStressTest {
             )
 
             // 性能断言
-            assertTrue(avgTimePerRule < 2.0, "Average time per $category rule should be less than 2ms")
+            assertTrue(avgTimePerRule < 2.0, "$category 规则的平均时间应该少于2ms")
         }
     }
 
@@ -468,26 +468,26 @@ class PerformanceAndStressTest {
             val massiveData = result["massiveData"] as Map<String, Any>
             val users = massiveData["users"] as List<*>
 
-            assertEquals(1000, users.size, "Should have 1000 users")
+            assertEquals(1000, users.size, "应该有1000个用户")
 
             // 验证第一个用户的结构
             val firstUser = users[0] as Map<String, Any>
-            assertNotNull(firstUser["id"], "User should have id")
-            assertNotNull(firstUser["profile"], "User should have profile")
-            assertNotNull(firstUser["posts"], "User should have posts")
+            assertNotNull(firstUser["id"], "用户应该有id")
+            assertNotNull(firstUser["profile"], "用户应该有profile")
+            assertNotNull(firstUser["posts"], "用户应该有posts")
 
             val posts = firstUser["posts"] as List<*>
-            assertEquals(10, posts.size, "User should have 10 posts")
+            assertEquals(10, posts.size, "用户应该有10个帖子")
 
             // 验证第一个帖子的结构
             val firstPost = posts[0] as Map<String, Any>
-            assertNotNull(firstPost["id"], "Post should have id")
-            assertNotNull(firstPost["title"], "Post should have title")
-            assertNotNull(firstPost["content"], "Post should have content")
-            assertNotNull(firstPost["tags"], "Post should have tags")
+            assertNotNull(firstPost["id"], "帖子应该有id")
+            assertNotNull(firstPost["title"], "帖子应该有title")
+            assertNotNull(firstPost["content"], "帖子应该有content")
+            assertNotNull(firstPost["tags"], "帖子应该有tags")
 
             val tags = firstPost["tags"] as List<*>
-            assertEquals(5, tags.size, "Post should have 5 tags")
+            assertEquals(5, tags.size, "帖子应该有5个标签")
         }
 
         println("Extreme stress test completed in ${executionTime}ms")
@@ -495,7 +495,7 @@ class PerformanceAndStressTest {
         // 极限测试的性能断言 - 应该在合理时间内完成
         assertTrue(
             executionTime < 60000,
-            "Extreme stress test should complete within 60 seconds, took ${executionTime}ms"
+            "极限压力测试应该在60秒内完成，实际用时 ${executionTime}ms"
         )
 
         // 计算生成的总数据量
@@ -514,7 +514,7 @@ class PerformanceAndStressTest {
             }ms per data point)"
         )
 
-        assertTrue(timePerDataPoint < 1.0, "Time per data point should be less than 1ms in extreme stress test")
+        assertTrue(timePerDataPoint < 1.0, "极限压力测试中每个数据点的时间应该少于1ms")
     }
 
     // ==================== 资源清理测试 ====================
@@ -546,7 +546,7 @@ class PerformanceAndStressTest {
         }
 
         // 最终验证
-        assertTrue(results.size <= 10, "Results list should be cleaned up, size: ${results.size}")
+        assertTrue(results.size <= 10, "结果列表应该被清理，大小: ${results.size}")
         println("Resource cleanup test completed successfully")
     }
 }

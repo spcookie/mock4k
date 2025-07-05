@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 /**
- * Test cases for custom placeholder extension functionality
+ * 自定义占位符扩展功能的测试用例
  *
  * @author spcookie
  * @since 1.0.0
@@ -15,37 +15,37 @@ class ExtendPlaceholderTest {
 
     @BeforeEach
     fun setUp() {
-        // Clear any existing custom placeholders before each test
+        // 在每个测试前清除任何现有的自定义占位符
         Mock.Random.clearExtended()
     }
 
     @Test
     fun `test extend with single placeholder without parameters`() {
-        // Register a custom placeholder
+        // 注册一个自定义占位符
         Mock.Random.extend("customGreeting") { "Hello, World!" }
 
-        // Test the custom placeholder
+        // 测试自定义占位符
         val result = Mock.mock("@customGreeting")
         assertEquals("Hello, World!", result)
     }
 
     @Test
     fun `test extend with single placeholder with parameters`() {
-        // Register a custom placeholder with parameters
+        // 注册一个带参数的自定义占位符
         Mock.Random.extendWithParams("repeat") { params ->
             val text = params.getOrNull(0)?.toString() ?: "default"
             val count = params.getOrNull(1) as? Int ?: 1
             (1..count).joinToString("") { text }
         }
 
-        // Test the custom placeholder with parameters
+        // 测试带参数的自定义占位符
         val result = Mock.mock("@repeat('Hi', 3)")
         assertEquals("HiHiHi", result)
     }
 
     @Test
     fun `test extend with map of placeholders`() {
-        // Register multiple custom placeholders
+        // 注册多个自定义占位符
         Mock.Random.extend(
             mapOf(
             "customName" to { "John Doe" },
@@ -53,7 +53,7 @@ class ExtendPlaceholderTest {
             "customCity" to { "New York" }
         ))
 
-        // Test the custom placeholders
+        // 测试自定义占位符
         assertEquals("John Doe", Mock.mock("@customName"))
         assertEquals(25, Mock.mock("@customAge"))
         assertEquals("New York", Mock.mock("@customCity"))
@@ -64,7 +64,7 @@ class ExtendPlaceholderTest {
         Mock.Random.extend("testPlaceholder") { "test" }
 
         assertTrue(Mock.Random.hasExtended("testPlaceholder"))
-        assertTrue(Mock.Random.hasExtended("TESTPLACEHOLDER")) // case insensitive
+        assertTrue(Mock.Random.hasExtended("TESTPLACEHOLDER")) // 不区分大小写
         assertFalse(Mock.Random.hasExtended("nonExistent"))
     }
 
@@ -110,7 +110,7 @@ class ExtendPlaceholderTest {
 
     @Test
     fun `test method chaining`() {
-        // Test that extend methods return MockRandom for chaining
+        // 测试扩展方法返回 MockRandom 以支持链式调用
         val result = Mock.Random
             .extend("test1") { "value1" }
             .extend(mapOf("test2" to { "value2" }))
@@ -124,19 +124,19 @@ class ExtendPlaceholderTest {
 
     @Test
     fun `test error handling in custom placeholders`() {
-        // Register a custom placeholder that throws an exception
+        // 注册一个抛出异常的自定义占位符
         Mock.Random.extend("errorPlaceholder") {
             throw RuntimeException("Test error")
         }
 
-        // Should fallback to the original placeholder string when error occurs
+        // 当发生错误时应该回退到原始占位符字符串
         val result = Mock.mock("@errorPlaceholder")
         assertEquals("@errorPlaceholder", result)
     }
 
     @Test
     fun `test fallback to built-in when custom placeholder not found`() {
-        // Test that built-in placeholders still work when no custom placeholder is registered
+        // 测试当没有注册自定义占位符时内置占位符仍然有效
         val result = Mock.mock("@name")
         assertNotNull(result)
         assertTrue(result is String)
@@ -145,39 +145,39 @@ class ExtendPlaceholderTest {
 
     @Test
     fun `demonstrate extended placeholder usage`() {
-        // Register simple placeholders using the new naming convention
+        // 使用新的命名约定注册简单占位符
         MockRandom.extend("company") { "TechCorp" }
         MockRandom.extend("department") { "Engineering" }
 
-        // Register placeholders with parameters
+        // 注册带参数的占位符
         MockRandom.extendWithParams("greeting") { params ->
             val name = params.getOrNull(0) ?: "World"
             "Hello, $name!"
         }
 
-        // Batch registration using map
+        // 使用映射批量注册
         MockRandom.extend(
             mapOf(
             "status" to { "Active" },
             "priority" to { "High" }
         ))
 
-        // Test simple placeholders
+        // 测试简单占位符
         val template1 = "@company - @department"
         val result1 = Mock.mock(template1)
         assertEquals("TechCorp - Engineering", result1)
 
-        // Test parameterized placeholders
+        // 测试参数化占位符
         val template2 = "@greeting(Alice)"
         val result2 = Mock.mock(template2)
         assertEquals("Hello, Alice!", result2)
 
-        // Test complex template
+        // 测试复杂模板
         val complexTemplate = "Company: @company, Department: @department, Status: @status, Priority: @priority"
         val complexResult = Mock.mock(complexTemplate)
         assertEquals("Company: TechCorp, Department: Engineering, Status: Active, Priority: High", complexResult)
 
-        // Demonstrate utility methods
+        // 演示实用方法
         assertTrue(MockRandom.hasExtended("company"))
         assertTrue(MockRandom.hasExtended("greeting"))
         assertFalse(MockRandom.hasExtended("nonexistent"))
@@ -188,20 +188,20 @@ class ExtendPlaceholderTest {
         assertTrue(placeholderNames.contains("status"))
         assertTrue(placeholderNames.contains("priority"))
 
-        // Test removal
+        // 测试移除
         MockRandom.removeExtended("status")
         assertFalse(MockRandom.hasExtended("status"))
 
-        // Test method chaining
+        // 测试方法链式调用
         MockRandom.extend("temp") { "temporary" }
         assertTrue(MockRandom.hasExtended("temp"))
 
-        // Test error handling
+        // 测试错误处理
         val invalidTemplate = "@nonexistent"
         val invalidResult = Mock.mock(invalidTemplate)
-        assertEquals("@nonexistent", invalidResult) // Should return original placeholder
+        assertEquals("@nonexistent", invalidResult) // 应该返回原始占位符
 
-        // Test cleanup
+        // 测试清理
         MockRandom.clearExtended()
         assertFalse(MockRandom.hasExtended("company"))
         assertTrue(MockRandom.getExtendedNames().isEmpty())

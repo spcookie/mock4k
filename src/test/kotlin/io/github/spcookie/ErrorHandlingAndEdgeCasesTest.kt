@@ -15,9 +15,9 @@ class ErrorHandlingAndEdgeCasesTest {
         val emptyMap = emptyMap<String, Any>()
         val result = Mock.mock(emptyMap)
 
-        assertNotNull(result, "Empty template should return non-null result")
-        assertTrue(result is Map<*, *>, "Empty template should return a map")
-        assertTrue((result as Map<*, *>).isEmpty(), "Empty template should return empty map")
+        assertNotNull(result, "空模板应该返回非null结果")
+        assertTrue(result is Map<*, *>, "空模板应该返回一个map")
+        assertTrue((result as Map<*, *>).isEmpty(), "空模板应该返回空map")
 
         println("Empty template result: $result")
     }
@@ -33,9 +33,9 @@ class ErrorHandlingAndEdgeCasesTest {
         val result = Mock.mock(template) as Map<String, Any?>
 
         // 验证null值的处理
-        assertTrue(result.containsKey("nullValue"), "Should contain null value key")
-        assertNotNull(result["normalValue"], "Normal value should not be null")
-        assertTrue(result.containsKey("anotherNull"), "Should contain another null key")
+        assertTrue(result.containsKey("nullValue"), "应该包含null值键")
+        assertNotNull(result["normalValue"], "正常值不应为null")
+        assertTrue(result.containsKey("anotherNull"), "应该包含另一个null键")
 
         println("Null values result: $result")
     }
@@ -50,9 +50,9 @@ class ErrorHandlingAndEdgeCasesTest {
 
         val result = Mock.mock(template) as Map<String, Any>
 
-        assertEquals("", result["emptyString"], "Empty string should remain empty")
-        assertEquals("   ", result["whitespaceString"], "Whitespace string should remain unchanged")
-        assertNotEquals("@STRING", result["normalString"], "Normal string placeholder should be resolved")
+        assertEquals("", result["emptyString"], "空字符串应该保持为空")
+        assertEquals("   ", result["whitespaceString"], "空白字符串应该保持不变")
+        assertNotEquals("@STRING", result["normalString"], "正常字符串占位符应该被解析")
 
         println("Empty strings result: $result")
     }
@@ -77,11 +77,11 @@ class ErrorHandlingAndEdgeCasesTest {
 
         // 验证无效占位符的处理 - 应该返回原始字符串或某种默认值
         result.forEach { (key, value) ->
-            assertNotNull(value, "$key should not be null")
+            assertNotNull(value, "$key 不应为null")
             val valueStr = value.toString()
             assertTrue(
                 valueStr.isNotEmpty() || key == "emptyPlaceholder" || key == "justAt",
-                "$key should not be empty (except for @ placeholders): $valueStr"
+                "$key 不应为空（除了@占位符）: $valueStr"
             )
             println("$key: $valueStr")
         }
@@ -103,7 +103,7 @@ class ErrorHandlingAndEdgeCasesTest {
         val result = Mock.mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
-            assertNotNull(value, "$key should not be null even with invalid parameters")
+            assertNotNull(value, "即使参数无效，$key 也不应为null")
             val valueStr = value.toString()
             println("$key: $valueStr")
 
@@ -112,7 +112,7 @@ class ErrorHandlingAndEdgeCasesTest {
                 "zeroLength" -> {
                     // 零长度字符串的处理
                     if (value is String) {
-                        assertTrue(value.isEmpty() || value.isNotEmpty(), "Zero length should be handled gracefully")
+                        assertTrue(value.isEmpty() || value.isNotEmpty(), "零长度应该被优雅处理")
                     }
                 }
 
@@ -120,7 +120,7 @@ class ErrorHandlingAndEdgeCasesTest {
                     // 负数长度的处理
                     assertTrue(
                         valueStr.isNotEmpty() || valueStr.isEmpty(),
-                        "Negative length should be handled gracefully"
+                        "负长度应该被优雅处理"
                     )
                 }
             }
@@ -152,35 +152,35 @@ class ErrorHandlingAndEdgeCasesTest {
 
         // 验证大数组
         val largeArray = result["largeArray"] as List<*>
-        assertEquals(100, largeArray.size, "Large array should have 100 elements")
+        assertEquals(100, largeArray.size, "大数组应该有100个元素")
         largeArray.forEach { item ->
-            assertNotNull(item, "Array item should not be null")
-            assertTrue(item is String, "Array item should be string")
-            assertTrue((item as String).isNotEmpty(), "Array item should not be empty")
+            assertNotNull(item, "数组项不应为 null")
+            assertTrue(item is String, "数组项应该是字符串")
+            assertTrue((item as String).isNotEmpty(), "数组项不应为空")
         }
 
         // 验证深度嵌套
         val deepNesting = result["deepNesting"] as Map<String, Any>
         var current: Any = deepNesting
         for (level in 1..5) {
-            assertTrue(current is Map<*, *>, "Level $level should be a map")
+            assertTrue(current is Map<*, *>, "第 $level 层应该是一个映射")
             current = (current as Map<String, Any>)["level$level"]!!
         }
-        assertTrue(current is String, "Final level should be a string")
-        assertTrue((current as String).isNotEmpty(), "Final string should not be empty")
+        assertTrue(current is String, "最终层应该是一个字符串")
+        assertTrue((current as String).isNotEmpty(), "最终字符串不应为空")
 
         // 验证长字符串
         val longString = result["longString"] as String
-        assertTrue(longString.length >= 100, "Long string should be reasonably long, got ${longString.length}")
+        assertTrue(longString.length >= 100, "长字符串应该足够长，得到 ${longString.length}")
 
         // 验证多字段
         val manyFields = result["manyFields"] as Map<String, Any>
-        assertEquals(50, manyFields.size, "Should have 50 fields")
+        assertEquals(50, manyFields.size, "应该有50个字段")
         manyFields.forEach { (key, value) ->
-            assertTrue(key.startsWith("field"), "Key should start with 'field': $key")
-            assertNotNull(value, "Field value should not be null")
-            assertTrue(value is String, "Field value should be string")
-            assertTrue((value as String).isNotEmpty(), "Field value should not be empty")
+            assertTrue(key.startsWith("field"), "键应该以 'field' 开头: $key")
+            assertNotNull(value, "字段值不应为 null")
+            assertTrue(value is String, "字段值应该是字符串")
+            assertTrue((value as String).isNotEmpty(), "字段值不应为空")
         }
 
         println("Large data structures test completed successfully")
@@ -200,9 +200,9 @@ class ErrorHandlingAndEdgeCasesTest {
         val singleArray = result["singleArray"] as String
         val mediumArray = result["mediumArray"] as List<*>
 
-        assertEquals(0, emptyArray.size, "Empty array should have 0 elements")
-        assertFalse(singleArray.startsWith("@"), "Single array should not start with @")
-        assertEquals(50, mediumArray.size, "Medium array should have 50 elements")
+        assertEquals(0, emptyArray.size, "空数组应该有0个元素")
+        assertFalse(singleArray.startsWith("@"), "单个数组不应该以@开头")
+        assertEquals(50, mediumArray.size, "中等数组应该有50个元素")
 
         println("Extreme array sizes test completed successfully")
     }
@@ -227,9 +227,9 @@ class ErrorHandlingAndEdgeCasesTest {
         val result = Mock.mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
-            assertNotNull(value, "Value for key '$key' should not be null")
-            assertTrue(value is String, "Value for key '$key' should be string")
-            assertTrue((value as String).isNotEmpty(), "Value for key '$key' should not be empty")
+            assertNotNull(value, "键 '$key' 的值不应为null")
+            assertTrue(value is String, "键 '$key' 的值应该是字符串")
+            assertTrue((value as String).isNotEmpty(), "键 '$key' 的值不应为空")
             println("$key: $value")
         }
     }
@@ -249,32 +249,32 @@ class ErrorHandlingAndEdgeCasesTest {
         val result = Mock.mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
-            assertNotNull(value, "Value for key '$key' should not be null")
+            assertNotNull(value, "键 '$key' 的值不应为null")
             val valueStr = value.toString()
-            assertTrue(valueStr.isNotEmpty(), "Value for key '$key' should not be empty")
+            assertTrue(valueStr.isNotEmpty(), "键 '$key' 的值不应为空")
 
             when (key) {
                 "mixedContent1" -> {
-                    assertFalse(valueStr.contains("@NAME"), "@NAME should be replaced")
-                    assertFalse(valueStr.contains("@COMPANY"), "@COMPANY should be replaced")
-                    assertTrue(valueStr.contains("Hello"), "Should contain 'Hello'")
-                    assertTrue(valueStr.contains("Welcome"), "Should contain 'Welcome'")
+                    assertFalse(valueStr.contains("@NAME"), "@NAME 应该被替换")
+                    assertFalse(valueStr.contains("@COMPANY"), "@COMPANY 应该被替换")
+                    assertTrue(valueStr.contains("Hello"), "应该包含 'Hello'")
+                    assertTrue(valueStr.contains("Welcome"), "应该包含 'Welcome'")
                 }
 
                 "mixedContent2" -> {
-                    assertFalse(valueStr.contains("@EMAIL"), "@EMAIL should be replaced")
-                    assertFalse(valueStr.contains("@PHONENUMBER"), "@PHONENUMBER should be replaced")
-                    assertTrue(valueStr.contains("Email:"), "Should contain 'Email:'")
-                    assertTrue(valueStr.contains("Phone:"), "Should contain 'Phone:'")
+                    assertFalse(valueStr.contains("@EMAIL"), "@EMAIL 应该被替换")
+                    assertFalse(valueStr.contains("@PHONENUMBER"), "@PHONENUMBER 应该被替换")
+                    assertTrue(valueStr.contains("Email:"), "应该包含 'Email:'")
+                    assertTrue(valueStr.contains("Phone:"), "应该包含 'Phone:'")
                 }
 
                 "specialChars" -> {
-                    assertTrue(valueStr.contains("!@#$%^&*()"), "Should contain special characters")
+                    assertTrue(valueStr.contains("!@#$%^&*()"), "应该包含特殊字符")
                 }
 
                 "unicodeContent" -> {
-                    assertTrue(valueStr.contains("🚀"), "Should contain rocket emoji")
-                    assertFalse(valueStr.contains("@STRING"), "@STRING should be replaced")
+                    assertTrue(valueStr.contains("🚀"), "应该包含火箭表情符号")
+                    assertFalse(valueStr.contains("@STRING"), "@STRING 应该被替换")
                 }
             }
 
@@ -322,18 +322,18 @@ class ErrorHandlingAndEdgeCasesTest {
         threads.forEach { it.join() }
 
         // 验证结果
-        assertEquals(15, results.size, "Should have 15 results from 5 threads * 3 iterations")
+        assertEquals(15, results.size, "应该有15个结果（5个线程 * 3次迭代）")
 
         results.forEach { result ->
-            assertNotNull(result["data"], "Each result should have data")
+            assertNotNull(result["data"], "每个结果都应该有data")
             val data = result["data"] as Map<String, Any>
-            assertNotNull(data["id"], "Each data should have id")
-            assertNotNull(data["name"], "Each data should have name")
-            assertNotNull(data["email"], "Each data should have email")
-            assertNotNull(data["items"], "Each data should have items")
+            assertNotNull(data["id"], "每个data都应该有id")
+            assertNotNull(data["name"], "每个data都应该有name")
+            assertNotNull(data["email"], "每个data都应该有email")
+            assertNotNull(data["items"], "每个data都应该有items")
 
             val items = data["items"] as List<*>
-            assertEquals(10, items.size, "Each items list should have 10 elements")
+            assertEquals(10, items.size, "每个items列表应该有10个元素")
         }
 
         println("Concurrent access test completed successfully")
@@ -380,22 +380,22 @@ class ErrorHandlingAndEdgeCasesTest {
 
         // 验证结果
         val users = result["users"] as List<*>
-        assertEquals(100, users.size, "Should have 100 users")
+        assertEquals(100, users.size, "应该有100个用户")
 
         users.forEach { user ->
-            assertTrue(user is Map<*, *>, "Each user should be a map")
+            assertTrue(user is Map<*, *>, "每个用户都应该是一个map")
             val userMap = user as Map<String, Any>
-            assertNotNull(userMap["id"], "User should have id")
-            assertNotNull(userMap["profile"], "User should have profile")
-            assertNotNull(userMap["preferences"], "User should have preferences")
-            assertNotNull(userMap["activity"], "User should have activity")
+            assertNotNull(userMap["id"], "用户应该有id")
+            assertNotNull(userMap["profile"], "用户应该有profile")
+            assertNotNull(userMap["preferences"], "用户应该有preferences")
+            assertNotNull(userMap["activity"], "用户应该有activity")
 
             val activity = userMap["activity"] as List<*>
-            assertEquals(20, activity.size, "Each user should have 20 activity records")
+            assertEquals(20, activity.size, "每个用户应该有20条活动记录")
         }
 
         println("Performance test completed in ${duration}ms")
-        assertTrue(duration < 10000, "Performance test should complete within 10 seconds, took ${duration}ms")
+        assertTrue(duration < 10000, "性能测试应该在10秒内完成，实际用时 ${duration}ms")
     }
 
     // ==================== 内存和资源测试 ====================
@@ -419,14 +419,14 @@ class ErrorHandlingAndEdgeCasesTest {
 
             // 每10次迭代验证一次结果
             if (iteration % 10 == 0) {
-                assertTrue(result is Map<*, *>, "Result should be a map")
+                assertTrue(result is Map<*, *>, "结果应该是一个map")
                 val resultMap = result as Map<String, Any>
-                assertNotNull(resultMap["data"], "Result should have data")
+                assertNotNull(resultMap["data"], "结果应该有data")
                 println("Iteration $iteration completed")
             }
         }
 
-        assertEquals(100, results.size, "Should have 100 results")
+        assertEquals(100, results.size, "应该有100个结果")
         println("Memory usage test completed successfully")
     }
 
@@ -447,26 +447,26 @@ class ErrorHandlingAndEdgeCasesTest {
         val result = Mock.mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
-            assertNotNull(value, "$key should not be null")
+            assertNotNull(value, "$key 不应为null")
 
             when (key) {
                 "zeroRange" -> {
                     val num = when (value) {
                         is String -> value.toInt()
                         is Int -> value
-                        else -> fail("Expected String or Int, got ${value::class.simpleName}")
+                        else -> fail("期望String或Int，实际得到 ${value::class.simpleName}")
                     }
-                    assertTrue(num in 0..2, "Zero range should return value between 0 and 2")
+                    assertTrue(num in 0..2, "零范围应该返回0到2之间的值")
                 }
 
                 "singleChar" -> {
                     val str = value as String
-                    assertEquals(1, str.length, "Single char string should have length 1")
+                    assertEquals(1, str.length, "单字符字符串应该长度为1")
                 }
 
                 "emptyArray" -> {
                     val array = value as List<*>
-                    assertEquals(0, array.size, "Empty array should have size 0")
+                    assertEquals(0, array.size, "空数组应该大小为0")
                 }
             }
 

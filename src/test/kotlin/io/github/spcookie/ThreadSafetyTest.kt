@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertTrue
 
 /**
- * Test thread safety of MockRandom
+ * 测试 MockRandom 的线程安全性
  */
 class ThreadSafetyTest {
 
@@ -24,7 +24,7 @@ class ThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(operationsPerThread) {
-                        // Test various MockRandom operations
+                        // 测试各种 MockRandom 操作
                         val randomInt = MockRandom.integer(1, 100)
                         val randomString = MockRandom.string(10)
                         val randomBoolean = MockRandom.boolean()
@@ -49,19 +49,19 @@ class ThreadSafetyTest {
             }
         }
 
-        // Wait for all threads to complete
-        assertTrue(latch.await(30, TimeUnit.SECONDS), "Threads did not complete in time")
+        // 等待所有线程完成
+        assertTrue(latch.await(30, TimeUnit.SECONDS), "线程未能及时完成")
         executor.shutdown()
 
-        // Check that no exceptions occurred
+        // 检查是否没有异常发生
         assertTrue(
             exceptions.isEmpty(),
-            "Exceptions occurred during concurrent execution: ${exceptions.joinToString()}"
+            "并发执行期间发生异常: ${exceptions.joinToString()}"
         )
 
-        // Check that we got the expected number of results
-        val expectedResults = threadCount * operationsPerThread * 5 // 5 operations per iteration
-        assertTrue(results.size == expectedResults, "Expected $expectedResults results, got ${results.size}")
+        // 检查是否得到了预期数量的结果
+        val expectedResults = threadCount * operationsPerThread * 5 // 每次迭代5个操作
+        assertTrue(results.size == expectedResults, "期望 $expectedResults 个结果，实际得到 ${results.size}")
     }
 
     @Test
@@ -72,7 +72,7 @@ class ThreadSafetyTest {
         val latch = CountDownLatch(threadCount)
         val exceptions = mutableListOf<Exception>()
 
-        // Register some custom placeholders
+        // 注册一些自定义占位符
         MockRandom.extend("threadTest") { "Thread-${Thread.currentThread().id}" }
         MockRandom.extendWithParams("threadTestWithParam") { params ->
             "Thread-${Thread.currentThread().id}-${params.firstOrNull() ?: "default"}"
@@ -82,17 +82,17 @@ class ThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(operationsPerThread) {
-                        // Test custom placeholder operations
+                        // 测试自定义占位符操作
                         val hasExtended = MockRandom.hasExtended("threadTest")
                         val customResult = MockRandom.getExtended("threadTest")?.invoke()
                         val customWithParamResult =
                             MockRandom.getExtendedWithParams("threadTestWithParam")?.invoke(listOf(threadIndex))
 
-                        assertTrue(hasExtended, "Custom placeholder should exist")
-                        assertTrue(customResult != null, "Custom placeholder should return a result")
+                        assertTrue(hasExtended, "自定义占位符应该存在")
+                        assertTrue(customResult != null, "自定义占位符应该返回结果")
                         assertTrue(
                             customWithParamResult != null,
-                            "Custom placeholder with params should return a result"
+                            "带参数的自定义占位符应该返回结果"
                         )
                     }
                 } catch (e: Exception) {
@@ -106,16 +106,16 @@ class ThreadSafetyTest {
         }
 
         // Wait for all threads to complete
-        assertTrue(latch.await(30, TimeUnit.SECONDS), "Threads did not complete in time")
+        assertTrue(latch.await(30, TimeUnit.SECONDS), "线程未能及时完成")
         executor.shutdown()
 
         // Check that no exceptions occurred
         assertTrue(
             exceptions.isEmpty(),
-            "Exceptions occurred during concurrent execution: ${exceptions.joinToString()}"
+            "并发执行期间发生异常: ${exceptions.joinToString()}"
         )
 
-        // Clean up
+        // 清理
         MockRandom.clearExtended()
     }
 
@@ -156,28 +156,28 @@ class ThreadSafetyTest {
         }
 
         // Wait for all threads to complete
-        assertTrue(latch.await(30, TimeUnit.SECONDS), "Threads did not complete in time")
+        assertTrue(latch.await(30, TimeUnit.SECONDS), "线程未能及时完成")
         executor.shutdown()
 
         // Check that no exceptions occurred
         assertTrue(
             exceptions.isEmpty(),
-            "Exceptions occurred during concurrent execution: ${exceptions.joinToString()}"
+            "并发执行期间发生异常: ${exceptions.joinToString()}"
         )
 
-        // Check that we got the expected number of results
+        // 检查我们是否得到了预期数量的结果
         val expectedResults = threadCount * operationsPerThread
-        assertTrue(results.size == expectedResults, "Expected $expectedResults results, got ${results.size}")
+        assertTrue(results.size == expectedResults, "期望 $expectedResults 个结果，实际得到 ${results.size}")
 
-        // Verify that all results are valid maps
+        // 验证所有结果都是有效的映射
         results.forEach { result ->
-            assertTrue(result is Map<*, *>, "Result should be a Map")
+            assertTrue(result is Map<*, *>, "结果应该是一个Map")
             val map = result
-            assertTrue(map.containsKey("id"), "Result should contain 'id' key")
-            assertTrue(map.containsKey("name"), "Result should contain 'name' key")
-            assertTrue(map.containsKey("email"), "Result should contain 'email' key")
-            assertTrue(map.containsKey("age"), "Result should contain 'age' key")
-            assertTrue(map.containsKey("active"), "Result should contain 'active' key")
+            assertTrue(map.containsKey("id"), "结果应该包含'id'键")
+            assertTrue(map.containsKey("name"), "结果应该包含'name'键")
+            assertTrue(map.containsKey("email"), "结果应该包含'email'键")
+            assertTrue(map.containsKey("age"), "结果应该包含'age'键")
+            assertTrue(map.containsKey("active"), "结果应该包含'active'键")
         }
     }
 }

@@ -5,35 +5,35 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 /**
- * Test to verify that increment counters are properly isolated between different mock instances
+ * 测试验证递增计数器在不同模拟实例之间是否正确隔离
  */
 class CounterIsolationTest {
 
     @Test
-    @DisplayName("Different mock calls should have isolated counters")
+    @DisplayName("不同的模拟调用应该有隔离的计数器")
     fun testCounterIsolation() {
         val template1 = mapOf("id|+1" to 100)
         val template2 = mapOf("id|+1" to 200)
 
-        // First call to template1
+        // 第一次调用 template1
         val result1a = Mock.mock(template1) as Map<String, Any>
         assertEquals(100, result1a["id"])
 
-        // First call to template2
+        // 第一次调用 template2
         val result2a = Mock.mock(template2) as Map<String, Any>
         assertEquals(200, result2a["id"])
 
-        // Second call to template1 - should start fresh
+        // 第二次调用 template1 - 应该重新开始
         val result1b = Mock.mock(template1) as Map<String, Any>
         assertEquals(100, result1b["id"])
 
-        // Second call to template2 - should start fresh
+        // 第二次调用 template2 - 应该重新开始
         val result2b = Mock.mock(template2) as Map<String, Any>
         assertEquals(200, result2b["id"])
     }
 
     @Test
-    @DisplayName("Within single template, counters should work normally")
+    @DisplayName("在单个模板内，计数器应该正常工作")
     fun testWithinTemplateCounters() {
         val template = mapOf(
             "user" to mapOf(
@@ -50,7 +50,7 @@ class CounterIsolationTest {
         val user = result["user"] as Map<String, Any>
         val admin = result["admin"] as Map<String, Any>
 
-        // Within the same template generation, counters should work
+        // 在同一个模板生成中，计数器应该正常工作
         assertEquals(1000, user["id"])
         assertEquals(0, user["score"])
         assertEquals(2000, admin["id"])
@@ -58,7 +58,7 @@ class CounterIsolationTest {
     }
 
     @Test
-    @DisplayName("Array elements should have independent counters within same call")
+    @DisplayName("数组元素在同一次调用中应该有独立的计数器")
     fun testArrayCounters() {
         val template = listOf(
             mapOf("id|+1" to 100),
@@ -68,7 +68,7 @@ class CounterIsolationTest {
 
         val result = Mock.mock(template) as List<Map<String, Any>>
 
-        // Each array element should have independent counter within the same call
+        // 在同一次调用中，每个数组元素应该有独立的计数器
         assertEquals(100, result[0]["id"])
         assertEquals(101, result[1]["id"])
         assertEquals(102, result[2]["id"])

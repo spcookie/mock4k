@@ -51,7 +51,7 @@ class ComprehensiveTest {
 
         // 验证所有字段都存在且不为空
         result.forEach { (key, value) ->
-            assertNotNull(value, "Field $key should not be null")
+            assertNotNull(value, "字段 $key 不应为 null")
             println("$key: $value")
         }
     }
@@ -113,16 +113,16 @@ class ComprehensiveTest {
         val temperature = result["temperature"] as Int
         val items = result["items"] as List<*>
 
-        assertTrue(age in 18..65, "Age should be in range 18-65, got $age")
-        assertTrue(score in 0..100, "Score should be in range 0-100, got $score")
-        assertTrue(temperature in -10..40, "Temperature should be in range -10-40, got $temperature")
+        assertTrue(age in 18..65, "年龄应该在18-65范围内，实际得到 $age")
+        assertTrue(score in 0..100, "分数应该在0-100范围内，实际得到 $score")
+        assertTrue(temperature in -10..40, "温度应该在-10-40范围内，实际得到 $temperature")
         // 验证数组重复范围：原数组有3个元素，重复2-8次，所以结果数组大小应该在6-24之间
         assertTrue(
             items.size in 6..24,
-            "Items count should be in range 6-24 (3 elements * 2-8 repetitions), got ${items.size}"
+            "项目数量应该在6-24范围内（3个元素 * 2-8次重复），实际得到 ${items.size}"
         )
         // 验证所有元素都来自原数组
-        assertTrue(items.all { it in listOf("apple", "banana", "orange") }, "All items should be from original array")
+        assertTrue(items.all { it in listOf("apple", "banana", "orange") }, "所有项目都应该来自原数组")
 
         println("Range modifier result: $result")
     }
@@ -160,12 +160,12 @@ class ComprehensiveTest {
         result.forEach { (key, value) ->
             when (value) {
                 is Double -> {
-                    assertTrue(value >= 0, "$key should be positive, got $value")
+                    assertTrue(value >= 0, "$key 应该为非负数，实际得到 $value")
                     println("$key: $value")
                 }
 
                 is Float -> {
-                    assertTrue(value >= 0, "$key should be positive, got $value")
+                    assertTrue(value >= 0, "$key 应该为非负数，实际得到 $value")
                     println("$key: $value")
                 }
             }
@@ -193,9 +193,9 @@ class ComprehensiveTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved, got: $valueStr")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析，实际得到: $valueStr")
             println("$key: $valueStr")
         }
     }
@@ -213,9 +213,9 @@ class ComprehensiveTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved, got: $valueStr")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析，实际得到: $valueStr")
             println("$key: $valueStr")
         }
     }
@@ -234,9 +234,9 @@ class ComprehensiveTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved, got: $valueStr")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析，实际得到: $valueStr")
             println("$key: $valueStr")
         }
     }
@@ -254,9 +254,9 @@ class ComprehensiveTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved, got: $valueStr")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析，实际得到: $valueStr")
             println("$key: $valueStr")
         }
     }
@@ -275,9 +275,9 @@ class ComprehensiveTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved, got: $valueStr")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析，实际得到: $valueStr")
             println("$key: $valueStr")
         }
     }
@@ -295,10 +295,10 @@ class ComprehensiveTest {
 
         result.forEach { (key, value) ->
             val phoneNumber = value.toString()
-            assertNotNull(value, "Phone number for $key should not be null")
-            assertTrue(phoneNumber.isNotEmpty(), "Phone number for $key should not be empty")
-            assertFalse(phoneNumber.startsWith("@"), "Phone placeholder $key should be resolved, got: $phoneNumber")
-            assertTrue(phoneNumber.any { it.isDigit() }, "Phone number $key should contain digits: $phoneNumber")
+            assertNotNull(value, "$key 的电话号码不应为 null")
+            assertTrue(phoneNumber.isNotEmpty(), "$key 的电话号码不应为空")
+            assertFalse(phoneNumber.startsWith("@"), "电话占位符 $key 应该被解析，实际得到: $phoneNumber")
+            assertTrue(phoneNumber.any { it.isDigit() }, "电话号码 $key 应该包含数字: $phoneNumber")
             println("$key: $phoneNumber")
         }
     }
@@ -323,9 +323,9 @@ class ComprehensiveTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved, got: $valueStr")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析，实际得到: $valueStr")
             println("Chinese $key: $valueStr")
         }
     }
@@ -345,9 +345,9 @@ class ComprehensiveTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved, got: $valueStr")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析，实际得到: $valueStr")
             println("Japanese $key: $valueStr")
         }
     }
@@ -367,9 +367,9 @@ class ComprehensiveTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved, got: $valueStr")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析，实际得到: $valueStr")
             println("Korean $key: $valueStr")
         }
     }
@@ -397,9 +397,9 @@ class ComprehensiveTest {
 
             result.forEach { (key, value) ->
                 val valueStr = value.toString()
-                assertNotNull(value, "$localeName $key should not be null")
-                assertTrue(valueStr.isNotEmpty(), "$localeName $key should not be empty")
-                assertFalse(valueStr.startsWith("@"), "$localeName $key placeholder should be resolved")
+                assertNotNull(value, "$localeName $key 不应为 null")
+                assertTrue(valueStr.isNotEmpty(), "$localeName $key 不应为空")
+                assertFalse(valueStr.startsWith("@"), "$localeName $key 占位符应该被解析")
                 println("$localeName $key: $valueStr")
             }
         }
@@ -454,7 +454,7 @@ class ComprehensiveTest {
         val result = Mock.mock(template) as Map<String, Any>
         val users = result["users"] as List<Map<String, Any>>
 
-        assertTrue(users.size in 3..5, "Users count should be in range 3-5")
+        assertTrue(users.size in 3..5, "用户数量应该在3-5范围内")
 
         users.forEachIndexed { index, user ->
             // 验证ID递增
@@ -479,10 +479,10 @@ class ComprehensiveTest {
 
             // 验证preferences对象
             val preferences = user["preferences"] as Map<String, Any>
-            assertTrue(preferences.size in 2..4, "Preferences size should be 2-4, got ${preferences.size}")
+            assertTrue(preferences.size in 2..4, "偏好设置大小应该在2-4之间，实际得到 ${preferences.size}")
 
             val tags = user["tags"] as List<*>
-            assertTrue(tags.isNotEmpty(), "Tags should not be empty")
+            assertTrue(tags.isNotEmpty(), "标签不应为空")
 
             val scores = user["scores"] as List<*>
             assertEquals(3, scores.size)
@@ -523,19 +523,19 @@ class ComprehensiveTest {
         val result = Mock.mock(template) as Map<String, Any>
         val products = result["products"] as List<Map<String, Any>>
 
-        assertTrue(products.size in 5..10, "Products count should be in range 5-10")
+        assertTrue(products.size in 5..10, "产品数量应该在5-10范围内")
 
         products.forEachIndexed { index, product ->
             assertEquals(1 + index, product["id"])
 
             val name = product["name"] as String
-            assertTrue(name.startsWith("Product "), "Product name should start with 'Product '")
+            assertTrue(name.startsWith("Product "), "产品名称应该以 'Product ' 开头")
 
             val price = product["price"]
-            assertTrue(price is Number, "Price should be a number")
+            assertTrue(price is Number, "价格应该是数字")
 
             val tags = product["tags"] as List<*>
-            assertTrue(tags.isNotEmpty(), "Tags should not be empty")
+            assertTrue(tags.isNotEmpty(), "标签不应为空")
 
             val manufacturer = product["manufacturer"] as Map<String, Any>
             assertNotNull(manufacturer["name"])
@@ -543,7 +543,7 @@ class ComprehensiveTest {
             assertNotNull(manufacturer["contact"])
 
             val reviews = product["reviews"] as List<*>
-            assertTrue(reviews.size in 0..3, "Reviews count should be in range 0-3")
+            assertTrue(reviews.size in 0..3, "评论数量应该在0-3范围内")
         }
 
         println("Mixed rules and placeholders result: $result")
@@ -561,10 +561,10 @@ class ComprehensiveTest {
 
         // 验证边界情况处理
         val singleItem = result["singleItem"] as String
-        assertEquals("only", singleItem, "Single item should be a only")
+        assertEquals("only", singleItem, "单个项目应该是 only")
 
         val largeRange = result["largeRange"] as Number
-        assertTrue(largeRange.toInt() in 1000..9999, "Large range should be between 1000-9999")
+        assertTrue(largeRange.toInt() in 1000..9999, "大范围应该在1000-9999之间")
 
         println("Error handling and edge cases result: $result")
     }
@@ -591,10 +591,10 @@ class ComprehensiveTest {
         val endTime = System.currentTimeMillis()
 
         val largeDataset = result["largeDataset"] as List<*>
-        assertEquals(100, largeDataset.size, "Large dataset should have 100 items")
+        assertEquals(100, largeDataset.size, "大数据集应该有100个项目")
 
         val executionTime = endTime - startTime
-        println("Performance test: Generated 100 items in ${executionTime}ms")
-        assertTrue(executionTime < 5000, "Performance test should complete within 5 seconds")
+        println("性能测试: 在 ${executionTime}ms 内生成了100个项目")
+        assertTrue(executionTime < 5000, "性能测试应该在5秒内完成")
     }
 }

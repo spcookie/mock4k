@@ -85,7 +85,7 @@ class RegexPatternTest {
         val result = Mock.mock(template) as Map<String, Any?>
         val invalid = result["invalid"] as String
         
-        // Should return the original string for invalid regex (not processed as regex)
+        // 对于无效的正则表达式应该返回原始字符串（不作为正则表达式处理）
         assertEquals("/[unclosed/", invalid)
     }
 
@@ -98,7 +98,7 @@ class RegexPatternTest {
         val result = Mock.mock(template) as Map<String, Any?>
         val normal = result["normal"] as String
         
-        // Should return the original string
+        // 应该返回原始字符串
         assertEquals("not a regex", normal)
     }
 
@@ -111,7 +111,7 @@ class RegexPatternTest {
         val result = Mock.mock(template) as Map<String, Any?>
         val emails = result["emails"]
         
-        // Should repeat the generated email 3 times
+        // 应该重复生成的邮箱3次
         assertNotNull(emails)
         assertTrue(emails.toString().isNotEmpty())
         println("Generated emails with rule: $emails")

@@ -182,7 +182,7 @@ class MockRandomTest {
             val phoneStr = phone as String
             assertTrue(
                 !phoneStr.startsWith("@PHONENUMBER"),
-                "Phone number should be generated, not placeholder: $phoneStr"
+                "电话号码应该被生成，而不是占位符: $phoneStr"
             )
         }
 
@@ -304,9 +304,9 @@ class MockRandomTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "Value for $key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "Value for $key should not be empty")
-            assertTrue(!valueStr.startsWith("@"), "Placeholder $key should be resolved, got: $valueStr")
+            assertNotNull(value, "$key 的值不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 的值不应为空")
+            assertTrue(!valueStr.startsWith("@"), "占位符 $key 应该被解析，得到: $valueStr")
         }
 
         println("Comprehensive placeholders test result: $result")
@@ -462,7 +462,7 @@ class MockRandomTest {
         }
 
         // 应该有一些多样性（不是全部相同）
-        assertTrue(names.size > 1, "Generated names should have some variety")
+        assertTrue(names.size > 1, "生成的姓名应该有一些多样性")
 
         println("Generated names: $names")
     }
@@ -476,7 +476,7 @@ class MockRandomTest {
 
         phoneNumbers.forEach { phone ->
             assertNotNull(phone)
-            assertTrue(phone.isNotEmpty(), "Phone number should not be empty")
+            assertTrue(phone.isNotEmpty(), "电话号码不应为空")
             println("Chinese phone: $phone")
 
             // 检查是否匹配中文电话模式
@@ -486,7 +486,7 @@ class MockRandomTest {
                     phone.matches(Regex("\\+86-\\d{3}-\\d{4}-\\d{4}")) || // +86-###-####-####
                     phone.matches(Regex("\\+86 \\d{3} \\d{4} \\d{4}")) // +86 ### #### ####
 
-            assertTrue(isValidChineseFormat, "Phone should match Chinese format: $phone")
+            assertTrue(isValidChineseFormat, "电话应该匹配中文格式: $phone")
         }
     }
 
@@ -499,7 +499,7 @@ class MockRandomTest {
 
         phoneNumbers.forEach { phone ->
             assertNotNull(phone)
-            assertTrue(phone.isNotEmpty(), "Phone number should not be empty")
+            assertTrue(phone.isNotEmpty(), "电话号码不应为空")
             println("English phone: $phone")
 
             // 检查是否匹配美国电话模式
@@ -509,7 +509,7 @@ class MockRandomTest {
                     phone.matches(Regex("\\d{3}\\.\\d{3}\\.\\d{4}")) || // ###.###.####
                     phone.matches(Regex("\\+1-\\d{3}-\\d{3}-\\d{4}")) // +1-###-###-####
 
-            assertTrue(isValidUSFormat, "Phone should match US format: $phone")
+            assertTrue(isValidUSFormat, "电话应该匹配美国格式: $phone")
         }
     }
 
@@ -523,7 +523,7 @@ class MockRandomTest {
 
         assertTrue(
             phone.matches(Regex("\\(\\d{3}\\) \\d{3}-\\d{4}")),
-            "Custom format should be respected: $phone"
+            "应该遵循自定义格式: $phone"
         )
         println("Custom format phone: $phone")
     }
@@ -534,7 +534,7 @@ class MockRandomTest {
         MockRandom.setLocale(Locale.ENGLISH)
         val defaultPhone = MockRandom.phoneNumber()
         assertNotNull(defaultPhone)
-        assertTrue(defaultPhone.isNotEmpty(), "Default phone should not be empty")
+        assertTrue(defaultPhone.isNotEmpty(), "默认电话不应为空")
         println("Default phone: $defaultPhone")
 
         // 应该匹配英文电话格式之一
@@ -544,7 +544,7 @@ class MockRandomTest {
                 defaultPhone.matches(Regex("\\d{3}\\.\\d{3}\\.\\d{4}")) ||
                 defaultPhone.matches(Regex("\\+1-\\d{3}-\\d{3}-\\d{4}"))
 
-        assertTrue(isValidFormat, "Default phone should match English format: $defaultPhone")
+        assertTrue(isValidFormat, "默认电话应该匹配英文格式: $defaultPhone")
     }
 
     @Test
@@ -578,7 +578,7 @@ class MockRandomTest {
         // 应该有合理的数字位数（7-15是电话号码的典型位数）
         assertTrue(
             digitsOnly.length >= 7 && digitsOnly.length <= 15,
-            "Phone should have 7-15 digits, got ${digitsOnly.length}: $phone"
+            "电话应该有7-15位数字，得到 ${digitsOnly.length}: $phone"
         )
         println("Phone digits: $digitsOnly (length: ${digitsOnly.length})")
     }
@@ -708,12 +708,12 @@ class MockRandomTest {
         val sentence = MockRandom.sentence()
 
         // 应该以大写字母开头并以句号结尾
-        Assertions.assertTrue(sentence.first().isUpperCase(), "Sentence should start with uppercase")
-        Assertions.assertTrue(sentence.endsWith("."), "Sentence should end with period")
+        Assertions.assertTrue(sentence.first().isUpperCase(), "句子应该以大写字母开头")
+        Assertions.assertTrue(sentence.endsWith("."), "句子应该以句号结尾")
 
         // 应该包含多个单词
         val wordCount = sentence.dropLast(1).split(" ").size
-        Assertions.assertTrue(wordCount >= 12, "Sentence should have at least 12 words")
+        Assertions.assertTrue(wordCount >= 12, "句子应该至少包含12个单词")
 
         println("Generated sentence: $sentence")
         println("Word count: $wordCount")
@@ -729,7 +729,7 @@ class MockRandomTest {
         // 每个单词都应该以大写字母开头
         val words = title.split(" ")
         words.forEach { word ->
-            Assertions.assertTrue(word.first().isUpperCase(), "Each word in title should start with uppercase: $word")
+            Assertions.assertTrue(word.first().isUpperCase(), "标题中的每个单词都应该以大写字母开头: $word")
         }
 
         println("Generated title: $title")
@@ -740,18 +740,18 @@ class MockRandomTest {
         // 测试英文图片文本
         MockRandom.setLocale(Locale.ENGLISH)
         val englishImageUrl = MockRandom.image()
-        Assertions.assertTrue(englishImageUrl.contains("text="), "Image URL should contain text parameter")
+        Assertions.assertTrue(englishImageUrl.contains("text="), "图片URL应该包含text参数")
         println("English image URL: $englishImageUrl")
 
         // 测试中文图片文本
         MockRandom.setLocale(Locale.CHINESE)
         val chineseImageUrl = MockRandom.image()
-        Assertions.assertTrue(chineseImageUrl.contains("text="), "Image URL should contain text parameter")
+        Assertions.assertTrue(chineseImageUrl.contains("text="), "图片URL应该包含text参数")
         println("Chinese image URL: $chineseImageUrl")
 
         // 测试自定义文本（应该覆盖国际化）
         val customImageUrl = MockRandom.image(text = "Custom")
-        Assertions.assertTrue(customImageUrl.contains("text=Custom"), "Custom text should be used")
+        Assertions.assertTrue(customImageUrl.contains("text=Custom"), "应该使用自定义文本")
         println("Custom image URL: $customImageUrl")
     }
 }

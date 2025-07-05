@@ -5,12 +5,12 @@ import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 /**
- * Test to verify increment counter isolation between different mock calls
+ * 测试验证不同模拟调用之间递增计数器的隔离性
  */
 class IncrementIsolationTest {
 
     @Test
-    @DisplayName("Different property names should start from initial value each time")
+    @DisplayName("不同属性名称每次都应该从初始值开始")
     fun testDifferentPropertyCounters() {
         val template1 = mapOf("id1|+1" to 100)
         val template2 = mapOf("id2|+1" to 200)
@@ -26,16 +26,16 @@ class IncrementIsolationTest {
             results2.add(result2["id2"] as Int)
         }
 
-        // Each call should start from initial value since counters are cleared after each mock call
+        // 每次调用都应该从初始值开始，因为计数器在每次模拟调用后都会被清除
         assertEquals(listOf(100, 100, 100), results1)
         assertEquals(listOf(200, 200, 200), results2)
     }
 
     @Test
-    @DisplayName("Same property name should start from initial value each time")
+    @DisplayName("相同属性名称每次都应该从初始值开始")
     fun testSamePropertyNameIndependentCounter() {
         val template1 = mapOf("id|+1" to 100)
-        val template2 = mapOf("id|+1" to 200)  // Same property name, different initial value
+        val template2 = mapOf("id|+1" to 200)  // 相同属性名称，不同初始值
 
         // Generate from both templates alternately
         val results1 = mutableListOf<Int>()
@@ -48,13 +48,13 @@ class IncrementIsolationTest {
             results2.add(result2["id"] as Int)
         }
 
-        // Each call should start from initial value since counters are cleared after each mock call
+        // 每次调用都应该从初始值开始，因为计数器在每次模拟调用后都会被清除
         assertEquals(listOf(100, 100, 100), results1)
         assertEquals(listOf(200, 200, 200), results2)
     }
 
     @Test
-    @DisplayName("Multiple properties in same template should increment within single call")
+    @DisplayName("同一模板中的多个属性应该在单次调用内递增")
     fun testMultiplePropertiesInSameTemplate() {
         val template = listOf(
             mapOf("id|+1" to 100),
@@ -62,10 +62,10 @@ class IncrementIsolationTest {
             mapOf("id|+1" to 100)
         )
 
-        // Generate once and check that same property increments within the same call
+        // 生成一次并检查相同属性在同一次调用内递增
         val result = Mock.mock(template) as List<Map<String, Any>>
 
-        // Within a single template generation, the same property should increment across array elements
+        // 在单次模板生成中，相同属性应该在数组元素间递增
         assertEquals(100, result[0]["id"])
         assertEquals(101, result[1]["id"])
         assertEquals(102, result[2]["id"])

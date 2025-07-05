@@ -27,34 +27,34 @@ class PlaceholderAdvancedTest {
 
         // 验证布尔值
         val boolean = result["boolean"]
-        assertDoesNotThrow({ boolean.toString().toBoolean() }, "Boolean should be a Boolean type")
+        assertDoesNotThrow({ boolean.toString().toBoolean() }, "布尔值应该是布尔类型")
 
         // 验证自然数
         val natural = result["natural"]
-        assertDoesNotThrow({ natural.toString().toInt() }, "Natural should be a Number type")
+        assertDoesNotThrow({ natural.toString().toInt() }, "自然数应该是数字类型")
         if (natural is Int) {
-            assertTrue(natural >= 0, "Natural should be non-negative")
+            assertTrue(natural >= 0, "自然数应该是非负数")
         }
 
         // 验证整数
         val integer = result["integer"]
-        assertDoesNotThrow({ integer.toString().toInt() }, "Integer should be a Number type")
+        assertDoesNotThrow({ integer.toString().toInt() }, "整数应该是数字类型")
 
         // 验证浮点数
         val float = result["float"]
-        assertDoesNotThrow({ float.toString().toFloat() }, "Float should be a Number type")
+        assertDoesNotThrow({ float.toString().toFloat() }, "浮点数应该是数字类型")
 
         // 验证字符
         val character = result["character"]
-        assertTrue(character is String || character is Char, "Character should be String or Char")
+        assertTrue(character is String || character is Char, "字符应该是字符串或字符类型")
         if (character is String) {
-            assertEquals(1, character.length, "Character string should have length 1")
+            assertEquals(1, character.length, "字符字符串长度应该为1")
         }
 
         // 验证字符串
         val string = result["string"]
-        assertTrue(string is String, "String should be a String type")
-        assertTrue((string as String).isNotEmpty(), "String should not be empty")
+        assertTrue(string is String, "字符串应该是字符串类型")
+        assertTrue((string as String).isNotEmpty(), "字符串不应为空")
 
         println("Basic data type placeholders result: $result")
     }
@@ -73,19 +73,19 @@ class PlaceholderAdvancedTest {
 
         // 验证自然数范围
         val naturalRange = result["naturalRange"].toString().toInt()
-        assertTrue(naturalRange in 10..100, "Natural range should be 10-100, got ${naturalRange.toInt()}")
+        assertTrue(naturalRange in 10..100, "自然数范围应该是10-100，得到${naturalRange.toInt()}")
 
         // 验证整数范围
         val integerRange = result["integerRange"].toString().toInt()
-        assertTrue(integerRange in -50..50, "Integer range should be -50 to 50, got ${integerRange.toInt()}")
+        assertTrue(integerRange in -50..50, "整数范围应该是-50到50，得到${integerRange.toInt()}")
 
         // 验证浮点数范围
         val floatRange = result["floatRange"].toString().toDouble()
-        assertTrue(floatRange in 1.0..10.0, "Float range should be 1.0-10.0, got ${floatRange.toDouble()}")
+        assertTrue(floatRange in 1.0..10.0, "浮点数范围应该是1.0-10.0，得到${floatRange.toDouble()}")
 
         // 验证字符串长度
         val stringLength = result["stringLength"] as String
-        assertEquals(15, stringLength.length, "String length should be 15, got ${stringLength.length}")
+        assertEquals(15, stringLength.length, "字符串长度应该是15，得到${stringLength.length}")
 
         println("Parameterized basic placeholders result: $result")
     }
@@ -105,25 +105,25 @@ class PlaceholderAdvancedTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析")
 
             // 基本格式验证
             when (key) {
                 "date" -> {
                     // 日期格式验证（可能包含年月日）
-                    assertTrue(valueStr.any { it.isDigit() }, "Date should contain digits")
+                    assertTrue(valueStr.any { it.isDigit() }, "日期应该包含数字")
                 }
 
                 "time" -> {
                     // 时间格式验证（可能包含时分秒）
-                    assertTrue(valueStr.any { it.isDigit() }, "Time should contain digits")
+                    assertTrue(valueStr.any { it.isDigit() }, "时间应该包含数字")
                 }
 
                 "datetime", "now" -> {
                     // 日期时间格式验证
-                    assertTrue(valueStr.any { it.isDigit() }, "DateTime should contain digits")
+                    assertTrue(valueStr.any { it.isDigit() }, "日期时间应该包含数字")
                 }
             }
 
@@ -146,22 +146,22 @@ class PlaceholderAdvancedTest {
 
         // 验证单词
         val word = result["word"] as String
-        assertTrue(word.isNotEmpty(), "Word should not be empty")
-        assertTrue(word.all { it.isLetter() || it.isWhitespace() }, "Word should contain only letters and spaces")
+        assertTrue(word.isNotEmpty(), "单词不应为空")
+        assertTrue(word.all { it.isLetter() || it.isWhitespace() }, "单词应该只包含字母和空格")
 
         // 验证句子
         val sentence = result["sentence"] as String
-        assertTrue(sentence.isNotEmpty(), "Sentence should not be empty")
-        assertTrue(sentence.length > word.length, "Sentence should be longer than word")
+        assertTrue(sentence.isNotEmpty(), "句子不应为空")
+        assertTrue(sentence.length > word.length, "句子应该比单词长")
 
         // 验证段落
         val paragraph = result["paragraph"] as String
-        assertTrue(paragraph.isNotEmpty(), "Paragraph should not be empty")
-        assertTrue(paragraph.length > sentence.length, "Paragraph should be longer than sentence")
+        assertTrue(paragraph.isNotEmpty(), "段落不应为空")
+        assertTrue(paragraph.length > sentence.length, "段落应该比句子长")
 
         // 验证标题
         val title = result["title"] as String
-        assertTrue(title.isNotEmpty(), "Title should not be empty")
+        assertTrue(title.isNotEmpty(), "标题不应为空")
 
         println("Text placeholders result: $result")
     }
@@ -180,12 +180,12 @@ class PlaceholderAdvancedTest {
         val longSentence = result["longSentence"] as String
         val customParagraph = result["customParagraph"] as String
 
-        assertTrue(shortSentence.isNotEmpty(), "Short sentence should not be empty")
-        assertTrue(longSentence.isNotEmpty(), "Long sentence should not be empty")
-        assertTrue(customParagraph.isNotEmpty(), "Custom paragraph should not be empty")
+        assertTrue(shortSentence.isNotEmpty(), "短句子不应为空")
+        assertTrue(longSentence.isNotEmpty(), "长句子不应为空")
+        assertTrue(customParagraph.isNotEmpty(), "自定义段落不应为空")
 
         // 长句子应该比短句子长（大概率）
-        assertTrue(longSentence.length >= shortSentence.length, "Long sentence should be longer than short sentence")
+        assertTrue(longSentence.length >= shortSentence.length, "长句子应该比短句子长")
 
         println("Parameterized text placeholders result: $result")
     }
@@ -206,14 +206,14 @@ class PlaceholderAdvancedTest {
         val firstName = result["firstName"] as String
         val lastName = result["lastName"] as String
 
-        assertTrue(fullName.isNotEmpty(), "Full name should not be empty")
-        assertTrue(firstName.isNotEmpty(), "First name should not be empty")
-        assertTrue(lastName.isNotEmpty(), "Last name should not be empty")
+        assertTrue(fullName.isNotEmpty(), "全名不应为空")
+        assertTrue(firstName.isNotEmpty(), "名字不应为空")
+        assertTrue(lastName.isNotEmpty(), "姓氏不应为空")
 
         // 全名应该包含空格（大概率）
         assertTrue(
             fullName.contains(" ") || fullName.length > firstName.length,
-            "Full name should be longer or contain space"
+            "全名应该更长或包含空格"
         )
 
         println("Name placeholders result: $result")
@@ -236,36 +236,36 @@ class PlaceholderAdvancedTest {
 
         // 验证URL
         val url = result["url"] as String
-        assertTrue(url.isNotEmpty(), "URL should not be empty")
-        assertTrue(url.contains(".") || url.contains("://"), "URL should contain . or ://")
+        assertTrue(url.isNotEmpty(), "URL 不应为空")
+        assertTrue(url.contains(".") || url.contains("://"), "URL应该包含.或://")
 
         // 验证域名
         val domain = result["domain"] as String
-        assertTrue(domain.isNotEmpty(), "Domain should not be empty")
-        assertTrue(domain.contains("."), "Domain should contain .")
+        assertTrue(domain.isNotEmpty(), "域名不应为空")
+        assertTrue(domain.contains("."), "域名应该包含 .")
 
         // 验证邮箱
         val email = result["email"] as String
-        assertTrue(email.isNotEmpty(), "Email should not be empty")
-        assertTrue(email.contains("@"), "Email should contain @")
-        assertTrue(email.contains("."), "Email should contain .")
+        assertTrue(email.isNotEmpty(), "邮箱不应为空")
+        assertTrue(email.contains("@"), "邮箱应该包含@")
+        assertTrue(email.contains("."), "邮箱应该包含 .")
 
         // 验证IP地址
         val ip = result["ip"] as String
-        assertTrue(ip.isNotEmpty(), "IP should not be empty")
-        assertTrue(ip.contains("."), "IP should contain .")
+        assertTrue(ip.isNotEmpty(), "IP 不应为空")
+        assertTrue(ip.contains("."), "IP 应该包含 .")
         val ipPattern = Pattern.compile("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$")
-        assertTrue(ipPattern.matcher(ip).matches(), "IP should match IPv4 pattern: $ip")
+        assertTrue(ipPattern.matcher(ip).matches(), "IP应该匹配IPv4格式: $ip")
 
         // 验证顶级域名
         val tld = result["tld"] as String
-        assertTrue(tld.isNotEmpty(), "TLD should not be empty")
-        assertTrue(tld.all { it.isLetter() }, "TLD should contain only letters")
+        assertTrue(tld.isNotEmpty(), "顶级域名不应为空")
+        assertTrue(tld.all { it.isLetter() }, "顶级域名应该只包含字母")
 
         // 验证邮箱域名
         val emailDomain = result["emailDomain"] as String
-        assertTrue(emailDomain.isNotEmpty(), "Email domain should not be empty")
-        assertTrue(emailDomain.contains("."), "Email domain should contain .")
+        assertTrue(emailDomain.isNotEmpty(), "邮箱域名不应为空")
+        assertTrue(emailDomain.contains("."), "邮箱域名应该包含.")
 
         println("Network placeholders result: $result")
     }
@@ -285,14 +285,14 @@ class PlaceholderAdvancedTest {
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty")
-            assertFalse(valueStr.startsWith("@"), "$key placeholder should be resolved")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(valueStr.isNotEmpty(), "$key 不应为空")
+            assertFalse(valueStr.startsWith("@"), "$key 占位符应该被解析")
 
             when (key) {
                 "areaCode" -> {
                     // 区号应该包含数字
-                    assertTrue(valueStr.any { it.isDigit() }, "Area code should contain digits")
+                    assertTrue(valueStr.any { it.isDigit() }, "区号应该包含数字")
                 }
             }
 
@@ -316,14 +316,14 @@ class PlaceholderAdvancedTest {
 
         result.forEach { (key, value) ->
             val phoneNumber = value.toString()
-            assertNotNull(value, "$key should not be null")
-            assertTrue(phoneNumber.isNotEmpty(), "$key should not be empty")
-            assertFalse(phoneNumber.startsWith("@"), "$key placeholder should be resolved")
-            assertTrue(phoneNumber.any { it.isDigit() }, "$key should contain digits: $phoneNumber")
+            assertNotNull(value, "$key 不应为 null")
+            assertTrue(phoneNumber.isNotEmpty(), "$key 不应为空")
+            assertFalse(phoneNumber.startsWith("@"), "$key 占位符应该被解析")
+            assertTrue(phoneNumber.any { it.isDigit() }, "$key 应该包含数字: $phoneNumber")
 
             // 电话号码长度验证
             val digitCount = phoneNumber.count { it.isDigit() }
-            assertTrue(digitCount >= 7, "$key should have at least 7 digits, got $digitCount in $phoneNumber")
+            assertTrue(digitCount >= 7, "$key 应该至少有7位数字，在$phoneNumber中得到$digitCount位")
 
             println("$key: $phoneNumber")
         }
@@ -345,12 +345,12 @@ class PlaceholderAdvancedTest {
         val profession = result["profession"] as String
         val bankCard = result["bankCard"] as String
 
-        assertTrue(company.isNotEmpty(), "Company should not be empty")
-        assertTrue(profession.isNotEmpty(), "Profession should not be empty")
-        assertTrue(bankCard.isNotEmpty(), "Bank card should not be empty")
+        assertTrue(company.isNotEmpty(), "公司不应为空")
+        assertTrue(profession.isNotEmpty(), "职业不应为空")
+        assertTrue(bankCard.isNotEmpty(), "银行卡不应为空")
 
         // 银行卡号应该包含数字
-        assertTrue(bankCard.any { it.isDigit() }, "Bank card should contain digits")
+        assertTrue(bankCard.any { it.isDigit() }, "银行卡应该包含数字")
 
         println("Business placeholders result: $result")
     }
@@ -369,11 +369,11 @@ class PlaceholderAdvancedTest {
         val guid = result["guid"] as String
         val id = result["id"] as String
 
-        assertTrue(guid.isNotEmpty(), "GUID should not be empty")
-        assertTrue(id.isNotEmpty(), "ID should not be empty")
+        assertTrue(guid.isNotEmpty(), "GUID不应为空")
+        assertTrue(id.isNotEmpty(), "ID不应为空")
 
         // GUID格式验证（通常包含连字符）
-        assertTrue(guid.contains("-") || guid.length >= 32, "GUID should contain - or be at least 32 chars")
+        assertTrue(guid.contains("-") || guid.length >= 32, "GUID应该包含-或至少32个字符")
 
         println("Identifier placeholders result: $result")
     }
@@ -394,12 +394,12 @@ class PlaceholderAdvancedTest {
         val image = result["image"] as String
         val dataImage = result["dataImage"] as String
 
-        assertTrue(color.isNotEmpty(), "Color should not be empty")
-        assertTrue(image.isNotEmpty(), "Image should not be empty")
-        assertTrue(dataImage.isNotEmpty(), "Data image should not be empty")
+        assertTrue(color.isNotEmpty(), "颜色不应为空")
+        assertTrue(image.isNotEmpty(), "图像不应为空")
+        assertTrue(dataImage.isNotEmpty(), "数据图像不应为空")
 
         // 颜色格式验证（可能是十六进制或颜色名）
-        assertTrue(color.startsWith("#") || color.all { it.isLetter() }, "Color should be hex or color name")
+        assertTrue(color.startsWith("#") || color.all { it.isLetter() }, "颜色应该是十六进制或颜色名")
 
         println("Color and image placeholders result: $result")
     }
@@ -466,8 +466,8 @@ class PlaceholderAdvancedTest {
         // 验证邮箱格式
         val email = userProfile["email"] as String
         val workEmail = work["workEmail"] as String
-        assertTrue(email.contains("@"), "Email should contain @")
-        assertTrue(workEmail.contains("@"), "Work email should contain @")
+        assertTrue(email.contains("@"), "邮箱应该包含@")
+        assertTrue(workEmail.contains("@"), "工作邮箱应该包含@")
 
         println("Compound placeholders result: $result")
     }
@@ -508,7 +508,7 @@ class PlaceholderAdvancedTest {
         val result = Mock.mock(template) as Map<String, Any>
         val products = result["products"] as List<Map<String, Any>>
 
-        assertEquals(5, products.size, "Should have 5 products")
+        assertEquals(5, products.size, "应该有5个产品")
 
         products.forEach { product ->
             // 验证基本信息
@@ -539,9 +539,9 @@ class PlaceholderAdvancedTest {
             assertNotNull(availability["lastUpdated"])
 
             // 验证数据类型
-            assertDoesNotThrow({ product["price"].toString().toFloat() }, "Price should be a number")
-            assertDoesNotThrow({ availability["inStock"].toString().toBoolean() }, "InStock should be boolean")
-            assertDoesNotThrow({ availability["quantity"].toString().toLong() }, "Quantity should be a number")
+            assertDoesNotThrow({ product["price"].toString().toFloat() }, "价格应该是数字")
+            assertDoesNotThrow({ availability["inStock"].toString().toBoolean() }, "库存状态应该是布尔值")
+            assertDoesNotThrow({ availability["quantity"].toString().toLong() }, "数量应该是数字")
         }
 
         println("Placeholder combinations result: $result")
@@ -563,9 +563,9 @@ class PlaceholderAdvancedTest {
 
         // 即使有无效占位符，也应该返回某种结果
         result.forEach { (key, value) ->
-            assertNotNull(value, "$key should not be null even with invalid placeholder")
+            assertNotNull(value, "即使有无效占位符，$key也不应为null")
             val valueStr = value.toString()
-            assertTrue(valueStr.isNotEmpty(), "$key should not be empty even with invalid placeholder")
+            assertTrue(valueStr.isNotEmpty(), "即使有无效占位符，$key也不应为空")
             println("$key: $valueStr")
         }
     }

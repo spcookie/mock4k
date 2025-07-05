@@ -42,9 +42,9 @@ class RuleModifierAdvancedTest {
         val word = result["word"] as String
         val empty = result["empty"] as String
 
-        assertTrue(text.length in 4..10, "text length should be 4-10 (2-5 * 2), got ${text.length}")
-        assertTrue(word.length in 4..12, "word length should be 4-12 (1-3 * 4), got ${word.length}")
-        assertTrue(empty.length in 0..10, "empty length should be 0-10 (0-2 * 5), got ${empty.length}")
+        assertTrue(text.length in 4..10, "text长度应该是4-10 (2-5 * 2)，实际为 ${text.length}")
+        assertTrue(word.length in 4..12, "word长度应该是4-12 (1-3 * 4)，实际为 ${word.length}")
+        assertTrue(empty.length in 0..10, "empty长度应该是0-10 (0-2 * 5)，实际为 ${empty.length}")
 
         println("String range rule result: $result")
     }
@@ -67,10 +67,10 @@ class RuleModifierAdvancedTest {
         val negative = result["negative"] as Int
         val large = result["large"] as Int
 
-        assertTrue(age in 18..65, "Age should be 18-65, got $age")
-        assertTrue(score in 0..100, "Score should be 0-100, got $score")
-        assertTrue(negative in -50..-10, "Negative should be -50 to -10, got $negative")
-        assertTrue(large in 1000..9999, "Large should be 1000-9999, got $large")
+        assertTrue(age in 18..65, "年龄应该是18-65，实际为 $age")
+        assertTrue(score in 0..100, "分数应该是0-100，实际为 $score")
+        assertTrue(negative in -50..-10, "负数应该是-50到-10，实际为 $negative")
+        assertTrue(large in 1000..9999, "大数应该是1000-9999，实际为 $large")
 
         println("Integer range rule result: $result")
     }
@@ -89,12 +89,12 @@ class RuleModifierAdvancedTest {
         result.forEach { (key, value) ->
             when (value) {
                 is Double -> {
-                    assertTrue(value >= 0, "$key should be non-negative, got $value")
+                    assertTrue(value >= 0, "$key 应该是非负数，实际为 $value")
                     println("$key (Double): $value")
                 }
 
                 is Float -> {
-                    assertTrue(value >= 0, "$key should be non-negative, got $value")
+                    assertTrue(value >= 0, "$key 应该是非负数，实际为 $value")
                     println("$key (Float): $value")
                 }
 
@@ -206,9 +206,9 @@ class RuleModifierAdvancedTest {
         val values = result["values"] as List<*>
         val flags = result["flags"] as List<*>
 
-        assertTrue(items.size in 12..30, "Items size should be 12-30, got ${items.size}")
-        assertTrue(values.size in 4..12, "Values size should be 4-12, got ${values.size}")
-        assertTrue(flags.size in 0..6, "Flags size should be 0-6, got ${flags.size}")
+        assertTrue(items.size in 12..30, "Items大小应该是12-30，实际为 ${items.size}")
+        assertTrue(values.size in 4..12, "Values大小应该是4-12，实际为 ${values.size}")
+        assertTrue(flags.size in 0..6, "Flags大小应该是0-6，实际为 ${flags.size}")
 
         println("Array range rule result: $result")
     }
@@ -229,9 +229,9 @@ class RuleModifierAdvancedTest {
         val status = result["status"]
         val options = result["options"]
 
-        assertTrue(flag is Boolean, "Flag should be boolean")
-        assertTrue(status is Boolean, "Status should be boolean")
-        assertTrue(options is Boolean, "Options should be boolean")
+        assertTrue(flag is Boolean, "Flag应该是布尔值")
+        assertTrue(status is Boolean, "Status应该是布尔值")
+        assertTrue(options is Boolean, "Options应该是布尔值")
 
         println("Boolean rules result: $result")
     }
@@ -259,21 +259,21 @@ class RuleModifierAdvancedTest {
         val settings = result["settings"] as Map<String, Any>
 
         // 验证 config 对象包含 2 个属性
-        assertEquals(2, config.size, "Config should have exactly 2 properties")
+        assertEquals(2, config.size, "Config应该恰好有2个属性")
 
         // 验证 settings 对象包含 1-3 个属性
-        assertTrue(settings.size in 1..3, "Settings size should be 1-3, got ${settings.size}")
+        assertTrue(settings.size in 1..3, "Settings大小应该是1-3，实际为 ${settings.size}")
 
         // 验证 config 的属性都来自原始对象
         val originalConfigKeys = setOf("debug", "timeout", "retries")
         config.keys.forEach { key ->
-            assertTrue(originalConfigKeys.contains(key), "Config key '$key' should be from original object")
+            assertTrue(originalConfigKeys.contains(key), "Config键 '$key' 应该来自原始对象")
         }
 
         // 验证 settings 的属性都来自原始对象
         val originalSettingsKeys = setOf("theme", "language", "notifications")
         settings.keys.forEach { key ->
-            assertTrue(originalSettingsKeys.contains(key), "Settings key '$key' should be from original object")
+            assertTrue(originalSettingsKeys.contains(key), "Settings键 '$key' 应该来自原始对象")
         }
 
         println("Object rules result: $result")
@@ -307,7 +307,7 @@ class RuleModifierAdvancedTest {
         val result = Mock.mock(template) as Map<String, Any>
         val complexData = result["complexData"] as List<Map<String, Any>>
 
-        assertTrue(complexData.size in 2..3, "Complex data size should be 2-3")
+        assertTrue(complexData.size in 2..3, "复杂数据大小应该是2-3")
 
         var scoreCount = 50
         complexData.forEachIndexed { index, item ->
@@ -316,15 +316,15 @@ class RuleModifierAdvancedTest {
 
             // 验证字符串重复
             val name = item["name"] as String
-            assertEquals("ItemItemItem", name, "Name should be 'ItemItemItem' (Item * 3)")
+            assertEquals("ItemItemItem", name, "名称应该是 'ItemItemItem' (Item * 3)")
 
             // 验证嵌套数组和递增
             val scores = item["scores"] as List<Map<String, Any>>
-            assertTrue(scores.size in 3..5, "Scores size should be 3-5")
+            assertTrue(scores.size in 3..5, "分数大小应该是3-5")
 
             // 验证标签数组 (tags|2-4 表示重复数组元素2-4次)
             val tags = item["tags"] as List<*>
-            assertTrue(tags.size in 4..8, "Tags size should be 4-8, but got ${tags.size}")
+            assertTrue(tags.size in 4..8, "标签大小应该是4-8，实际为 ${tags.size}")
 
             // 验证元数据
             val metadata = item["metadata"] as Map<String, Any>
@@ -352,17 +352,17 @@ class RuleModifierAdvancedTest {
 
         // 验证边界情况
         val zero = result["zero"] as String
-        assertEquals("", zero, "Zero repetition should result in empty string")
+        assertEquals("", zero, "零次重复应该产生空字符串")
 
         val emptyArray = result["emptyArray"] as List<*>
-        assertEquals(0, emptyArray.size, "Empty array should have 0 items")
+        assertEquals(0, emptyArray.size, "空数组应该有0个元素")
 
         val sameRange = result["sameRange"] as Int
-        assertEquals(5, sameRange, "Same range should return the exact value")
+        assertEquals(5, sameRange, "相同范围应该返回确切值")
 
         val longRepeat = result["longRepeat"] as String
-        assertEquals(50, longRepeat.length, "Long repeat should have exact length")
-        assertEquals("A".repeat(50), longRepeat, "Long repeat should be correct")
+        assertEquals(50, longRepeat.length, "长重复应该有确切长度")
+        assertEquals("A".repeat(50), longRepeat, "长重复应该是正确的")
 
         println("Edge cases result: $result")
     }
