@@ -451,8 +451,11 @@ class ErrorHandlingAndEdgeCasesTest {
 
             when (key) {
                 "zeroRange" -> {
-                    val str = value as String
-                    val num = str.toInt()
+                    val num = when (value) {
+                        is String -> value.toInt()
+                        is Int -> value
+                        else -> fail("Expected String or Int, got ${value::class.simpleName}")
+                    }
                     assertTrue(num in 0..2, "Zero range should return value between 0 and 2")
                 }
 
