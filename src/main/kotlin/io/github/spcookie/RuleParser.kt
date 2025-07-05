@@ -2,6 +2,9 @@ package io.github.spcookie
 
 /**
  * Parser for template rules
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 internal class RuleParser {
 

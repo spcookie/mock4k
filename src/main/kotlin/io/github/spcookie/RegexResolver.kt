@@ -2,6 +2,9 @@ package io.github.spcookie
 
 /**
  * Resolver for regex patterns in format /pattern/
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 internal class RegexResolver {
 

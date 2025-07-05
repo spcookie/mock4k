@@ -7,6 +7,9 @@ import kotlin.random.Random
 /**
  * Random data generator utility
  * Provides methods for generating various types of random data
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 object MockRandom {
 

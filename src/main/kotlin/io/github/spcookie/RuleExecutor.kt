@@ -5,6 +5,9 @@ import kotlin.math.pow
 
 /**
  * Executor for generation rules
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 internal class RuleExecutor {
 

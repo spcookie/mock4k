@@ -3,6 +3,9 @@ package io.github.spcookie
 /**
  * Represents different types of generation rules
  * Based on Mock.js syntax specification
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 internal sealed interface Rule {
 

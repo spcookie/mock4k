@@ -4,6 +4,9 @@ import kotlin.reflect.full.memberFunctions
 
 /**
  * Resolver for @placeholder syntax
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 internal class PlaceholderResolver {
 

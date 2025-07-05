@@ -2,6 +2,9 @@ package io.github.spcookie
 
 /**
  * Execution context for tracking instance, path information, increment counters and resolved data
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 internal data class ExecutionContext(
     val path: String = "",

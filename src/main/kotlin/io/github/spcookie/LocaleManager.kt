@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentHashMap
 /**
  * Locale management utility for MockRandom
  * Handles locale settings and resource loading
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 object LocaleManager {
 

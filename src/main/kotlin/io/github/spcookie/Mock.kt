@@ -2,6 +2,9 @@ package io.github.spcookie
 
 /**
  * Mock4K - A Kotlin library for generating mock data
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 object Mock {
 

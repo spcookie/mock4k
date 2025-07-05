@@ -2,6 +2,9 @@ package io.github.spcookie
 
 /**
  * Core engine for mock data generation
+ *
+ * @author spcookie
+ * @since 1.0.0
  */
 internal class MockEngine() {
 
