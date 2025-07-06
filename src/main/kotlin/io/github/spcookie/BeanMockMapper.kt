@@ -18,14 +18,14 @@ import kotlin.reflect.jvm.javaField
  * @author spcookie
  * @since 1.2.0
  */
-internal class BeanResultMapper(private val typeAdapter: TypeAdapter) {
+internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
 
-    private val logger = LoggerFactory.getLogger(BeanResultMapper::class.java)
+    private val logger = LoggerFactory.getLogger(BeanMockMapper::class.java)
 
     /**
      * Map generated data to Bean instance
      */
-    fun <T : Any> mapToBean(clazz: KClass<T>, data: Map<String, Any?>, config: BeanPropertyAnalyzer.BeanMockConfig): T {
+    fun <T : Any> mapToBean(clazz: KClass<T>, data: Map<String, Any?>, config: BeanMockConfig): T {
         val instance = createInstance(clazz)
         val properties = getEligibleProperties(clazz, config)
 
@@ -57,7 +57,7 @@ internal class BeanResultMapper(private val typeAdapter: TypeAdapter) {
     /**
      * Get eligible properties for mapping
      */
-    private fun getEligibleProperties(clazz: KClass<*>, config: BeanPropertyAnalyzer.BeanMockConfig): List<KProperty<*>> {
+    private fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KProperty<*>> {
         return clazz.memberProperties.filter { property ->
             val javaField = property.javaField
             val isMutableProperty = property is KMutableProperty<*>
@@ -66,7 +66,7 @@ internal class BeanResultMapper(private val typeAdapter: TypeAdapter) {
                 javaField == null -> false
                 !isMutableProperty -> false
                 else -> {
-                    val mockParam = property.findAnnotation<Mock.Property>()
+                    val mockParam = property.findAnnotation<io.github.spcookie.Mock.Property>()
                     mockParam?.enabled != false
                 }
             }
@@ -77,13 +77,13 @@ internal class BeanResultMapper(private val typeAdapter: TypeAdapter) {
      * Map generated value to property type
      */
     private fun mapValueToProperty(value: Any?, property: KProperty<*>): Any? {
-        return mapValueToProperty(value, property.returnType, BeanPropertyAnalyzer.BeanMockConfig())
+        return mapValueToProperty(value, property.returnType, BeanMockConfig())
     }
 
     /**
      * Map generated value to property type with config
      */
-    private fun mapValueToProperty(value: Any?, kType: KType, config: BeanPropertyAnalyzer.BeanMockConfig): Any? {
+    private fun mapValueToProperty(value: Any?, kType: KType, config: BeanMockConfig): Any? {
         if (value == null) return null
         
         val propertyClass = kType.classifier as? KClass<*> ?: return null
@@ -96,15 +96,15 @@ internal class BeanResultMapper(private val typeAdapter: TypeAdapter) {
                 mapToBean(propertyClass, dataMap, config)
             }
             // Handle Lists
-            value is List<*> && (propertyClass == List::class || propertyClass == MutableList::class || propertyClass == ArrayList::class) -> {
+            value is List<*> && (propertyClass == List::class || propertyClass == MutableList::class) -> {
                 mapListValue(value, kType)
             }
             // Handle Sets
-            value is List<*> && (propertyClass == Set::class || propertyClass == MutableSet::class || propertyClass == HashSet::class) -> {
+            value is List<*> && (propertyClass == Set::class || propertyClass == MutableSet::class) -> {
                 mapSetValue(value, kType)
             }
             // Handle Maps
-            value is Map<*, *> && (propertyClass == Map::class || propertyClass == MutableMap::class || propertyClass == HashMap::class) -> {
+            value is Map<*, *> && (propertyClass == Map::class || propertyClass == MutableMap::class) -> {
                 mapMapValue(value, kType)
             }
             // Handle basic types
@@ -119,7 +119,7 @@ internal class BeanResultMapper(private val typeAdapter: TypeAdapter) {
      */
     private fun mapListValue(value: List<*>, kType: KType): List<Any?> {
         val elementType = getGenericTypeArgument(kType, 0) ?: return value.toMutableList()
-        val config = BeanPropertyAnalyzer.BeanMockConfig()
+        val config = BeanMockConfig()
         
         return value.map { element ->
             mapValueToProperty(element, elementType, config)
@@ -141,7 +141,7 @@ internal class BeanResultMapper(private val typeAdapter: TypeAdapter) {
         val keyType = getGenericTypeArgument(kType, 0) ?: return value.toMutableMap()
         val valueType = getGenericTypeArgument(kType, 1) ?: return value.toMutableMap()
         val keyClass = keyType.classifier as? KClass<*> ?: return value.toMutableMap()
-        val config = BeanPropertyAnalyzer.BeanMockConfig()
+        val config = BeanMockConfig()
         
         return value.mapKeys { (key, _) ->
             convertToType(key, keyClass, keyType)
@@ -173,7 +173,37 @@ internal class BeanResultMapper(private val typeAdapter: TypeAdapter) {
             type == Double::class || type == java.lang.Double::class -> false
             type == Boolean::class || type == java.lang.Boolean::class -> false
             type == BigDecimal::class -> false
+            type == java.math.BigInteger::class -> false
+            isDateTimeType(type) -> false
             else -> true
+        }
+    }
+
+    /**
+     * Check if a class is a date/time type (both legacy and Java 8+ types)
+     */
+    private fun isDateTimeType(type: KClass<*>): Boolean {
+        return when (type) {
+            // Legacy date/time types (before Java 8)
+            java.util.Date::class -> true
+            java.sql.Date::class -> true
+            java.sql.Time::class -> true
+            java.sql.Timestamp::class -> true
+            java.util.Calendar::class -> true
+            // Java 8+ date/time types
+            java.time.LocalDate::class -> true
+            java.time.LocalTime::class -> true
+            java.time.LocalDateTime::class -> true
+            java.time.ZonedDateTime::class -> true
+            java.time.OffsetDateTime::class -> true
+            java.time.OffsetTime::class -> true
+            java.time.Instant::class -> true
+            java.time.Duration::class -> true
+            java.time.Period::class -> true
+            java.time.Year::class -> true
+            java.time.YearMonth::class -> true
+            java.time.MonthDay::class -> true
+            else -> false
         }
     }
 
@@ -232,6 +262,79 @@ internal class BeanResultMapper(private val typeAdapter: TypeAdapter) {
                     is Number -> BigDecimal.valueOf(value.toDouble())
                     is String -> BigDecimal(value)
                     else -> BigDecimal.ZERO
+                }
+            }
+            java.math.BigInteger::class -> {
+                when (value) {
+                    is java.math.BigInteger -> value
+                    is Number -> java.math.BigInteger.valueOf(value.toLong())
+                    is String -> java.math.BigInteger(value)
+                    else -> java.math.BigInteger.ZERO
+                }
+            }
+            // Time and date types before Java 8
+            java.util.Date::class -> {
+                when (value) {
+                    is java.util.Date -> value
+                    is String -> java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(value)
+                    is Number -> java.util.Date(value.toLong())
+                    else -> java.util.Date()
+                }
+            }
+            java.sql.Date::class -> {
+                when (value) {
+                    is java.sql.Date -> value
+                    is java.util.Date -> java.sql.Date(value.time)
+                    is String -> java.sql.Date.valueOf(value)
+                    is Number -> java.sql.Date(value.toLong())
+                    else -> java.sql.Date(System.currentTimeMillis())
+                }
+            }
+            java.sql.Time::class -> {
+                when (value) {
+                    is java.sql.Time -> value
+                    is String -> java.sql.Time.valueOf(value)
+                    is Number -> java.sql.Time(value.toLong())
+                    else -> java.sql.Time(System.currentTimeMillis())
+                }
+            }
+            java.sql.Timestamp::class -> {
+                when (value) {
+                    is java.sql.Timestamp -> value
+                    is java.util.Date -> java.sql.Timestamp(value.time)
+                    is String -> java.sql.Timestamp.valueOf(value)
+                    is Number -> java.sql.Timestamp(value.toLong())
+                    else -> java.sql.Timestamp(System.currentTimeMillis())
+                }
+            }
+            // Java 8 new time and date types
+            java.time.LocalDate::class -> {
+                when (value) {
+                    is java.time.LocalDate -> value
+                    is String -> java.time.LocalDate.parse(value)
+                    else -> java.time.LocalDate.now()
+                }
+            }
+            java.time.LocalTime::class -> {
+                when (value) {
+                    is java.time.LocalTime -> value
+                    is String -> java.time.LocalTime.parse(value)
+                    else -> java.time.LocalTime.now()
+                }
+            }
+            java.time.LocalDateTime::class -> {
+                when (value) {
+                    is java.time.LocalDateTime -> value
+                    is String -> java.time.LocalDateTime.parse(value)
+                    else -> java.time.LocalDateTime.now()
+                }
+            }
+            java.time.Instant::class -> {
+                when (value) {
+                    is java.time.Instant -> value
+                    is String -> java.time.Instant.parse(value)
+                    is Number -> java.time.Instant.ofEpochMilli(value.toLong())
+                    else -> java.time.Instant.now()
                 }
             }
             else -> {

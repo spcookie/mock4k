@@ -30,9 +30,9 @@ object Mocks {
     internal val mockEngine = MockEngine()
 
     /**
-     * BeanMockEngine instance
+     * BeanMockBridge instance
      */
-    internal val beanMockEngine = BeanMockEngine(mockEngine, TypeAdapter)
+    internal val beanMockEngine = BeanMockBridge(mockEngine, TypeAdapter)
 
     /**
      * Generate mock data based on template

@@ -11,11 +11,11 @@ import kotlin.reflect.full.findAnnotation
  * @author spcookie
  * @since 1.2.0
  */
-internal class BeanMockEngine(private val mockEngine: MockEngine, private val typeAdapter: TypeAdapter) {
+internal class BeanMockBridge(private val mockEngine: MockEngine, private val typeAdapter: TypeAdapter) {
 
-    private val logger = LoggerFactory.getLogger(BeanMockEngine::class.java)
-    private val propertyAnalyzer = BeanPropertyAnalyzer()
-    private val resultMapper = BeanResultMapper(typeAdapter)
+    private val logger = LoggerFactory.getLogger(BeanMockBridge::class.java)
+    private val beanIntrospect = BeanIntrospect()
+    private val beanMockMapper = BeanMockMapper(typeAdapter)
 
     /**
      * Mock a bean object with optional configuration
@@ -27,7 +27,7 @@ internal class BeanMockEngine(private val mockEngine: MockEngine, private val ty
         includeTransient: Boolean? = null
     ): T {
         val mockBeanAnnotation = clazz.findAnnotation<Mock.Bean>()
-        val config = BeanPropertyAnalyzer.BeanMockConfig(
+        val config = BeanMockConfig(
             // Method parameters take precedence over annotation values
             // If method parameter is null, use annotation value; otherwise use method parameter
             includePrivate = includePrivate ?: (mockBeanAnnotation?.includePrivate ?: false),
@@ -44,17 +44,17 @@ internal class BeanMockEngine(private val mockEngine: MockEngine, private val ty
      * 2. Use MockEngine to generate data
      * 3. Map generated data back to Bean object
      */
-    private fun <T : Any> mockBeanInternal(clazz: KClass<T>, config: BeanPropertyAnalyzer.BeanMockConfig): T {
+    private fun <T : Any> mockBeanInternal(clazz: KClass<T>, config: BeanMockConfig): T {
         try {
             // Step 1: Analyze Bean properties and convert to Map structure
-            val propertyMap = propertyAnalyzer.analyzeBean(clazz, config)
+            val propertyMap = beanIntrospect.analyzeBean(clazz, config)
 
             // Step 2: Use MockEngine to generate data
             @Suppress("UNCHECKED_CAST")
             val generatedData = mockEngine.generate(propertyMap) as Map<String, Any?>
 
             // Step 3: Map generated data back to Bean object
-            val result = resultMapper.mapToBean(clazz, generatedData, config)
+            val result = beanMockMapper.mapToBean(clazz, generatedData, config)
 
             return result
         } catch (e: Exception) {
