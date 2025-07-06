@@ -1,0 +1,23 @@
+# Maven Central Portal 凭证配置模板
+# 请将此文件复制到 ~/.gradle/gradle.properties 并填入实际值
+
+# Maven Central Portal 凭证
+mavenCentralUsername=your_sonatype_username
+mavenCentralPassword=your_sonatype_password
+
+# GPG 签名配置（密钥环文件方式）
+# 注意：keyId 必须是8位短格式（如：5A1CB4E3），不是完整的指纹
+signing.keyId=5A1CB4E3
+signing.password=your_gpg_key_password
+signing.secretKeyRingFile=/Users/your_username/.gnupg/secring.gpg
+
+# 注意事项：
+# 1. mavenCentralUsername 和 mavenCentralPassword 是你在 Central Portal 的凭证
+# 2. 当前 build.gradle.kts 使用密钥环文件方式
+#    - signing.keyId: GPG 密钥 ID（最后 8 位或 16 位）
+#    - signing.password: GPG 密钥密码
+#    - signing.secretKeyRingFile: GPG 私钥环文件路径
+# 3. 导出私钥环文件的命令：
+#    gpg --keyring secring.gpg --export-secret-keys > ~/.gnupg/secring.gpg
+# 4. 确保私钥文件权限正确：
+#    chmod 600 ~/.gnupg/secring.gpg
