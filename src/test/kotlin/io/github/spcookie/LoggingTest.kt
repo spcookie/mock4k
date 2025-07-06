@@ -66,8 +66,8 @@ class LoggingTest {
             "company" to "@company",
             "skills|3-5" to listOf("@word")
         )
-        
-        val result = MockObject.g(template)
+
+        val result = Mocks.g(template)
         logger.info("Generated mock data: $result")
         
         // 测试列表生成
@@ -77,8 +77,8 @@ class LoggingTest {
                 "name" to "@first @last"
             )
         )
-        
-        val listResult = MockObject.g(listTemplate)
+
+        val listResult = Mocks.g(listTemplate)
         logger.info("Generated list data: $listResult")
     }
     

@@ -1,7 +1,8 @@
 package io.github.spcookie
 
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 import org.slf4j.LoggerFactory
 
 class MockParamDebugTest {
@@ -26,7 +27,7 @@ class MockParamDebugTest {
         logger.info("MockEngine result: $result")
         
         // 3. 测试完整的 Bean mock
-        val user = MockObject.beanMockEngine.mockBean(UserWithMockParamTest::class)
+        val user = Mocks.beanMockEngine.mockBean(UserWithMockParamTest::class)
         
         logger.info("Final bean result: $user")
         logger.info("ID: ${user.id} (should be 1000-9999)")

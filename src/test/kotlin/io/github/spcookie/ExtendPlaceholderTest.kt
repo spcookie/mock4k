@@ -16,13 +16,13 @@ class ExtendPlaceholderTest {
     @BeforeEach
     fun setUp() {
         // 在每个测试前清除任何现有的自定义占位符
-        MockObject.Random.clearExtended()
+        Mocks.Random.clearExtended()
     }
 
     @Test
     fun `test extend with single placeholder without parameters`() {
         // 注册一个自定义占位符
-        MockObject.Random.extend("customGreeting") { "Hello, World!" }
+        Mocks.Random.extend("customGreeting") { "Hello, World!" }
 
         // 测试自定义占位符
         val result = mock("@customGreeting")
@@ -32,7 +32,7 @@ class ExtendPlaceholderTest {
     @Test
     fun `test extend with single placeholder with parameters`() {
         // 注册一个带参数的自定义占位符
-        MockObject.Random.extendWithParams("repeat") { params ->
+        Mocks.Random.extendWithParams("repeat") { params ->
             val text = params.getOrNull(0)?.toString() ?: "default"
             val count = params.getOrNull(1) as? Int ?: 1
             (1..count).joinToString("") { text }
@@ -46,7 +46,7 @@ class ExtendPlaceholderTest {
     @Test
     fun `test extend with map of placeholders`() {
         // 注册多个自定义占位符
-        MockObject.Random.extend(
+        Mocks.Random.extend(
             mapOf(
             "customName" to { "John Doe" },
             "customAge" to { 25 },
@@ -61,33 +61,33 @@ class ExtendPlaceholderTest {
 
     @Test
     fun `test hasExtended`() {
-        MockObject.Random.extend("testPlaceholder") { "test" }
+        Mocks.Random.extend("testPlaceholder") { "test" }
 
-        assertTrue(MockObject.Random.hasExtended("testPlaceholder"))
-        assertTrue(MockObject.Random.hasExtended("TESTPLACEHOLDER")) // 不区分大小写
-        assertFalse(MockObject.Random.hasExtended("nonExistent"))
+        assertTrue(Mocks.Random.hasExtended("testPlaceholder"))
+        assertTrue(Mocks.Random.hasExtended("TESTPLACEHOLDER")) // 不区分大小写
+        assertFalse(Mocks.Random.hasExtended("nonExistent"))
     }
 
     @Test
     fun `test removeExtended`() {
-        MockObject.Random.extend("toRemove") { "test" }
-        assertTrue(MockObject.Random.hasExtended("toRemove"))
+        Mocks.Random.extend("toRemove") { "test" }
+        assertTrue(Mocks.Random.hasExtended("toRemove"))
 
-        MockObject.Random.removeExtended("toRemove")
-        assertFalse(MockObject.Random.hasExtended("toRemove"))
+        Mocks.Random.removeExtended("toRemove")
+        assertFalse(Mocks.Random.hasExtended("toRemove"))
     }
 
     @Test
     fun `test getExtendedNames`() {
-        MockObject.Random.extend(
+        Mocks.Random.extend(
             mapOf(
             "placeholder1" to { "test1" },
             "placeholder2" to { "test2" }
         ))
 
-        MockObject.Random.extendWithParams("placeholder3") { _ -> "test3" }
+        Mocks.Random.extendWithParams("placeholder3") { _ -> "test3" }
 
-        val names = MockObject.Random.getExtendedNames()
+        val names = Mocks.Random.getExtendedNames()
         assertEquals(3, names.size)
         assertTrue(names.contains("placeholder1"))
         assertTrue(names.contains("placeholder2"))
@@ -96,36 +96,36 @@ class ExtendPlaceholderTest {
 
     @Test
     fun `test clearExtendedPlaceholders`() {
-        MockObject.Random.extend(
+        Mocks.Random.extend(
             mapOf(
             "placeholder1" to { "test1" },
             "placeholder2" to { "test2" }
         ))
 
-        assertTrue(MockObject.Random.getExtendedNames().isNotEmpty())
+        assertTrue(Mocks.Random.getExtendedNames().isNotEmpty())
 
-        MockObject.Random.clearExtended()
-        assertTrue(MockObject.Random.getExtendedNames().isEmpty())
+        Mocks.Random.clearExtended()
+        assertTrue(Mocks.Random.getExtendedNames().isEmpty())
     }
 
     @Test
     fun `test method chaining`() {
         // 测试扩展方法返回 MockRandom 以支持链式调用
-        val result = MockObject.Random
+        val result = Mocks.Random
             .extend("test1") { "value1" }
             .extend(mapOf("test2" to { "value2" }))
             .extendWithParams("test3") { _ -> "value3" }
 
-        assertSame(MockObject.Random, result)
-        assertTrue(MockObject.Random.hasExtended("test1"))
-        assertTrue(MockObject.Random.hasExtended("test2"))
-        assertTrue(MockObject.Random.hasExtended("test3"))
+        assertSame(Mocks.Random, result)
+        assertTrue(Mocks.Random.hasExtended("test1"))
+        assertTrue(Mocks.Random.hasExtended("test2"))
+        assertTrue(Mocks.Random.hasExtended("test3"))
     }
 
     @Test
     fun `test error handling in custom placeholders`() {
         // 注册一个抛出异常的自定义占位符
-        MockObject.Random.extend("errorPlaceholder") {
+        Mocks.Random.extend("errorPlaceholder") {
             throw RuntimeException("Test error")
         }
 
