@@ -11,7 +11,7 @@ class RegexPatternTest {
             "email" to "/[a-z]{5,10}@[a-z]{3,8}\\.(com|org|net)/"
         )
         
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         val email = result["email"] as String
         
         assertTrue(email.isNotEmpty())
@@ -26,7 +26,7 @@ class RegexPatternTest {
             "phone" to "/\\d{11}/"
         )
         
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         val phone = result["phone"] as String
         
         assertEquals(11, phone.length)
@@ -40,7 +40,7 @@ class RegexPatternTest {
             "username" to "/\\w{5,15}/"
         )
         
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         val username = result["username"] as String
         
         assertTrue(username.length in 5..15)
@@ -56,7 +56,7 @@ class RegexPatternTest {
             "digits" to "/[0-9]{4}/"
         )
         
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         
         val lowercase = result["lowercase"] as String
         val uppercase = result["uppercase"] as String
@@ -82,7 +82,7 @@ class RegexPatternTest {
             "invalid" to "/[unclosed/"
         )
         
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         val invalid = result["invalid"] as String
         
         // 对于无效的正则表达式应该返回原始字符串（不作为正则表达式处理）
@@ -95,7 +95,7 @@ class RegexPatternTest {
             "normal" to "not a regex"
         )
         
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         val normal = result["normal"] as String
         
         // 应该返回原始字符串
@@ -108,7 +108,7 @@ class RegexPatternTest {
             "emails|3" to "/[a-z]{3,6}@[a-z]{2,5}\\.(com|org)/"
         )
         
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         val emails = result["emails"]
         
         // 应该重复生成的邮箱3次
@@ -127,7 +127,7 @@ class RegexPatternTest {
             )
         )
         
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         val user = result["user"] as Map<String, Any?>
         
         val id = user["id"] as String

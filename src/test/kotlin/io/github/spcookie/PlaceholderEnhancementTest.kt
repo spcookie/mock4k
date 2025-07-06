@@ -1,9 +1,12 @@
 package io.github.spcookie
 
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions.*
+import org.slf4j.LoggerFactory
 
 class PlaceholderEnhancementTest {
+
+    private val logger = LoggerFactory.getLogger(PlaceholderEnhancementTest::class.java)
 
     @Test
     fun testPropertyReferenceInSameLevel() {
@@ -14,7 +17,7 @@ class PlaceholderEnhancementTest {
             "full" to "@first @middle @last"
         )
 
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
 
         // 验证属性已生成
         assertNotNull(result["first"])
@@ -46,7 +49,7 @@ class PlaceholderEnhancementTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         val nameObj = result["name"] as Map<String, Any?>
 
         // 验证属性已生成
@@ -83,7 +86,7 @@ class PlaceholderEnhancementTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
         val userObj = result["user"] as Map<String, Any?>
         val nameObj = userObj["name"] as Map<String, Any?>
         val profileObj = userObj["profile"] as Map<String, Any?>
@@ -94,10 +97,10 @@ class PlaceholderEnhancementTest {
         val username = profileObj["username"] as String
 
         // 调试输出
-        println("firstName: $firstName")
-        println("lastName: $lastName")
-        println("displayName: $displayName")
-        println("username: $username")
+        logger.info("firstName: $firstName")
+        logger.info("lastName: $lastName")
+        logger.info("displayName: $displayName")
+        logger.info("username: $username")
 
         // 验证绝对路径引用有效
         assertTrue(displayName.contains(firstName), "显示名称 '$displayName' 应该包含名字 '$firstName'")
@@ -116,7 +119,7 @@ class PlaceholderEnhancementTest {
             "summary" to "User @name has ID @id and email @email"
         )
 
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
 
         val id = result["id"]
         val name = result["name"] as String
@@ -138,7 +141,7 @@ class PlaceholderEnhancementTest {
             "randomData" to "@NONEXISTENT_PROPERTY @LAST" // 应该回退到 @LAST 占位符
         )
 
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
 
         assertNotNull(result["name"])
         assertNotNull(result["randomData"])
@@ -159,7 +162,7 @@ class PlaceholderEnhancementTest {
             "email" to "@username@@domain"
         )
 
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
 
         val domain = result["domain"] as String
         val username = result["username"] as String

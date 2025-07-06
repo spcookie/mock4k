@@ -8,12 +8,12 @@
     </appender>
 
     <!-- Logger for Mock4K during testing -->
-    <logger name="io.github.spcookie" level="DEBUG" additivity="false">
+    <logger name="io.github.spcookie" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 
     <!-- Root logger for testing -->
-    <root level="WARN">
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

@@ -16,19 +16,19 @@ class CounterIsolationTest {
         val template2 = mapOf("id|+1" to 200)
 
         // 第一次调用 template1
-        val result1a = Mock.mock(template1) as Map<String, Any>
+        val result1a = mock(template1) as Map<String, Any>
         assertEquals(100, result1a["id"])
 
         // 第一次调用 template2
-        val result2a = Mock.mock(template2) as Map<String, Any>
+        val result2a = mock(template2) as Map<String, Any>
         assertEquals(200, result2a["id"])
 
         // 第二次调用 template1 - 应该重新开始
-        val result1b = Mock.mock(template1) as Map<String, Any>
+        val result1b = mock(template1) as Map<String, Any>
         assertEquals(100, result1b["id"])
 
         // 第二次调用 template2 - 应该重新开始
-        val result2b = Mock.mock(template2) as Map<String, Any>
+        val result2b = mock(template2) as Map<String, Any>
         assertEquals(200, result2b["id"])
     }
 
@@ -46,7 +46,7 @@ class CounterIsolationTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val user = result["user"] as Map<String, Any>
         val admin = result["admin"] as Map<String, Any>
 
@@ -66,7 +66,7 @@ class CounterIsolationTest {
             mapOf("id|+1" to 100)
         )
 
-        val result = Mock.mock(template) as List<Map<String, Any>>
+        val result = mock(template) as List<Map<String, Any>>
 
         // 在同一次调用中，每个数组元素应该有独立的计数器
         assertEquals(100, result[0]["id"])

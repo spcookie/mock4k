@@ -153,19 +153,19 @@ import io.github.spcookie.MockRandom
 
 fun main() {
     // 基础模拟
-    val name = Mock.mock("@name")
+    val name = mock("@name")
     println("姓名: $name")
 
     // 数字规则
-    val number = Mock.mock("@integer(1,100)")
+    val number = mock("@integer(1,100)")
     println("数字: $number")
 
     // 字符串规则
-    val email = Mock.mock("@email")
+    val email = mock("@email")
     println("邮箱: $email")
 
     // 复杂模板
-    val user = Mock.mock("""
+    val user = mock("""
         {
             "id": "@integer(1,1000)",
             "name": "@name",
@@ -195,11 +195,11 @@ fun main() {
     println("英文姓名: $englishName")
     
     // 正则表达式生成
-    val regexString = Mock.mock("/[a-z]{3}\\d{2}/")
+    val regexString = mock("/[a-z]{3}\\d{2}/")
     println("正则生成: $regexString")
     
     // 自定义占位符扩展示例
-    val customTemplate = Mock.mock("@string(5)|2-3")
+    val customTemplate = mock("@string(5)|2-3")
     println("自定义模板: $customTemplate")
 }
 ```
@@ -212,19 +212,19 @@ import io.github.spcookie.MockRandom;
 public class JavaExample {
     public static void main(String[] args) {
         // 基础模拟
-        String name = Mock.mock("@name");
+        String name = mock("@name");
         System.out.println("姓名: " + name);
 
         // 数字规则
-        String number = Mock.mock("@integer(1,100)");
+        String number = mock("@integer(1,100)");
         System.out.println("数字: " + number);
 
         // 字符串规则
-        String email = Mock.mock("@email");
+        String email = mock("@email");
         System.out.println("邮箱: " + email);
 
         // 复杂模板
-        String user = Mock.mock(
+        String user = mock(
             "{" +
             "\"id\": \"@integer(1,1000)\"," +
             "\"name\": \"@name\"," +
@@ -254,11 +254,11 @@ public class JavaExample {
         System.out.println("英文姓名: " + englishName);
         
         // 正则表达式生成
-        String regexString = Mock.mock("/[a-z]{3}\\d{2}/");
+        String regexString = mock("/[a-z]{3}\\d{2}/");
         System.out.println("正则生成: " + regexString);
         
         // 自定义占位符扩展示例
-        String customTemplate = Mock.mock("@string(5)|2-3");
+        String customTemplate = mock("@string(5)|2-3");
         System.out.println("自定义模板: " + customTemplate);
     }
 }
@@ -426,7 +426,7 @@ public class JavaExample {
 ```kotlin
 // 字符串重复
 val template1 = mapOf("text|3" to "Hello")
-val result1 = Mock.mock(template1) // {"text": "HelloHelloHello"}
+val result1 = mock(template1) // {"text": "HelloHelloHello"}
 
 // 数字递增
 val template2 = mapOf(
@@ -434,15 +434,15 @@ val template2 = mapOf(
         mapOf("id|+1" to 1000)
     )
 )
-val result2 = Mock.mock(template2) // 生成id为1000, 1001, 1002的列表
+val result2 = mock(template2) // 生成id为1000, 1001, 1002的列表
 
 // 浮点数范围
 val template3 = mapOf("price|10-20.2" to 0.0)
-val result3 = Mock.mock(template3) // {"price": 15.23}
+val result3 = mock(template3) // {"price": 15.23}
 
 // 数组选择
 val template4 = mapOf("color|1" to listOf("red", "green", "blue"))
-val result4 = Mock.mock(template4) // {"color": "red"} 或其他颜色
+val result4 = mock(template4) // {"color": "red"} 或其他颜色
 
 // 复杂对象示例
 val complexTemplate = mapOf(
@@ -451,7 +451,7 @@ val complexTemplate = mapOf(
     "tags|1-3" to listOf("@word"),
     "score|1-100.1-2" to 1.0
 )
-val user = Mock.mock(complexTemplate)
+val user = mock(complexTemplate)
 ```
 
 ### 🌍 国际化支持
@@ -587,7 +587,7 @@ val template = mapOf(
     )
 )
 
-val result = Mock.mock(template)
+val result = mock(template)
 // 生成的数据将全部是中文本地化内容
 ```
 

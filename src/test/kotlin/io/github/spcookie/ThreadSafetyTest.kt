@@ -140,7 +140,7 @@ class ThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(operationsPerThread) {
-                        val result = Mock.mock(template)
+                        val result = mock(template)
                         synchronized(results) {
                             results.add(result)
                         }

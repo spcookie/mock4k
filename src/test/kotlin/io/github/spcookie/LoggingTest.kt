@@ -1,6 +1,7 @@
 package io.github.spcookie
 
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import java.util.*
 
 /**
@@ -11,11 +12,13 @@ import java.util.*
  */
 class LoggingTest {
 
+    private val logger = LoggerFactory.getLogger(LoggingTest::class.java)
+
     @Test
     fun `test logging with locale operations`() {
         // 测试语言环境设置的日志记录
         val originalLocale = LocaleManager.getCurrentLocale()
-        println("Original locale: $originalLocale")
+        logger.info("Original locale: $originalLocale")
         
         // 设置不同的语言环境以触发日志记录
         LocaleManager.setLocale(Locale.ENGLISH)
@@ -24,10 +27,10 @@ class LoggingTest {
         
         // 测试数据加载的日志记录
         val words = LocaleManager.getDataList("words")
-        println("Loaded ${words.size} words")
+        logger.info("Loaded ${words.size} words")
         
         val cities = LocaleManager.getDataList("cities")
-        println("Loaded ${cities.size} cities")
+        logger.info("Loaded ${cities.size} cities")
         
         // 测试缓存清理
         LocaleManager.clearCache()
@@ -40,17 +43,17 @@ class LoggingTest {
     fun `test logging with mock data generation`() {
         // 测试 MockRandom 操作的日志记录
         val word = MockRandom.word()
-        println("Generated word: $word")
+        logger.info("Generated word: $word")
         
         val city = MockRandom.city()
-        println("Generated city: $city")
+        logger.info("Generated city: $city")
         
         val company = MockRandom.company()
-        println("Generated company: $company")
+        logger.info("Generated company: $company")
         
         // 测试多个数据生成
         val words = MockRandom.words(5)
-        println("Generated words: $words")
+        logger.info("Generated words: $words")
     }
     
     @Test
@@ -64,8 +67,8 @@ class LoggingTest {
             "skills|3-5" to listOf("@word")
         )
         
-        val result = Mock.g(template)
-        println("Generated mock data: $result")
+        val result = MockObject.g(template)
+        logger.info("Generated mock data: $result")
         
         // 测试列表生成
         val listTemplate = listOf(
@@ -75,8 +78,8 @@ class LoggingTest {
             )
         )
         
-        val listResult = Mock.g(listTemplate)
-        println("Generated list data: $listResult")
+        val listResult = MockObject.g(listTemplate)
+        logger.info("Generated list data: $listResult")
     }
     
     @Test
@@ -93,7 +96,7 @@ class LoggingTest {
             LocaleManager.setLocale(locale)
             val word = MockRandom.word()
             val city = MockRandom.city()
-            println("Locale: ${locale.displayName}, Word: $word, City: $city")
+            logger.info("Locale: ${locale.displayName}, Word: $word, City: $city")
         }
         
         // 清理缓存以测试缓存未命中的日志记录
@@ -101,6 +104,6 @@ class LoggingTest {
         
         // 再次生成数据以测试缓存重新加载
         val word = MockRandom.word()
-        println("After cache clear, generated word: $word")
+        logger.info("After cache clear, generated word: $word")
     }
 }

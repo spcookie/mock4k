@@ -2,24 +2,27 @@ package io.github.spcookie
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 
 /**
  * 错误处理和边界情况测试 - 测试各种异常情况和边界条件
  */
 class ErrorHandlingAndEdgeCasesTest {
 
+    private val logger = LoggerFactory.getLogger(ErrorHandlingAndEdgeCasesTest::class.java)
+
     // ==================== 空值和空模板测试 ====================
 
     @Test
     fun testEmptyTemplate() {
         val emptyMap = emptyMap<String, Any>()
-        val result = Mock.mock(emptyMap)
+        val result = mock(emptyMap)
 
         assertNotNull(result, "空模板应该返回非null结果")
         assertTrue(result is Map<*, *>, "空模板应该返回一个map")
         assertTrue((result as Map<*, *>).isEmpty(), "空模板应该返回空map")
 
-        println("Empty template result: $result")
+        logger.info("Empty template result: $result")
     }
 
     @Test
@@ -30,14 +33,14 @@ class ErrorHandlingAndEdgeCasesTest {
             "anotherNull" to null
         )
 
-        val result = Mock.mock(template) as Map<String, Any?>
+        val result = mock(template) as Map<String, Any?>
 
         // 验证null值的处理
         assertTrue(result.containsKey("nullValue"), "应该包含null值键")
         assertNotNull(result["normalValue"], "正常值不应为null")
         assertTrue(result.containsKey("anotherNull"), "应该包含另一个null键")
 
-        println("Null values result: $result")
+        logger.info("Null values result: $result")
     }
 
     @Test
@@ -48,13 +51,13 @@ class ErrorHandlingAndEdgeCasesTest {
             "normalString" to "@STRING"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         assertEquals("", result["emptyString"], "空字符串应该保持为空")
         assertEquals("   ", result["whitespaceString"], "空白字符串应该保持不变")
         assertNotEquals("@STRING", result["normalString"], "正常字符串占位符应该被解析")
 
-        println("Empty strings result: $result")
+        logger.info("Empty strings result: $result")
     }
 
     // ==================== 无效占位符测试 ====================
@@ -73,7 +76,7 @@ class ErrorHandlingAndEdgeCasesTest {
             "mixedCase" to "@String"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证无效占位符的处理 - 应该返回原始字符串或某种默认值
         result.forEach { (key, value) ->
@@ -83,7 +86,7 @@ class ErrorHandlingAndEdgeCasesTest {
                 valueStr.isNotEmpty() || key == "emptyPlaceholder" || key == "justAt",
                 "$key 不应为空（除了@占位符）: $valueStr"
             )
-            println("$key: $valueStr")
+            logger.info("$key: $valueStr")
         }
     }
 
@@ -100,12 +103,12 @@ class ErrorHandlingAndEdgeCasesTest {
             "floatOverflow" to "@FLOAT(1.0, 1.7976931348623157E+308)" // 浮点数溢出
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             assertNotNull(value, "即使参数无效，$key 也不应为null")
             val valueStr = value.toString()
-            println("$key: $valueStr")
+            logger.info("$key: $valueStr")
 
             // 特定验证
             when (key) {
@@ -148,7 +151,7 @@ class ErrorHandlingAndEdgeCasesTest {
             "manyFields" to (1..50).associate { "field$it" to "@STRING" }
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证大数组
         val largeArray = result["largeArray"] as List<*>
@@ -183,7 +186,7 @@ class ErrorHandlingAndEdgeCasesTest {
             assertTrue((value as String).isNotEmpty(), "字段值不应为空")
         }
 
-        println("Large data structures test completed successfully")
+        logger.info("Large data structures test completed successfully")
     }
 
     @Test
@@ -194,7 +197,7 @@ class ErrorHandlingAndEdgeCasesTest {
             "mediumArray|50" to listOf("@STRING")
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val emptyArray = result["emptyArray"] as List<*>
         val singleArray = result["singleArray"] as String
@@ -204,7 +207,7 @@ class ErrorHandlingAndEdgeCasesTest {
         assertFalse(singleArray.startsWith("@"), "单个数组不应该以@开头")
         assertEquals(50, mediumArray.size, "中等数组应该有50个元素")
 
-        println("Extreme array sizes test completed successfully")
+        logger.info("Extreme array sizes test completed successfully")
     }
 
     // ==================== 特殊字符和编码测试 ====================
@@ -224,13 +227,13 @@ class ErrorHandlingAndEdgeCasesTest {
             "한국어키" to "@STRING"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             assertNotNull(value, "键 '$key' 的值不应为null")
             assertTrue(value is String, "键 '$key' 的值应该是字符串")
             assertTrue((value as String).isNotEmpty(), "键 '$key' 的值不应为空")
-            println("$key: $value")
+            logger.info("$key: $value")
         }
     }
 
@@ -246,7 +249,7 @@ class ErrorHandlingAndEdgeCasesTest {
             "tabContent" to "Tab\tseparated\t@STRING\tvalues"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             assertNotNull(value, "键 '$key' 的值不应为null")
@@ -278,7 +281,7 @@ class ErrorHandlingAndEdgeCasesTest {
                 }
             }
 
-            println("$key: $valueStr")
+            logger.info("$key: $valueStr")
         }
     }
 
@@ -303,15 +306,15 @@ class ErrorHandlingAndEdgeCasesTest {
         val results = mutableListOf<Map<String, Any>>()
         val threads = mutableListOf<Thread>()
 
-        // 创建多个线程同时执行Mock.mock
+        // 创建多个线程同时执行mock
         repeat(5) { threadIndex ->
             val thread = Thread {
                 repeat(3) { iteration ->
-                    val result = Mock.mock(template) as Map<String, Any>
+                    val result = mock(template) as Map<String, Any>
                     synchronized(results) {
                         results.add(result)
                     }
-                    println("Thread $threadIndex, Iteration $iteration completed")
+                    logger.info("Thread $threadIndex, Iteration $iteration completed")
                 }
             }
             threads.add(thread)
@@ -336,7 +339,7 @@ class ErrorHandlingAndEdgeCasesTest {
             assertEquals(10, items.size, "每个items列表应该有10个元素")
         }
 
-        println("Concurrent access test completed successfully")
+        logger.info("Concurrent access test completed successfully")
     }
 
     @Test
@@ -373,7 +376,7 @@ class ErrorHandlingAndEdgeCasesTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val endTime = System.currentTimeMillis()
         val duration = endTime - startTime
@@ -394,7 +397,7 @@ class ErrorHandlingAndEdgeCasesTest {
             assertEquals(20, activity.size, "每个用户应该有20条活动记录")
         }
 
-        println("Performance test completed in ${duration}ms")
+        logger.info("Performance test completed in ${duration}ms")
         assertTrue(duration < 10000, "性能测试应该在10秒内完成，实际用时 ${duration}ms")
     }
 
@@ -412,9 +415,9 @@ class ErrorHandlingAndEdgeCasesTest {
 
         val results = mutableListOf<Any>()
 
-        // 执行多次Mock.mock调用
+        // 执行多次mock调用
         repeat(100) { iteration ->
-            val result = Mock.mock(template)
+            val result = mock(template)
             results.add(result)
 
             // 每10次迭代验证一次结果
@@ -422,12 +425,12 @@ class ErrorHandlingAndEdgeCasesTest {
                 assertTrue(result is Map<*, *>, "结果应该是一个map")
                 val resultMap = result as Map<String, Any>
                 assertNotNull(resultMap["data"], "结果应该有data")
-                println("Iteration $iteration completed")
+                logger.info("Iteration $iteration completed")
             }
         }
 
         assertEquals(100, results.size, "应该有100个结果")
-        println("Memory usage test completed successfully")
+        logger.info("Memory usage test completed successfully")
     }
 
     // ==================== 边界值测试 ====================
@@ -444,7 +447,7 @@ class ErrorHandlingAndEdgeCasesTest {
             "emptyArray|0" to listOf("@STRING")
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             assertNotNull(value, "$key 不应为null")
@@ -470,7 +473,7 @@ class ErrorHandlingAndEdgeCasesTest {
                 }
             }
 
-            println("$key: $value")
+            logger.info("$key: $value")
         }
     }
 }

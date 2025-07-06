@@ -23,7 +23,7 @@ class PlaceholderAdvancedTest {
             "range" to "@RANGE"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证布尔值
         val boolean = result["boolean"]
@@ -69,7 +69,7 @@ class PlaceholderAdvancedTest {
             "rangeCustom" to "@RANGE(5, 20)"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证自然数范围
         val naturalRange = result["naturalRange"].toString().toInt()
@@ -101,7 +101,7 @@ class PlaceholderAdvancedTest {
             "now" to "@NOW"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -142,7 +142,7 @@ class PlaceholderAdvancedTest {
             "title" to "@TITLE"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证单词
         val word = result["word"] as String
@@ -174,7 +174,7 @@ class PlaceholderAdvancedTest {
             "customParagraph" to "@PARAGRAPH(3, 5)"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val shortSentence = result["shortSentence"] as String
         val longSentence = result["longSentence"] as String
@@ -200,7 +200,7 @@ class PlaceholderAdvancedTest {
             "lastName" to "@LAST"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val fullName = result["fullName"] as String
         val firstName = result["firstName"] as String
@@ -232,7 +232,7 @@ class PlaceholderAdvancedTest {
             "emailDomain" to "@EMAILDOMAIN"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证URL
         val url = result["url"] as String
@@ -281,7 +281,7 @@ class PlaceholderAdvancedTest {
             "areaCode" to "@AREACODE"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -312,7 +312,7 @@ class PlaceholderAdvancedTest {
             "premiumPhone2" to "@PHONENUMBER(PT.P)"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val phoneNumber = value.toString()
@@ -323,7 +323,7 @@ class PlaceholderAdvancedTest {
 
             // 电话号码长度验证
             val digitCount = phoneNumber.count { it.isDigit() }
-            assertTrue(digitCount >= 7, "$key 应该至少有7位数字，在$phoneNumber中得到$digitCount位")
+            assertTrue(digitCount >= 7, "$key 应该至少有7位数字，在 $phoneNumber 中得到 ${digitCount} 位")
 
             println("$key: $phoneNumber")
         }
@@ -339,7 +339,7 @@ class PlaceholderAdvancedTest {
             "bankCard" to "@BANKCARD"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val company = result["company"] as String
         val profession = result["profession"] as String
@@ -364,7 +364,7 @@ class PlaceholderAdvancedTest {
             "id" to "@ID"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val guid = result["guid"] as String
         val id = result["id"] as String
@@ -388,7 +388,7 @@ class PlaceholderAdvancedTest {
             "dataImage" to "@DATAIMAGE"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val color = result["color"] as String
         val image = result["image"] as String
@@ -434,7 +434,7 @@ class PlaceholderAdvancedTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val userProfile = result["userProfile"] as Map<String, Any>
 
         // 验证基本信息
@@ -505,7 +505,7 @@ class PlaceholderAdvancedTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val products = result["products"] as List<Map<String, Any>>
 
         assertEquals(5, products.size, "应该有5个产品")
@@ -559,13 +559,13 @@ class PlaceholderAdvancedTest {
             "nestedPlaceholders" to "@SENTENCE(@NATURAL(5, 10))"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 即使有无效占位符，也应该返回某种结果
         result.forEach { (key, value) ->
-            assertNotNull(value, "即使有无效占位符，$key也不应为null")
+            assertNotNull(value, "即使有无效占位符，$key 也不应为null")
             val valueStr = value.toString()
-            assertTrue(valueStr.isNotEmpty(), "即使有无效占位符，$key也不应为空")
+            assertTrue(valueStr.isNotEmpty(), "即使有无效占位符，$key 也不应为空")
             println("$key: $valueStr")
         }
     }

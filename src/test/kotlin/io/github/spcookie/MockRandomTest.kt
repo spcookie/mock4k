@@ -21,7 +21,7 @@ class MockRandomTest {
             )
         )
 
-        val result = Mock.mock(template)
+        val result = mock(template)
         assertNotNull(result)
         println("Basic mock result: $result")
     }
@@ -33,7 +33,7 @@ class MockRandomTest {
             "name|3" to "Hello"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val name = result["name"] as String
         assertTrue(name == "HelloHelloHello")
         println("String rule result: $result")
@@ -47,7 +47,7 @@ class MockRandomTest {
             "score|1-100.1-2" to 85.5
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         assertNotNull(result["age"])
         assertNotNull(result["score"])
         println("Number rule result: $result")
@@ -60,7 +60,7 @@ class MockRandomTest {
             "items|3-5" to listOf("apple", "banana", "orange")
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val items = result["items"] as List<*>
         assertTrue(items.isNotEmpty())
         println("Array rule result: $result")
@@ -76,7 +76,7 @@ class MockRandomTest {
             "id" to "@GUID"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         assertNotNull(result["name"])
         assertNotNull(result["email"])
         assertNotNull(result["date"])
@@ -103,7 +103,7 @@ class MockRandomTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val users = result["users"] as List<*>
         assertTrue(users.isNotEmpty())
         println("Complex template result: $result")
@@ -121,7 +121,7 @@ class MockRandomTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val list = result["list"] as List<*>
         assertTrue(list.size == 3)
         println("Increment rule result: $result")
@@ -135,7 +135,7 @@ class MockRandomTest {
             "isEnabled|3-7" to false
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         assertNotNull(result["isActive"])
         assertNotNull(result["isEnabled"])
         println("Boolean rule result: $result")
@@ -154,7 +154,7 @@ class MockRandomTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val config = result["config"] as Map<*, *>
         assertTrue(config.size in 2..3)
         println("Object rule result: $result")
@@ -175,7 +175,7 @@ class MockRandomTest {
             "premium2" to "@PHONENUMBER(PT.PREMIUM)"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证所有PT前缀都有效
         result.values.forEach { phone ->
@@ -300,7 +300,7 @@ class MockRandomTest {
             "company" to "@COMPANY"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()

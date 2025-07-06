@@ -89,7 +89,7 @@ class InternationalizationAdvancedTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证所有字段都有值
         result.forEach { (key, value) ->
@@ -168,7 +168,7 @@ class InternationalizationAdvancedTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             when (value) {
@@ -209,7 +209,7 @@ class InternationalizationAdvancedTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             when (value) {
@@ -251,7 +251,7 @@ class InternationalizationAdvancedTest {
                 "sentence" to "@SENTENCE"
             )
 
-            val result = Mock.mock(template) as Map<String, Any>
+            val result = mock(template) as Map<String, Any>
 
             result.forEach { (key, value) ->
                 val valueStr = value.toString()
@@ -287,7 +287,7 @@ class InternationalizationAdvancedTest {
                 "company" to "@COMPANY"
             )
 
-            val result = Mock.mock(template) as Map<String, Any>
+            val result = mock(template) as Map<String, Any>
             results[locale] = result
 
             println("${locale.displayName} result: $result")
@@ -332,13 +332,13 @@ class InternationalizationAdvancedTest {
 
         // 为每个用户的每个语言配置生成数据
         MockRandom.setLocale(Locale.ENGLISH)
-        val englishResult = Mock.mock(template) as Map<String, Any>
+        val englishResult = mock(template) as Map<String, Any>
 
         MockRandom.setLocale(Locale.CHINESE)
-        val chineseResult = Mock.mock(template) as Map<String, Any>
+        val chineseResult = mock(template) as Map<String, Any>
 
         MockRandom.setLocale(Locale.JAPANESE)
-        val japaneseResult = Mock.mock(template) as Map<String, Any>
+        val japaneseResult = mock(template) as Map<String, Any>
 
         // 验证所有结果都有效
         listOf(

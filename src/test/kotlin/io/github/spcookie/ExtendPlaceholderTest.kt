@@ -16,37 +16,37 @@ class ExtendPlaceholderTest {
     @BeforeEach
     fun setUp() {
         // 在每个测试前清除任何现有的自定义占位符
-        Mock.Random.clearExtended()
+        MockObject.Random.clearExtended()
     }
 
     @Test
     fun `test extend with single placeholder without parameters`() {
         // 注册一个自定义占位符
-        Mock.Random.extend("customGreeting") { "Hello, World!" }
+        MockObject.Random.extend("customGreeting") { "Hello, World!" }
 
         // 测试自定义占位符
-        val result = Mock.mock("@customGreeting")
+        val result = mock("@customGreeting")
         assertEquals("Hello, World!", result)
     }
 
     @Test
     fun `test extend with single placeholder with parameters`() {
         // 注册一个带参数的自定义占位符
-        Mock.Random.extendWithParams("repeat") { params ->
+        MockObject.Random.extendWithParams("repeat") { params ->
             val text = params.getOrNull(0)?.toString() ?: "default"
             val count = params.getOrNull(1) as? Int ?: 1
             (1..count).joinToString("") { text }
         }
 
         // 测试带参数的自定义占位符
-        val result = Mock.mock("@repeat('Hi', 3)")
+        val result = mock("@repeat('Hi', 3)")
         assertEquals("HiHiHi", result)
     }
 
     @Test
     fun `test extend with map of placeholders`() {
         // 注册多个自定义占位符
-        Mock.Random.extend(
+        MockObject.Random.extend(
             mapOf(
             "customName" to { "John Doe" },
             "customAge" to { 25 },
@@ -54,40 +54,40 @@ class ExtendPlaceholderTest {
         ))
 
         // 测试自定义占位符
-        assertEquals("John Doe", Mock.mock("@customName"))
-        assertEquals(25, Mock.mock("@customAge"))
-        assertEquals("New York", Mock.mock("@customCity"))
+        assertEquals("John Doe", mock("@customName"))
+        assertEquals(25, mock("@customAge"))
+        assertEquals("New York", mock("@customCity"))
     }
 
     @Test
     fun `test hasExtended`() {
-        Mock.Random.extend("testPlaceholder") { "test" }
+        MockObject.Random.extend("testPlaceholder") { "test" }
 
-        assertTrue(Mock.Random.hasExtended("testPlaceholder"))
-        assertTrue(Mock.Random.hasExtended("TESTPLACEHOLDER")) // 不区分大小写
-        assertFalse(Mock.Random.hasExtended("nonExistent"))
+        assertTrue(MockObject.Random.hasExtended("testPlaceholder"))
+        assertTrue(MockObject.Random.hasExtended("TESTPLACEHOLDER")) // 不区分大小写
+        assertFalse(MockObject.Random.hasExtended("nonExistent"))
     }
 
     @Test
     fun `test removeExtended`() {
-        Mock.Random.extend("toRemove") { "test" }
-        assertTrue(Mock.Random.hasExtended("toRemove"))
+        MockObject.Random.extend("toRemove") { "test" }
+        assertTrue(MockObject.Random.hasExtended("toRemove"))
 
-        Mock.Random.removeExtended("toRemove")
-        assertFalse(Mock.Random.hasExtended("toRemove"))
+        MockObject.Random.removeExtended("toRemove")
+        assertFalse(MockObject.Random.hasExtended("toRemove"))
     }
 
     @Test
     fun `test getExtendedNames`() {
-        Mock.Random.extend(
+        MockObject.Random.extend(
             mapOf(
             "placeholder1" to { "test1" },
             "placeholder2" to { "test2" }
         ))
 
-        Mock.Random.extendWithParams("placeholder3") { _ -> "test3" }
+        MockObject.Random.extendWithParams("placeholder3") { _ -> "test3" }
 
-        val names = Mock.Random.getExtendedNames()
+        val names = MockObject.Random.getExtendedNames()
         assertEquals(3, names.size)
         assertTrue(names.contains("placeholder1"))
         assertTrue(names.contains("placeholder2"))
@@ -96,48 +96,48 @@ class ExtendPlaceholderTest {
 
     @Test
     fun `test clearExtendedPlaceholders`() {
-        Mock.Random.extend(
+        MockObject.Random.extend(
             mapOf(
             "placeholder1" to { "test1" },
             "placeholder2" to { "test2" }
         ))
 
-        assertTrue(Mock.Random.getExtendedNames().isNotEmpty())
+        assertTrue(MockObject.Random.getExtendedNames().isNotEmpty())
 
-        Mock.Random.clearExtended()
-        assertTrue(Mock.Random.getExtendedNames().isEmpty())
+        MockObject.Random.clearExtended()
+        assertTrue(MockObject.Random.getExtendedNames().isEmpty())
     }
 
     @Test
     fun `test method chaining`() {
         // 测试扩展方法返回 MockRandom 以支持链式调用
-        val result = Mock.Random
+        val result = MockObject.Random
             .extend("test1") { "value1" }
             .extend(mapOf("test2" to { "value2" }))
             .extendWithParams("test3") { _ -> "value3" }
 
-        assertSame(Mock.Random, result)
-        assertTrue(Mock.Random.hasExtended("test1"))
-        assertTrue(Mock.Random.hasExtended("test2"))
-        assertTrue(Mock.Random.hasExtended("test3"))
+        assertSame(MockObject.Random, result)
+        assertTrue(MockObject.Random.hasExtended("test1"))
+        assertTrue(MockObject.Random.hasExtended("test2"))
+        assertTrue(MockObject.Random.hasExtended("test3"))
     }
 
     @Test
     fun `test error handling in custom placeholders`() {
         // 注册一个抛出异常的自定义占位符
-        Mock.Random.extend("errorPlaceholder") {
+        MockObject.Random.extend("errorPlaceholder") {
             throw RuntimeException("Test error")
         }
 
         // 当发生错误时应该回退到原始占位符字符串
-        val result = Mock.mock("@errorPlaceholder")
+        val result = mock("@errorPlaceholder")
         assertEquals("@errorPlaceholder", result)
     }
 
     @Test
     fun `test fallback to built-in when custom placeholder not found`() {
         // 测试当没有注册自定义占位符时内置占位符仍然有效
-        val result = Mock.mock("@name")
+        val result = mock("@name")
         assertNotNull(result)
         assertTrue(result is String)
         assertTrue((result as String).isNotEmpty())
@@ -164,17 +164,17 @@ class ExtendPlaceholderTest {
 
         // 测试简单占位符
         val template1 = "@company - @department"
-        val result1 = Mock.mock(template1)
+        val result1 = mock(template1)
         assertEquals("TechCorp - Engineering", result1)
 
         // 测试参数化占位符
         val template2 = "@greeting(Alice)"
-        val result2 = Mock.mock(template2)
+        val result2 = mock(template2)
         assertEquals("Hello, Alice!", result2)
 
         // 测试复杂模板
         val complexTemplate = "Company: @company, Department: @department, Status: @status, Priority: @priority"
-        val complexResult = Mock.mock(complexTemplate)
+        val complexResult = mock(complexTemplate)
         assertEquals("Company: TechCorp, Department: Engineering, Status: Active, Priority: High", complexResult)
 
         // 演示实用方法
@@ -198,7 +198,7 @@ class ExtendPlaceholderTest {
 
         // 测试错误处理
         val invalidTemplate = "@nonexistent"
-        val invalidResult = Mock.mock(invalidTemplate)
+        val invalidResult = mock(invalidTemplate)
         assertEquals("@nonexistent", invalidResult) // 应该返回原始占位符
 
         // 测试清理

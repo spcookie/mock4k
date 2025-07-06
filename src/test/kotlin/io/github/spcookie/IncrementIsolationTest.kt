@@ -20,8 +20,8 @@ class IncrementIsolationTest {
         val results2 = mutableListOf<Int>()
 
         repeat(3) {
-            val result1 = Mock.mock(template1) as Map<String, Any>
-            val result2 = Mock.mock(template2) as Map<String, Any>
+            val result1 = mock(template1) as Map<String, Any>
+            val result2 = mock(template2) as Map<String, Any>
             results1.add(result1["id1"] as Int)
             results2.add(result2["id2"] as Int)
         }
@@ -42,8 +42,8 @@ class IncrementIsolationTest {
         val results2 = mutableListOf<Int>()
 
         repeat(3) {
-            val result1 = Mock.mock(template1) as Map<String, Any>
-            val result2 = Mock.mock(template2) as Map<String, Any>
+            val result1 = mock(template1) as Map<String, Any>
+            val result2 = mock(template2) as Map<String, Any>
             results1.add(result1["id"] as Int)
             results2.add(result2["id"] as Int)
         }
@@ -63,7 +63,7 @@ class IncrementIsolationTest {
         )
 
         // 生成一次并检查相同属性在同一次调用内递增
-        val result = Mock.mock(template) as List<Map<String, Any>>
+        val result = mock(template) as List<Map<String, Any>>
 
         // 在单次模板生成中，相同属性应该在数组元素间递增
         assertEquals(100, result[0]["id"])

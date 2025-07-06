@@ -40,7 +40,7 @@ class ComprehensiveTest {
         )
 
         val result = try {
-            Mock.mock(template) as Map<String, Any>
+            mock(template) as Map<String, Any>
         } catch (e: Exception) {
             println("Error in testErrorHandlingAndEdgeCases: ${e.message}")
             println("Exception type: ${e.javaClass.simpleName}")
@@ -71,7 +71,7 @@ class ComprehensiveTest {
         )
 
         val result = try {
-            Mock.mock(template) as Map<String, Any>
+            mock(template) as Map<String, Any>
         } catch (e: Exception) {
             println("Error in testErrorHandlingAndEdgeCases: ${e.message}")
             println("Exception type: ${e.javaClass.simpleName}")
@@ -106,7 +106,7 @@ class ComprehensiveTest {
             "items|2-8" to listOf("apple", "banana", "orange")
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val age = result["age"] as Int
         val score = result["score"] as Int
@@ -135,7 +135,7 @@ class ComprehensiveTest {
             "flags|3" to true
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val tags = result["tags"] as List<*>
         val letters = result["letters"] as String
@@ -155,7 +155,7 @@ class ComprehensiveTest {
             "percentage|0-100.2-4" to 75.25
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             when (value) {
@@ -189,7 +189,7 @@ class ComprehensiveTest {
             "street" to "@STREETNAME"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -209,7 +209,7 @@ class ComprehensiveTest {
             "now" to "@NOW"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -230,7 +230,7 @@ class ComprehensiveTest {
             "emailDomain" to "@EMAILDOMAIN"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -250,7 +250,7 @@ class ComprehensiveTest {
             "title" to "@TITLE"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -271,7 +271,7 @@ class ComprehensiveTest {
             "sentenceWithLength" to "@SENTENCE(5, 10)"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -291,7 +291,7 @@ class ComprehensiveTest {
             "premium2" to "@PHONENUMBER(PT.P)"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val phoneNumber = value.toString()
@@ -319,7 +319,7 @@ class ComprehensiveTest {
             "sentence" to "@SENTENCE"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -341,7 +341,7 @@ class ComprehensiveTest {
             "word" to "@WORD"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -363,7 +363,7 @@ class ComprehensiveTest {
             "word" to "@WORD"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             val valueStr = value.toString()
@@ -393,7 +393,7 @@ class ComprehensiveTest {
             MockRandom.setLocale(locale)
             assertEquals(locale, MockRandom.getCurrentLocale())
 
-            val result = Mock.mock(template) as Map<String, Any>
+            val result = mock(template) as Map<String, Any>
 
             result.forEach { (key, value) ->
                 val valueStr = value.toString()
@@ -451,7 +451,7 @@ class ComprehensiveTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val users = result["users"] as List<Map<String, Any>>
 
         assertTrue(users.size in 3..5, "用户数量应该在3-5范围内")
@@ -520,7 +520,7 @@ class ComprehensiveTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val products = result["products"] as List<Map<String, Any>>
 
         assertTrue(products.size in 5..10, "产品数量应该在5-10范围内")
@@ -557,7 +557,7 @@ class ComprehensiveTest {
             "largeRange|1000-9999" to 5000
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证边界情况处理
         val singleItem = result["singleItem"] as String
@@ -587,7 +587,7 @@ class ComprehensiveTest {
         )
 
         val startTime = System.currentTimeMillis()
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val endTime = System.currentTimeMillis()
 
         val largeDataset = result["largeDataset"] as List<*>

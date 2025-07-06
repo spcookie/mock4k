@@ -27,7 +27,7 @@ class PerformanceAndStressTest {
         val iterations = 1000
         val executionTime = measureTimeMillis {
             repeat(iterations) {
-                val result = Mock.mock(template)
+                val result = mock(template)
                 assertNotNull(result, "结果不应为null")
             }
         }
@@ -86,7 +86,7 @@ class PerformanceAndStressTest {
         val iterations = 10
         val executionTime = measureTimeMillis {
             repeat(iterations) {
-                val result = Mock.mock(template) as Map<String, Any>
+                val result = mock(template) as Map<String, Any>
                 val users = result["users"] as List<*>
                 assertEquals(50, users.size, "应该有50个用户")
             }
@@ -129,7 +129,7 @@ class PerformanceAndStressTest {
             )
 
             val executionTime = measureTimeMillis {
-                val result = Mock.mock(template) as Map<String, Any>
+                val result = mock(template) as Map<String, Any>
                 val items = result["items"] as List<*>
                 assertEquals(size, items.size, "应该有 $size 个项目")
 
@@ -173,7 +173,7 @@ class PerformanceAndStressTest {
             )
 
             val executionTime = measureTimeMillis {
-                val result = Mock.mock(template) as Map<String, Any>
+                val result = mock(template) as Map<String, Any>
                 assertNotNull(result["nested"], "嵌套结构不应为null")
 
                 // 验证嵌套结构的深度
@@ -228,7 +228,7 @@ class PerformanceAndStressTest {
                 val thread = Thread {
                     val threadStartTime = System.currentTimeMillis()
                     repeat(iterationsPerThread) {
-                        val result = Mock.mock(template)
+                        val result = mock(template)
                         assertNotNull(result, "结果不应为null")
                     }
                     val threadEndTime = System.currentTimeMillis()
@@ -292,7 +292,7 @@ class PerformanceAndStressTest {
 
         val executionTime = measureTimeMillis {
             repeat(iterations) { iteration ->
-                val result = Mock.mock(template) as Map<String, Any>
+                val result = mock(template) as Map<String, Any>
                 results.add(result)
 
                 // 每10次迭代进行一次验证
@@ -358,7 +358,7 @@ class PerformanceAndStressTest {
             val iterations = 200
             val executionTime = measureTimeMillis {
                 repeat(iterations) {
-                    val result = Mock.mock(template) as Map<String, Any>
+                    val result = mock(template) as Map<String, Any>
 
                     // 验证所有占位符都被解析
                     result.forEach { (key, value) ->
@@ -412,7 +412,7 @@ class PerformanceAndStressTest {
             val executionTime = measureTimeMillis {
                 repeat(iterations) {
                     templates.forEach { (ruleName, template) ->
-                        val result = Mock.mock(mapOf("test" to template))
+                        val result = mock(mapOf("test" to template))
                         assertNotNull(result, "$ruleName 的结果不应为null")
                     }
                 }
@@ -464,7 +464,7 @@ class PerformanceAndStressTest {
         )
 
         val executionTime = measureTimeMillis {
-            val result = Mock.mock(template) as Map<String, Any>
+            val result = mock(template) as Map<String, Any>
             val massiveData = result["massiveData"] as Map<String, Any>
             val users = massiveData["users"] as List<*>
 
@@ -534,7 +534,7 @@ class PerformanceAndStressTest {
 
         // 执行多次生成，然后清理引用
         repeat(iterations) { iteration ->
-            val result = Mock.mock(template)
+            val result = mock(template)
             results.add(result)
 
             // 每10次迭代清理一次结果列表

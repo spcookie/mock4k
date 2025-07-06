@@ -19,7 +19,7 @@ class RuleModifierAdvancedTest {
             "char|10" to "A"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         assertEquals("HelloHelloHello", result["text"])
         assertEquals("World", result["word"])
@@ -36,7 +36,7 @@ class RuleModifierAdvancedTest {
             "empty|0-2" to "Empty"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val text = result["text"] as String
         val word = result["word"] as String
@@ -60,7 +60,7 @@ class RuleModifierAdvancedTest {
             "large|1000-9999" to 5000
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val age = result["age"] as Int
         val score = result["score"] as Int
@@ -84,7 +84,7 @@ class RuleModifierAdvancedTest {
             "precise|1-5.3" to 2.123
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         result.forEach { (key, value) ->
             when (value) {
@@ -119,7 +119,7 @@ class RuleModifierAdvancedTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val items = result["items"] as List<Map<String, Any>>
 
         assertEquals(3, items.size)
@@ -153,7 +153,7 @@ class RuleModifierAdvancedTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val data = result["data"] as List<Map<String, Any>>
 
         assertEquals(5, data.size)
@@ -179,7 +179,7 @@ class RuleModifierAdvancedTest {
             "booleans|2" to listOf(true, false)
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val tags = result["tags"] as List<*>
         val numbers = result["numbers"] as List<*>
@@ -200,7 +200,7 @@ class RuleModifierAdvancedTest {
             "flags|0-2" to listOf(true, false, true)
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val items = result["items"] as List<*>
         val values = result["values"] as List<*>
@@ -223,7 +223,7 @@ class RuleModifierAdvancedTest {
             "options|2-4" to true
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val flag = result["flag"]
         val status = result["status"]
@@ -253,7 +253,7 @@ class RuleModifierAdvancedTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         val config = result["config"] as Map<String, Any>
         val settings = result["settings"] as Map<String, Any>
@@ -304,7 +304,7 @@ class RuleModifierAdvancedTest {
             )
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
         val complexData = result["complexData"] as List<Map<String, Any>>
 
         assertTrue(complexData.size in 2..3, "复杂数据大小应该是2-3")
@@ -348,7 +348,7 @@ class RuleModifierAdvancedTest {
             "longRepeat|50" to "A"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证边界情况
         val zero = result["zero"] as String
@@ -377,7 +377,7 @@ class RuleModifierAdvancedTest {
             "complexRule" to "base|1-10.2-5"
         )
 
-        val result = Mock.mock(template) as Map<String, Any>
+        val result = mock(template) as Map<String, Any>
 
         // 验证解析边界情况
         assertNotNull(result["noRule"])
