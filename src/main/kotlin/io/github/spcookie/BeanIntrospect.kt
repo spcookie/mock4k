@@ -219,70 +219,7 @@ internal class BeanIntrospect {
     }
 
 
-    /**
-     * Check if type is a collection type (Category 2)
-     */
-    private fun isCollectionType(kClass: KClass<*>): Boolean {
-        return when {
-            List::class.java.isAssignableFrom(kClass.java) -> true
-            Set::class.java.isAssignableFrom(kClass.java) -> true
-            Map::class.java.isAssignableFrom(kClass.java) -> true
-            kClass.java.isArray -> true
-            else -> false
-        }
-    }
 
-    /**
-     * Check if type is a container type (Advanced)
-     */
-    private fun isContainerType(kClass: KClass<*>): Boolean {
-        return when {
-            // Java standard container types
-            Optional::class.java.isAssignableFrom(kClass.java) -> true
-            CompletableFuture::class.java.isAssignableFrom(kClass.java) -> true
-            java.util.concurrent.Future::class.java.isAssignableFrom(kClass.java) -> true
-            java.util.concurrent.Callable::class.java.isAssignableFrom(kClass.java) -> true
-            java.util.function.Supplier::class.java.isAssignableFrom(kClass.java) -> true
-            // Kotlin standard container types
-            kotlin.Lazy::class.java.isAssignableFrom(kClass.java) -> true
-            else -> {
-                val qualifiedName = kClass.qualifiedName ?: return false
-                // Check for third-party library container types using string comparison to avoid dependency issues
-                when {
-                    // Kotlin Coroutines
-                    qualifiedName.startsWith("kotlinx.coroutines.Deferred") -> true
-                    // Project Reactor
-                    qualifiedName.startsWith("reactor.core.publisher.Mono") -> true
-                    qualifiedName.startsWith("reactor.core.publisher.Flux") -> true
-                    // RxJava 2/3
-                    qualifiedName.startsWith("io.reactivex.Observable") -> true
-                    qualifiedName.startsWith("io.reactivex.Single") -> true
-                    qualifiedName.startsWith("io.reactivex.Maybe") -> true
-                    qualifiedName.startsWith("io.reactivex.Completable") -> true
-                    qualifiedName.startsWith("io.reactivex.Flowable") -> true
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Observable") -> true
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Single") -> true
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Maybe") -> true
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Completable") -> true
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Flowable") -> true
-                    // Vavr (formerly Javaslang)
-                    qualifiedName.startsWith("io.vavr.control.Option") -> true
-                    qualifiedName.startsWith("io.vavr.control.Try") -> true
-                    qualifiedName.startsWith("io.vavr.control.Either") -> true
-                    qualifiedName.startsWith("io.vavr.control.Validation") -> true
-                    qualifiedName.startsWith("io.vavr.Lazy") -> true
-                    qualifiedName.startsWith("io.vavr.concurrent.Future") -> true
-                    // Arrow (Kotlin functional programming)
-                    qualifiedName.startsWith("arrow.core.Option") -> true
-                    qualifiedName.startsWith("arrow.core.Either") -> true
-                    qualifiedName.startsWith("arrow.core.Try") -> true
-                    qualifiedName.startsWith("arrow.core.Validated") -> true
-                    qualifiedName.startsWith("arrow.fx.coroutines.Resource") -> true
-                    else -> false
-                }
-            }
-        }
-    }
 
     /**
      * Get placeholder for basic types
@@ -514,7 +451,7 @@ internal class BeanIntrospect {
         wrappedType: KType?,
         annotation: Mock.Property?,
         propertyBeanAnnotation: Mock.Bean?
-    ): Any {
+    ): Any? {
         return if (wrappedType != null) {
             analyzePropertyType(wrappedType, annotation, propertyBeanAnnotation)
         } else {
