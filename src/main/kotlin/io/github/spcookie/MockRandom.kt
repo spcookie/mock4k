@@ -72,6 +72,24 @@ object MockRandom {
     }
 
     /**
+     * Generate random long
+     */
+    fun long(): Long {
+        return random.nextLong()
+    }
+
+    /**
+     * Generate random long with range
+     */
+    fun long(min: Long, max: Long): Long {
+        return if (min == max) {
+            min
+        } else {
+            random.nextLong(min, max + 1)
+        }
+    }
+
+    /**
      * Generate random float
      */
     fun float(): Double {

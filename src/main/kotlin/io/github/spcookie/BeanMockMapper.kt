@@ -2,6 +2,9 @@ package io.github.spcookie
 
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import java.math.BigInteger
+import java.util.*
+import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
@@ -9,11 +12,12 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
 
 /**
- * Maps MockEngine generated results back to Bean objects
+ * Maps generated mock data back to Bean instances
  *
  * @author spcookie
  * @since 1.2.0
@@ -26,17 +30,83 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
      * Map generated data to Bean instance
      */
     fun <T : Any> mapToBean(clazz: KClass<T>, data: Map<String, Any?>, config: BeanMockConfig): T {
-        val instance = createInstance(clazz)
-        val properties = getEligibleProperties(clazz, config)
+        logger.debug("Mapping data to bean class: ${clazz.simpleName}")
 
-        properties.forEach { property ->
+        return try {
+            // Try constructor-based creation first
+            createInstanceWithConstructor(clazz, data, config)
+        } catch (e: Exception) {
+            logger.debug("Constructor-based creation failed, trying property-based creation: ${e.message}")
+            // Fallback to property-based creation
+            createInstanceWithProperties(clazz, data, config)
+        }
+    }
+
+    /**
+     * Create instance using primary constructor
+     */
+    private fun <T : Any> createInstanceWithConstructor(
+        clazz: KClass<T>,
+        data: Map<String, Any?>,
+        config: BeanMockConfig
+    ): T {
+        val constructor = clazz.primaryConstructor
+            ?: throw IllegalArgumentException("No primary constructor found for ${clazz.simpleName}")
+
+        val args = constructor.parameters.map { param ->
+            val propertyName = param.name ?: throw IllegalArgumentException("Parameter name not available")
+            val rawValue = findValueForProperty(propertyName, data)
+
+            if (rawValue != null) {
+                convertValue(rawValue, param.type, config)
+            } else {
+                // Use default value if available
+                if (param.isOptional) {
+                    null
+                } else {
+                    getDefaultValueForType(param.type)
+                }
+            }
+        }.toTypedArray()
+
+        return constructor.call(*args)
+    }
+
+    /**
+     * Create instance using default constructor and set properties
+     */
+    private fun <T : Any> createInstanceWithProperties(
+        clazz: KClass<T>,
+        data: Map<String, Any?>,
+        config: BeanMockConfig
+    ): T {
+        val instance = clazz.createInstance()
+
+        // Get all mutable properties
+        val mutableProperties = clazz.memberProperties.filterIsInstance<KMutableProperty<*>>()
+
+        for (property in mutableProperties) {
             try {
-                val propertyName = property.name
-                val generatedValue = data[propertyName]
-                val mappedValue = mapValueToProperty(generatedValue, property)
-                setPropertyValue(instance, property, mappedValue)
+                val propertyAnnotation = property.findAnnotation<Mock.Property>()
+
+                // Skip if property is disabled
+                if (propertyAnnotation?.enabled == false) {
+                    continue
+                }
+
+                // Check if property should be included based on config
+                if (!shouldIncludeProperty(property, config)) {
+                    continue
+                }
+
+                val rawValue = findValueForProperty(property.name, data)
+                if (rawValue != null) {
+                    val convertedValue = convertValue(rawValue, property.returnType, config)
+                    setPropertyValue(instance, property, convertedValue)
+                    logger.debug("Set property ${property.name} = $convertedValue")
+                }
             } catch (e: Exception) {
-                logger.warn("Failed to map property ${property.name}: ${e.message}", e)
+                logger.warn("Failed to set property ${property.name}: ${e.message}")
             }
         }
 
@@ -44,323 +114,419 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
     }
 
     /**
-     * Create instance of the given class
+     * Find value for property in generated data, handling rule-based keys
      */
-    private fun <T : Any> createInstance(clazz: KClass<T>): T {
-        return try {
-            clazz.createInstance()
-        } catch (e: Exception) {
-            throw IllegalArgumentException("Cannot create instance of ${clazz.simpleName}. Make sure it has a no-arg constructor.", e)
+    private fun findValueForProperty(propertyName: String, data: Map<String, Any?>): Any? {
+        // First try exact match
+        data[propertyName]?.let { return it }
+
+        // Then try to find keys that start with property name followed by |
+        val ruleBasedKey = data.keys.find { it.startsWith("$propertyName|") }
+        if (ruleBasedKey != null) {
+            return data[ruleBasedKey]
         }
+
+        return null
     }
 
     /**
-     * Get eligible properties for mapping
+     * Check if property should be included based on configuration
      */
-    private fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KProperty<*>> {
-        return clazz.memberProperties.filter { property ->
-            val javaField = property.javaField
-            val isMutableProperty = property is KMutableProperty<*>
-            
-            when {
-                javaField == null -> false
-                !isMutableProperty -> false
-                else -> {
-                    val mockParam = property.findAnnotation<io.github.spcookie.Mock.Property>()
-                    mockParam?.enabled != false
+    private fun shouldIncludeProperty(property: KProperty<*>, config: BeanMockConfig): Boolean {
+        val javaField = property.javaField
+
+        // Check private access
+        if (!config.includePrivate && javaField != null && !java.lang.reflect.Modifier.isPublic(javaField.modifiers)) {
+            return false
+        }
+
+        // Check static access
+        if (!config.includeStatic && javaField != null && java.lang.reflect.Modifier.isStatic(javaField.modifiers)) {
+            return false
+        }
+
+        // Check transient access
+        if (!config.includeTransient && javaField != null && java.lang.reflect.Modifier.isTransient(javaField.modifiers)) {
+            return false
+        }
+
+        return true
+    }
+
+    /**
+     * Convert value to target type using TypeAdapter
+     */
+    private fun convertValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
+        if (value == null) return null
+
+        val targetClass = targetType.classifier as? KClass<*> ?: return value
+        
+        return when {
+            // Handle Pair type specially
+            targetClass == Pair::class -> {
+                when (value) {
+                    is String -> {
+                        // Parse from string like "first,second" or use default
+                        val parts = value.split(",")
+                        if (parts.size >= 2) {
+                            Pair(parts[0].trim(), parts[1].trim())
+                        } else {
+                            Pair(value, "")
+                        }
+                    }
+
+                    is Pair<*, *> -> value
+                    else -> Pair(value.toString(), "")
                 }
             }
+
+            // Handle basic types with TypeAdapter
+            isBasicType(targetClass) -> {
+                // If value is a placeholder string with rules, generate actual value first
+                val actualValue = if (value is String && value.startsWith("@")) {
+                    val mockEngine = MockEngine()
+                    mockEngine.generate(value)
+                } else {
+                    value
+                }
+
+                val adapter = typeAdapter.get(targetClass)
+                adapter?.invoke(actualValue) ?: actualValue
+            }
+
+            // Handle collections
+            isCollectionType(targetClass) -> convertCollectionValue(value, targetType, config)
+
+            // Handle container types
+            isContainerType(targetClass) -> convertContainerValue(value, targetType, config)
+
+            // Handle custom objects
+            isCustomClass(targetClass) -> convertCustomObjectValue(value, targetClass, config)
+
+            else -> value
         }
     }
 
     /**
-     * Map generated value to property type
+     * Convert collection values
      */
-    private fun mapValueToProperty(value: Any?, property: KProperty<*>): Any? {
-        return mapValueToProperty(value, property.returnType, BeanMockConfig())
-    }
-
-    /**
-     * Map generated value to property type with config
-     */
-    private fun mapValueToProperty(value: Any?, kType: KType, config: BeanMockConfig): Any? {
+    private fun convertCollectionValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
         if (value == null) return null
-        
-        val propertyClass = kType.classifier as? KClass<*> ?: return null
+
+        val targetClass = targetType.classifier as KClass<*>
 
         return when {
-            // Handle nested objects (Maps that should become Bean instances)
-            value is Map<*, *> && isCustomClass(propertyClass) -> {
-                @Suppress("UNCHECKED_CAST")
-                val dataMap = value as Map<String, Any?>
-                mapToBean(propertyClass, dataMap, config)
+            List::class.java.isAssignableFrom(targetClass.java) -> {
+                val elementType = targetType.arguments.firstOrNull()?.type
+                when (value) {
+                    is List<*> -> {
+                        if (elementType != null) {
+                            value.map { convertValue(it, elementType, config) }
+                        } else {
+                            value
+                        }
+                    }
+
+                    else -> listOf(value)
+                }
             }
-            // Handle Lists
-            value is List<*> && (propertyClass == List::class || propertyClass == MutableList::class) -> {
-                mapListValue(value, kType)
+
+            Set::class.java.isAssignableFrom(targetClass.java) -> {
+                val elementType = targetType.arguments.firstOrNull()?.type
+                when (value) {
+                    is List<*> -> {
+                        if (elementType != null) {
+                            value.map { convertValue(it, elementType, config) }.toSet()
+                        } else {
+                            value.toSet()
+                        }
+                    }
+
+                    is Set<*> -> value
+                    else -> setOf(value)
+                }
             }
-            // Handle Sets
-            value is List<*> && (propertyClass == Set::class || propertyClass == MutableSet::class) -> {
-                mapSetValue(value, kType)
+
+            Map::class.java.isAssignableFrom(targetClass.java) -> {
+                val keyType = targetType.arguments.getOrNull(0)?.type
+                val valueType = targetType.arguments.getOrNull(1)?.type
+                
+                when (value) {
+                    is Map<*, *> -> {
+                        if (keyType != null && valueType != null) {
+                            value.mapKeys { (k, _) -> convertValue(k, keyType, config) }
+                                .mapValues { (_, v) -> convertValue(v, valueType, config) }
+                        } else {
+                            value
+                        }
+                    }
+
+                    else -> mapOf("key" to value)
+                }
             }
-            // Handle Maps
-            value is Map<*, *> && (propertyClass == Map::class || propertyClass == MutableMap::class) -> {
-                mapMapValue(value, kType)
+
+            targetClass.java.isArray -> {
+                when (value) {
+                    is List<*> -> {
+                        val componentType = targetClass.java.componentType
+                        val array = java.lang.reflect.Array.newInstance(componentType, value.size)
+                        value.forEachIndexed { index, item ->
+                            java.lang.reflect.Array.set(array, index, item)
+                        }
+                        array
+                    }
+
+                    else -> arrayOf(value)
+                }
             }
-            // Handle basic types
+
+            else -> value
+        }
+    }
+
+    /**
+     * Convert container values (Optional, CompletableFuture, Future, Callable, Supplier, Lazy, Deferred, Reactor, RxJava, Vavr, Arrow, etc.)
+     */
+    private fun convertContainerValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
+        if (value == null) return null
+
+        val targetClass = targetType.classifier as KClass<*>
+        val qualifiedName = targetClass.qualifiedName ?: ""
+        val wrappedType = targetType.arguments.firstOrNull()?.type
+
+        return when {
+            // Java standard container types
+            Optional::class.java.isAssignableFrom(targetClass.java) -> {
+                val wrappedValue = convertWrappedValue(value, wrappedType, config)
+                Optional.ofNullable(wrappedValue)
+            }
+
+            CompletableFuture::class.java.isAssignableFrom(targetClass.java) ||
+                    java.util.concurrent.Future::class.java.isAssignableFrom(targetClass.java) -> {
+                val wrappedValue = convertWrappedValue(value, wrappedType, config)
+                CompletableFuture.completedFuture(wrappedValue)
+            }
+
+            java.util.concurrent.Callable::class.java.isAssignableFrom(targetClass.java) -> {
+                val wrappedValue = convertWrappedValue(value, wrappedType, config)
+                java.util.concurrent.Callable { wrappedValue }
+            }
+
+            java.util.function.Supplier::class.java.isAssignableFrom(targetClass.java) -> {
+                val wrappedValue = convertWrappedValue(value, wrappedType, config)
+                java.util.function.Supplier { wrappedValue }
+            }
+
+            kotlin.Lazy::class.java.isAssignableFrom(targetClass.java) -> {
+                val wrappedValue = convertWrappedValue(value, wrappedType, config)
+                lazy { wrappedValue }
+            }
+
+            // Third-party library container types (using string comparison to avoid dependency issues)
+            // For these types, we return the converted value directly since we can't create instances without dependencies
+            qualifiedName.startsWith("kotlinx.coroutines.Deferred") ||
+                    qualifiedName.startsWith("reactor.core.publisher.Mono") ||
+                    qualifiedName.startsWith("io.reactivex.Single") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Single") ||
+                    qualifiedName.startsWith("io.reactivex.Maybe") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Maybe") ||
+                    qualifiedName.startsWith("io.vavr.control.Option") ||
+                    qualifiedName.startsWith("io.vavr.control.Try") ||
+                    qualifiedName.startsWith("io.vavr.Lazy") ||
+                    qualifiedName.startsWith("io.vavr.concurrent.Future") ||
+                    qualifiedName.startsWith("arrow.core.Option") ||
+                    qualifiedName.startsWith("arrow.core.Try") ||
+                    qualifiedName.startsWith("arrow.core.Validated") ||
+                    qualifiedName.startsWith("arrow.fx.coroutines.Resource") -> {
+                convertWrappedValue(value, wrappedType, config)
+            }
+
+            // Stream types - return as list
+            qualifiedName.startsWith("reactor.core.publisher.Flux") ||
+                    qualifiedName.startsWith("io.reactivex.Observable") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Observable") ||
+                    qualifiedName.startsWith("io.reactivex.Flowable") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Flowable") -> {
+                when (value) {
+                    is List<*> -> value.map { convertWrappedValue(it, wrappedType, config) }
+                    else -> listOf(convertWrappedValue(value, wrappedType, config))
+                }
+            }
+
+            // Either-like types - use right/second type parameter
+            qualifiedName.startsWith("io.vavr.control.Either") ||
+                    qualifiedName.startsWith("io.vavr.control.Validation") ||
+                    qualifiedName.startsWith("arrow.core.Either") -> {
+                val rightType = targetType.arguments.getOrNull(1)?.type
+                convertWrappedValue(value, rightType, config)
+            }
+
+            // Completable types - return null
+            qualifiedName.startsWith("io.reactivex.Completable") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Completable") -> {
+                null
+            }
+
+            else -> value
+        }
+    }
+
+    /**
+     * Convert wrapped value with fallback to original value
+     */
+    private fun convertWrappedValue(value: Any?, wrappedType: KType?, config: BeanMockConfig): Any? {
+        return if (wrappedType != null) {
+            convertValue(value, wrappedType, config)
+        } else {
+            value
+        }
+    }
+
+    /**
+     * Convert custom object values
+     */
+    private fun convertCustomObjectValue(value: Any?, targetClass: KClass<*>, config: BeanMockConfig): Any? {
+        if (value == null) return null
+
+        return when (value) {
+            is Map<*, *> -> {
+                try {
+                    @Suppress("UNCHECKED_CAST")
+                    val dataMap = value as Map<String, Any?>
+                    mapToBean(targetClass, dataMap, config)
+                } catch (e: Exception) {
+                    logger.warn("Failed to convert map to ${targetClass.simpleName}: ${e.message}")
+                    null
+                }
+            }
             else -> {
-                convertToType(value, propertyClass, kType)
+                // Try to use TypeAdapter if available
+                val adapter = typeAdapter.get(targetClass)
+                adapter?.invoke(value) ?: value
             }
         }
     }
 
     /**
-     * Map List value
+     * Set property value on instance
      */
-    private fun mapListValue(value: List<*>, kType: KType): List<Any?> {
-        val elementType = getGenericTypeArgument(kType, 0) ?: return value.toMutableList()
-        val config = BeanMockConfig()
-        
-        return value.map { element ->
-            mapValueToProperty(element, elementType, config)
-        }.toMutableList()
-    }
-
-    /**
-     * Map Set value
-     */
-    private fun mapSetValue(value: List<*>, kType: KType): Set<Any?> {
-        val listValue = mapListValue(value, kType)
-        return listValue.toMutableSet()
-    }
-
-    /**
-     * Map Map value
-     */
-    private fun mapMapValue(value: Map<*, *>, kType: KType): Map<Any?, Any?> {
-        val keyType = getGenericTypeArgument(kType, 0) ?: return value.toMutableMap()
-        val valueType = getGenericTypeArgument(kType, 1) ?: return value.toMutableMap()
-        val keyClass = keyType.classifier as? KClass<*> ?: return value.toMutableMap()
-        val config = BeanMockConfig()
-        
-        return value.mapKeys { (key, _) ->
-            convertToType(key, keyClass, keyType)
-        }.mapValues { (_, mapValue) ->
-            mapValueToProperty(mapValue, valueType, config)
-        }.toMutableMap()
-    }
-
-    /**
-     * Get generic type argument at specified index
-     */
-    private fun getGenericTypeArgument(kType: KType, index: Int): KType? {
-        return kType.arguments.getOrNull(index)?.type
-    }
-
-    /**
-     * Check if a class is a custom class (not a basic type)
-     */
-    private fun isCustomClass(type: KClass<*>): Boolean {
-        return when {
-            type.java.isPrimitive -> false
-            type.java.isEnum -> false
-            type.java.packageName.startsWith("java.") -> false
-            type.java.packageName.startsWith("kotlin.") -> false
-            type == String::class -> false
-            type == Int::class || type == Integer::class -> false
-            type == Long::class || type == java.lang.Long::class -> false
-            type == Float::class || type == java.lang.Float::class -> false
-            type == Double::class || type == java.lang.Double::class -> false
-            type == Boolean::class || type == java.lang.Boolean::class -> false
-            type == BigDecimal::class -> false
-            type == java.math.BigInteger::class -> false
-            isDateTimeType(type) -> false
-            else -> true
+    private fun setPropertyValue(instance: Any, property: KMutableProperty<*>, value: Any?) {
+        try {
+            property.isAccessible = true
+            @Suppress("UNCHECKED_CAST")
+            (property as KMutableProperty<Any?>).setter.call(instance, value)
+        } catch (e: Exception) {
+            logger.warn("Failed to set property ${property.name}: ${e.message}")
+            throw e
         }
     }
 
     /**
-     * Check if a class is a date/time type (both legacy and Java 8+ types)
+     * Get default value for type
      */
-    private fun isDateTimeType(type: KClass<*>): Boolean {
-        return when (type) {
-            // Legacy date/time types (before Java 8)
-            java.util.Date::class -> true
-            java.sql.Date::class -> true
-            java.sql.Time::class -> true
-            java.sql.Timestamp::class -> true
-            java.util.Calendar::class -> true
-            // Java 8+ date/time types
-            java.time.LocalDate::class -> true
-            java.time.LocalTime::class -> true
-            java.time.LocalDateTime::class -> true
-            java.time.ZonedDateTime::class -> true
-            java.time.OffsetDateTime::class -> true
-            java.time.OffsetTime::class -> true
-            java.time.Instant::class -> true
-            java.time.Duration::class -> true
-            java.time.Period::class -> true
-            java.time.Year::class -> true
-            java.time.YearMonth::class -> true
-            java.time.MonthDay::class -> true
+    private fun getDefaultValueForType(type: KType): Any? {
+        val kClass = type.classifier as? KClass<*> ?: return null
+
+        return when (kClass) {
+            String::class -> ""
+            Int::class, Integer::class -> 0
+            Long::class, java.lang.Long::class -> 0L
+            Float::class, java.lang.Float::class -> 0.0f
+            Double::class, java.lang.Double::class -> 0.0
+            Boolean::class, java.lang.Boolean::class -> false
+            Char::class, Character::class -> '\u0000'
+            Byte::class, java.lang.Byte::class -> 0.toByte()
+            Short::class, java.lang.Short::class -> 0.toShort()
+            BigDecimal::class -> BigDecimal.ZERO
+            BigInteger::class -> BigInteger.ZERO
+            List::class -> emptyList<Any>()
+            Set::class -> emptySet<Any>()
+            Map::class -> emptyMap<Any, Any>()
+            else -> null
+        }
+    }
+
+
+    /**
+     * Check if type is a collection type
+     */
+    private fun isCollectionType(kClass: KClass<*>): Boolean {
+        return when {
+            List::class.java.isAssignableFrom(kClass.java) -> true
+            Set::class.java.isAssignableFrom(kClass.java) -> true
+            Map::class.java.isAssignableFrom(kClass.java) -> true
+            kClass.java.isArray -> true
             else -> false
         }
     }
 
     /**
-     * Convert result to target type
+     * Check if type is a custom class (Category 3)
      */
-    private fun convertToType(value: Any?, targetType: KClass<*>, kType: KType): Any? {
-        if (value == null) return null
-        
-        val adapter = typeAdapter.get(targetType)
-        if (adapter != null) {
-            return adapter(value)
-        }
-
-        return when (targetType) {
-            String::class -> value.toString()
-            Int::class, Integer::class -> {
-                when (value) {
-                    is Number -> value.toInt()
-                    is String -> value.toIntOrNull() ?: 0
-                    else -> 0
-                }
-            }
-            Long::class, java.lang.Long::class -> {
-                when (value) {
-                    is Number -> value.toLong()
-                    is String -> value.toLongOrNull() ?: 0L
-                    else -> 0L
-                }
-            }
-            Float::class, java.lang.Float::class -> {
-                when (value) {
-                    is Number -> value.toFloat()
-                    is String -> value.toFloatOrNull() ?: 0f
-                    else -> 0f
-                }
-            }
-            Double::class, java.lang.Double::class -> {
-                when (value) {
-                    is Number -> value.toDouble()
-                    is String -> value.toDoubleOrNull() ?: 0.0
-                    else -> 0.0
-                }
-            }
-            Boolean::class, java.lang.Boolean::class -> {
-                when (value) {
-                    is Boolean -> value
-                    is String -> value.toBoolean()
-                    is Number -> value.toInt() != 0
-                    else -> false
-                }
-            }
-            BigDecimal::class -> {
-                when (value) {
-                    is BigDecimal -> value
-                    is Number -> BigDecimal.valueOf(value.toDouble())
-                    is String -> BigDecimal(value)
-                    else -> BigDecimal.ZERO
-                }
-            }
-            java.math.BigInteger::class -> {
-                when (value) {
-                    is java.math.BigInteger -> value
-                    is Number -> java.math.BigInteger.valueOf(value.toLong())
-                    is String -> java.math.BigInteger(value)
-                    else -> java.math.BigInteger.ZERO
-                }
-            }
-            // Time and date types before Java 8
-            java.util.Date::class -> {
-                when (value) {
-                    is java.util.Date -> value
-                    is String -> java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(value)
-                    is Number -> java.util.Date(value.toLong())
-                    else -> java.util.Date()
-                }
-            }
-            java.sql.Date::class -> {
-                when (value) {
-                    is java.sql.Date -> value
-                    is java.util.Date -> java.sql.Date(value.time)
-                    is String -> java.sql.Date.valueOf(value)
-                    is Number -> java.sql.Date(value.toLong())
-                    else -> java.sql.Date(System.currentTimeMillis())
-                }
-            }
-            java.sql.Time::class -> {
-                when (value) {
-                    is java.sql.Time -> value
-                    is String -> java.sql.Time.valueOf(value)
-                    is Number -> java.sql.Time(value.toLong())
-                    else -> java.sql.Time(System.currentTimeMillis())
-                }
-            }
-            java.sql.Timestamp::class -> {
-                when (value) {
-                    is java.sql.Timestamp -> value
-                    is java.util.Date -> java.sql.Timestamp(value.time)
-                    is String -> java.sql.Timestamp.valueOf(value)
-                    is Number -> java.sql.Timestamp(value.toLong())
-                    else -> java.sql.Timestamp(System.currentTimeMillis())
-                }
-            }
-            // Java 8 new time and date types
-            java.time.LocalDate::class -> {
-                when (value) {
-                    is java.time.LocalDate -> value
-                    is String -> java.time.LocalDate.parse(value)
-                    else -> java.time.LocalDate.now()
-                }
-            }
-            java.time.LocalTime::class -> {
-                when (value) {
-                    is java.time.LocalTime -> value
-                    is String -> java.time.LocalTime.parse(value)
-                    else -> java.time.LocalTime.now()
-                }
-            }
-            java.time.LocalDateTime::class -> {
-                when (value) {
-                    is java.time.LocalDateTime -> value
-                    is String -> java.time.LocalDateTime.parse(value)
-                    else -> java.time.LocalDateTime.now()
-                }
-            }
-            java.time.Instant::class -> {
-                when (value) {
-                    is java.time.Instant -> value
-                    is String -> java.time.Instant.parse(value)
-                    is Number -> java.time.Instant.ofEpochMilli(value.toLong())
-                    else -> java.time.Instant.now()
-                }
-            }
-            else -> {
-                if (targetType.java.isEnum) {
-                    val enumConstants = targetType.java.enumConstants
-                    return enumConstants?.find { it.toString() == value.toString() }
-                        ?: enumConstants?.firstOrNull()
-                }
-                value
-            }
+    private fun isCustomClass(kClass: KClass<*>): Boolean {
+        return when {
+            isBasicType(kClass) -> false
+            isCollectionType(kClass) -> false
+            isContainerType(kClass) -> false
+            kClass.java.isEnum -> false
+            kClass.java.isPrimitive -> false
+            kClass.java.isInterface -> false
+            kClass.java.isArray -> false
+            kClass.isAbstract -> false
+            kClass.isSealed -> false
+            kClass == Any::class -> false
+            else -> true
         }
     }
 
     /**
-     * Set property value using reflection
+     * Check if type is a container type
      */
-    private fun setPropertyValue(instance: Any, property: KProperty<*>, value: Any?) {
-        if (property is KMutableProperty<*>) {
-            property.isAccessible = true
-            property.setter.call(instance, value)
-        } else {
-            // Try to set via field if property is not mutable
-            val field = property.javaField
-            if (field != null) {
-                field.isAccessible = true
-                field.set(instance, value)
+    private fun isContainerType(kClass: KClass<*>): Boolean {
+        return when {
+            // Java standard container types
+            Optional::class.java.isAssignableFrom(kClass.java) -> true
+            CompletableFuture::class.java.isAssignableFrom(kClass.java) -> true
+            java.util.concurrent.Future::class.java.isAssignableFrom(kClass.java) -> true
+            java.util.concurrent.Callable::class.java.isAssignableFrom(kClass.java) -> true
+            java.util.function.Supplier::class.java.isAssignableFrom(kClass.java) -> true
+            // Kotlin standard container types
+            kotlin.Lazy::class.java.isAssignableFrom(kClass.java) -> true
+            else -> {
+                val qualifiedName = kClass.qualifiedName ?: return false
+                // Check for third-party library container types using string comparison to avoid dependency issues
+                when {
+                    // Kotlin Coroutines
+                    qualifiedName.startsWith("kotlinx.coroutines.Deferred") -> true
+                    // Project Reactor
+                    qualifiedName.startsWith("reactor.core.publisher.Mono") -> true
+                    qualifiedName.startsWith("reactor.core.publisher.Flux") -> true
+                    // RxJava 2/3
+                    qualifiedName.startsWith("io.reactivex.Observable") -> true
+                    qualifiedName.startsWith("io.reactivex.Single") -> true
+                    qualifiedName.startsWith("io.reactivex.Maybe") -> true
+                    qualifiedName.startsWith("io.reactivex.Completable") -> true
+                    qualifiedName.startsWith("io.reactivex.Flowable") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Observable") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Single") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Maybe") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Completable") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Flowable") -> true
+                    // Vavr (formerly Javaslang)
+                    qualifiedName.startsWith("io.vavr.control.Option") -> true
+                    qualifiedName.startsWith("io.vavr.control.Try") -> true
+                    qualifiedName.startsWith("io.vavr.control.Either") -> true
+                    qualifiedName.startsWith("io.vavr.control.Validation") -> true
+                    qualifiedName.startsWith("io.vavr.Lazy") -> true
+                    qualifiedName.startsWith("io.vavr.concurrent.Future") -> true
+                    // Arrow (Kotlin functional programming)
+                    qualifiedName.startsWith("arrow.core.Option") -> true
+                    qualifiedName.startsWith("arrow.core.Either") -> true
+                    qualifiedName.startsWith("arrow.core.Try") -> true
+                    qualifiedName.startsWith("arrow.core.Validated") -> true
+                    qualifiedName.startsWith("arrow.fx.coroutines.Resource") -> true
+                    else -> false
+                }
             }
         }
     }

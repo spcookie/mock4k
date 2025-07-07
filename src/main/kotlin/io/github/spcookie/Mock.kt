@@ -1,6 +1,24 @@
 package io.github.spcookie
 
 /**
+ * Fill strategy enumeration for collection generation
+ *
+ * @author spcookie
+ * @since 1.2.0
+ */
+enum class FillStrategy {
+    /**
+     * Repeat the same element for all positions
+     */
+    REPEAT,
+
+    /**
+     * Generate different random elements for each position
+     */
+    RANDOM
+}
+
+/**
  * Mock annotation container for bean and property configurations
  *
  * @author spcookie
@@ -20,7 +38,7 @@ annotation class Mock {
      * @author spcookie
      * @since 1.2.0
      */
-    @Target(AnnotationTarget.CLASS)
+    @Target(AnnotationTarget.CLASS, AnnotationTarget.FIELD, AnnotationTarget.PROPERTY, AnnotationTarget.VALUE_PARAMETER)
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Bean(
         val includePrivate: Boolean = false,
@@ -43,46 +61,63 @@ annotation class Mock {
     annotation class Property(
         val rule: Rule = Rule(),
         val placeholder: Placeholder = Placeholder(),
+        val length: Length = Length(),
         val enabled: Boolean = true
-    ) {
-        /**
-         * Placeholder annotation for specifying placeholders
-         *
-         * @param value The placeholder expression to use
-         *
-         * @author spcookie
-         * @since 1.2.0
-         */
-        @Target()
-        @Retention(AnnotationRetention.RUNTIME)
-        annotation class Placeholder(
-            val value: String = ""
-        )
+    )
 
-        /**
-         * Rule annotation for specifying generation rules
-         *
-         * @param count Fixed count for generation
-         * @param min Minimum value for range generation
-         * @param max Maximum value for range generation
-         * @param step Step value for increment generation
-         * @param dmin Minimum decimal places
-         * @param dmax Maximum decimal places
-         * @param dcount Fixed decimal places
-         *
-         * @author spcookie
-         * @since 1.2.0
-         */
-        @Target()
-        @Retention(AnnotationRetention.RUNTIME)
-        annotation class Rule(
-            val count: Int = -1,
-            val min: Int = -1,
-            val max: Int = -1,
-            val step: Int = -1,
-            val dmin: Int = -1,
-            val dmax: Int = -1,
-            val dcount: Int = -1,
-        )
-    }
+    /**
+     * Placeholder annotation for specifying placeholders
+     *
+     * @param value The placeholder expression to use
+     *
+     * @author spcookie
+     * @since 1.2.0
+     */
+    @Target()
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class Placeholder(
+        val value: String = ""
+    )
+
+    /**
+     * Rule annotation for specifying generation rules
+     *
+     * @param count Fixed count for generation
+     * @param min Minimum value for range generation
+     * @param max Maximum value for range generation
+     * @param step Step value for increment generation
+     * @param dmin Minimum decimal places
+     * @param dmax Maximum decimal places
+     * @param dcount Fixed decimal places
+     *
+     * @author spcookie
+     * @since 1.2.0
+     */
+    @Target()
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class Rule(
+        val count: Int = -1,
+        val min: Int = -1,
+        val max: Int = -1,
+        val step: Int = -1,
+        val dmin: Int = -1,
+        val dmax: Int = -1,
+        val dcount: Int = -1
+    )
+
+    /**
+     * Length annotation for specifying collection size and fill strategy
+     *
+     * @param value The size of the collection (List or Map)
+     * @param fill The fill strategy: FillStrategy.REPEAT to repeat the first element, FillStrategy.RANDOM to generate random elements
+     *
+     * @author spcookie
+     * @since 1.2.0
+     */
+    @Target()
+    @Retention(AnnotationRetention.RUNTIME)
+    annotation class Length(
+        val value: Int = 1,
+        val fill: FillStrategy = FillStrategy.RANDOM
+    )
 }

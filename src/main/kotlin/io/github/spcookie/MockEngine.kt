@@ -27,7 +27,8 @@ internal class MockEngine() {
         val regexResult = regexResolver.resolveRegexPatterns(template)
 
         // Use PlaceholderResolver to handle both single and multiple placeholder resolution
-        return placeholderResolver.resolveStringTemplate(regexResult, context)
+        val result = placeholderResolver.resolveStringTemplate(regexResult, context)
+        return result
     }
 
     /**

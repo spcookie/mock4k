@@ -1,17 +1,17 @@
 package io.github.spcookie
 
 import org.slf4j.LoggerFactory
-import java.lang.reflect.Modifier
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.util.*
+import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KProperty
+import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
-import kotlin.reflect.KVisibility
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
-import io.github.spcookie.Mock.Property as MockProperty
 
 /**
  * Analyzes Bean properties and converts them to Map structure for MockEngine
@@ -24,19 +24,33 @@ internal class BeanIntrospect {
     private val logger = LoggerFactory.getLogger(BeanIntrospect::class.java)
 
     /**
-     * Analyze Bean class and convert to Map structure
+     * Analyze Bean class and convert to MapList structure for MockEngine
      */
     fun <T : Any> analyzeBean(clazz: KClass<T>, config: BeanMockConfig): Map<String, Any?> {
-        val properties = getEligibleProperties(clazz, config)
+        logger.debug("Analyzing bean class: ${clazz.simpleName}")
+
         val result = mutableMapOf<String, Any?>()
 
-        properties.forEach { property ->
+        // Get all properties based on configuration
+        val properties = getFilteredProperties(clazz, config)
+
+        for (property in properties) {
             try {
-                val propertyKey = buildPropertyKey(property, clazz)
-                val propertyValue = buildPropertyValue(property, config, clazz)
-                result[propertyKey] = propertyValue
+                // Try to get annotation from constructor parameter first, then from property
+                val propertyAnnotation = getPropertyAnnotation(clazz, property)
+                val propertyBeanAnnotation = getPropertyBeanAnnotation(clazz, property)
+
+                // Skip if property is disabled
+                if (propertyAnnotation?.enabled == false) {
+                    continue
+                }
+
+                val key = buildPropertyKey(property, propertyAnnotation)
+                val value = analyzePropertyType(property.returnType, propertyAnnotation, propertyBeanAnnotation)
+
+                result[key] = value
             } catch (e: Exception) {
-                logger.warn("Failed to analyze property ${property.name}: ${e.message}", e)
+                logger.warn("Failed to analyze property ${property.name}: ${e.message}")
             }
         }
 
@@ -44,512 +58,467 @@ internal class BeanIntrospect {
     }
 
     /**
-     * Get eligible properties for mocking based on configuration
+     * Get property annotation from constructor parameter or property itself
      */
-    private fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KProperty<*>> {
-
-        // Also check constructor parameters for annotations
+    private fun <T : Any> getPropertyAnnotation(clazz: KClass<T>, property: KProperty1<T, *>): Mock.Property? {
+        // First try to get annotation from constructor parameter
         val constructor = clazz.primaryConstructor
+        if (constructor != null) {
+            val parameter = constructor.parameters.find { it.name == property.name }
+            if (parameter != null) {
+                val paramAnnotation = parameter.findAnnotation<Mock.Property>()
+                if (paramAnnotation != null) {
+                    return paramAnnotation
+                }
+            }
+        }
 
-        val properties = clazz.memberProperties.filter { property ->
+        // Fallback to property annotation
+        return property.findAnnotation<Mock.Property>()
+    }
+
+    /**
+     * Get property-level @Mock.Bean annotation from constructor parameter or property itself
+     * Property-level annotation has higher priority than class-level annotation
+     */
+    private fun <T : Any> getPropertyBeanAnnotation(clazz: KClass<T>, property: KProperty1<T, *>): Mock.Bean? {
+        // First try to get annotation from constructor parameter
+        val constructor = clazz.primaryConstructor
+        if (constructor != null) {
+            val parameter = constructor.parameters.find { it.name == property.name }
+            if (parameter != null) {
+                val paramAnnotation = parameter.findAnnotation<Mock.Bean>()
+                if (paramAnnotation != null) {
+                    return paramAnnotation
+                }
+            }
+        }
+
+        // Fallback to property annotation
+        return property.findAnnotation<Mock.Bean>()
+    }
+
+    /**
+     * Get filtered properties based on configuration
+     */
+    private fun <T : Any> getFilteredProperties(
+        clazz: KClass<T>,
+        config: BeanMockConfig
+    ): Collection<KProperty1<T, *>> {
+        return clazz.memberProperties.filter { property ->
             val javaField = property.javaField
-            
-            // For Kotlin properties, check if they are mutable (var) rather than field visibility
-            val isMutableProperty = property is KMutableProperty<*>
-            
-            // For Kotlin properties, check if it's actually a private property
-            val isKotlinPrivateProperty = property.visibility == KVisibility.PRIVATE
 
-            // Check if property should be included based on configuration
-            when {
-                javaField == null -> {
-                    false
-                }
-                !isMutableProperty -> {
-                    false
-                }
-                !config.includePrivate && isKotlinPrivateProperty -> {
-                    false
-                }
-                !config.includeStatic && Modifier.isStatic(javaField.modifiers) -> {
-                    false
-                }
-                !config.includeTransient && Modifier.isTransient(javaField.modifiers) -> {
-                    false
-                }
-                else -> {
-                    // Check if Mock annotation is present and enabled
-                    val mockParam = property.findAnnotation<MockProperty>()
-                    val javaFieldAnnotation = javaField.getAnnotation(MockProperty::class.java)
-                    
-                    // Try to get annotation from constructor parameter
-                    val constructorParam = constructor?.parameters?.find { it.name == property.name }
-                    val constructorAnnotation = constructorParam?.findAnnotation<MockProperty>()
-
-                    val finalAnnotation = mockParam ?: javaFieldAnnotation ?: constructorAnnotation
-                    val enabled = finalAnnotation?.enabled != false
-                    enabled
-                }
+            // For properties without backing field (like computed properties), include them by default
+            if (javaField == null) {
+                return@filter true
             }
-        }
-        return properties
-    }
 
-    /**
-     * Get Mock.Property annotation from property, field, or constructor parameter
-     */
-    private fun getMockPropertyAnnotation(property: KProperty<*>, clazz: KClass<*>): MockProperty? {
-        val mockParam = property.findAnnotation<MockProperty>()
-        val javaFieldAnnotation = property.javaField?.getAnnotation(MockProperty::class.java)
-        
-        // Try to get annotation from constructor parameter
-        val constructor = clazz.primaryConstructor
-        val constructorParam = constructor?.parameters?.find { it.name == property.name }
-        val constructorAnnotation = constructorParam?.findAnnotation<MockProperty>()
-        
-        return mockParam ?: javaFieldAnnotation ?: constructorAnnotation
-    }
-
-    /**
-     * Build property key with rules if Mock.Property annotation is present
-     */
-    private fun buildPropertyKey(property: KProperty<*>, clazz: KClass<*>): String {
-        val finalAnnotation = getMockPropertyAnnotation(property, clazz)
-        val propertyName = property.name
-        val propertyType = property.returnType
-        val propertyClass = propertyType.classifier as? KClass<*>
-
-        if (finalAnnotation != null && finalAnnotation.enabled) {
-            val rule = finalAnnotation.rule
-            
-            // Only apply rule to key for collection types (List, Set, Map)
-            // For basic types, rule should be applied to value, not key
-            if (hasValidRule(rule) && isCollectionType(propertyClass)) {
-                val ruleString = buildRuleString(rule)
-                val keyWithRule = "$propertyName|$ruleString"
-                return keyWithRule
+            // Check private access
+            if (!config.includePrivate && !java.lang.reflect.Modifier.isPublic(javaField.modifiers)) {
+                return@filter false
             }
-        }
-        
-        return propertyName
-    }
 
-    /**
-     * Build property value based on type and annotations
-     */
-    private fun buildPropertyValue(property: KProperty<*>, config: BeanMockConfig, clazz: KClass<*>): Any? {
-        val propertyType = property.returnType
-        val propertyClass = propertyType.classifier as? KClass<*> ?: return null
-        val finalAnnotation = getMockPropertyAnnotation(property, clazz)
-
-        if (finalAnnotation != null && finalAnnotation.enabled) {
-            val rule = finalAnnotation.rule
-            val placeholder = finalAnnotation.placeholder
-            
-            // Priority 1: If placeholder is specified and property type supports placeholders, use it
-            if (placeholder.value.isNotEmpty() && isPlaceholderSupportedType(propertyClass)) {
-                val placeholderValue = buildPlaceholderValue(finalAnnotation.placeholder)
-                return placeholderValue
+            // Check static access
+            if (!config.includeStatic && java.lang.reflect.Modifier.isStatic(javaField.modifiers)) {
+                return@filter false
             }
-            
-            // Priority 2: If rule is specified, build rule-based value
-            if (hasValidRule(rule)) {
-                val ruleBasedValue = buildRuleBasedValue(rule, propertyClass, propertyType, config)
-                return ruleBasedValue
-            }
-        }
-        
-        // Priority 3: For properties without MockParam annotation or disabled, use buildValueByType
-        return buildValueByType(propertyClass, propertyType, config)
-    }
 
-    /**
-     * Check if property type supports placeholder
-     */
-    private fun isPlaceholderSupportedType(propertyClass: KClass<*>?): Boolean {
-        return when (propertyClass) {
-            String::class,
-            Int::class, Integer::class,
-            Long::class, java.lang.Long::class,
-            Float::class, java.lang.Float::class,
-            Double::class, java.lang.Double::class,
-            Boolean::class, java.lang.Boolean::class -> true
-            else -> false
+            // Check transient access
+            if (!config.includeTransient && java.lang.reflect.Modifier.isTransient(javaField.modifiers)) {
+                return@filter false
+            }
+
+            true
         }
     }
 
     /**
-     * Build placeholder value
+     * Build property key with rules from annotation
+     * Rule priority: step > count > range and decimal > range > decimal
      */
-    private fun buildPlaceholderValue(placeholder: MockProperty.Placeholder): String {
-        return if (placeholder.value.isNotEmpty()) {
-            // Handle placeholder value - if it already starts with @, use as is, otherwise add @
-            if (placeholder.value.startsWith("@")) {
-                placeholder.value
+    private fun buildPropertyKey(property: KProperty1<*, *>, annotation: Mock.Property?): String {
+        val baseName = property.name
+        val rule = annotation?.rule
+
+        if (rule == null) {
+            return baseName
+        }
+
+        // Priority 1: step rule (highest priority)
+        if (rule.step >= 0) {
+            return "$baseName|+${rule.step}"
+        }
+
+        // Priority 2: count rule
+        if (rule.count >= 0) {
+            val countPart = rule.count.toString()
+            val decimalPart = getDecimalPart(rule)
+            return if (decimalPart != null) {
+                "$baseName|$countPart.$decimalPart"
             } else {
-                "@${placeholder.value.uppercase()}"
-            }
-        } else {
-            "@WORD" // Default placeholder
-        }
-    }
-    
-    /**
-     * Check if rule has valid values
-     */
-    private fun hasValidRule(rule: MockProperty.Rule): Boolean {
-        return rule.count != -1 || rule.min != -1 || rule.max != -1 || 
-               rule.step != -1 || rule.dmin != -1 || rule.dmax != -1 || rule.dcount != -1
-    }
-    
-    /**
-     * Build rule-based value
-     */
-    private fun buildRuleBasedValue(rule: MockProperty.Rule, propertyClass: KClass<*>, propertyType: KType, config: BeanMockConfig): Any? {
-        // For collection types, the rule is applied to the key (handled in buildPropertyKey)
-        // Here we just build the template structure
-        return when (propertyClass) {
-            List::class, MutableList::class -> {
-                buildRuleBasedList(rule, propertyType, config)
-            }
-            Set::class, MutableSet::class -> {
-                buildRuleBasedSet(rule, propertyType, config)
-            }
-            Map::class, MutableMap::class -> {
-                buildRuleBasedMap(rule, propertyType, config)
-            }
-            else -> {
-                // Check if it's a custom class (nested object)
-                if (isCustomClass(propertyClass)) {
-                    // For nested objects, analyze the bean structure
-                    analyzeBean(propertyClass, config)
-                } else {
-                    // For basic types, generate template with rule
-                    buildRuleTemplate(rule, propertyClass)
-                }
+                "$baseName|$countPart"
             }
         }
-    }
-    
-    /**
-     * Build rule-based list
-     */
-    private fun buildRuleBasedList(rule: MockProperty.Rule, kType: KType, config: BeanMockConfig): List<Any?> {
-        val elementTemplate = extractCollectionElementTemplate(kType, config) ?: return emptyList()
-        
-        // Return a list with one template element
-        // The rule is applied to the property key, MockEngine will handle the repetition
-        return listOf(elementTemplate)
-    }
-    
-    /**
-     * Build rule-based set
-     */
-    private fun buildRuleBasedSet(rule: MockProperty.Rule, kType: KType, config: BeanMockConfig): List<Any?> {
-        // Use same structure as list for Set, MockEngine will convert to Set
-        return buildRuleBasedList(rule, kType, config)
-    }
-    
-    /**
-     * Build rule-based map
-     */
-    private fun buildRuleBasedMap(rule: MockProperty.Rule, kType: KType, config: BeanMockConfig): Map<String, Any?> {
-        val (keyTemplate, valueTemplate) = extractMapTemplates(kType, config) ?: return emptyMap()
-        
-        // For Map, use default key pattern since rule is applied to property key
-        val mapTemplate = mapOf(
-            "key|1-3" to keyTemplate,
-            "value|1-3" to valueTemplate
-        )
-        
-        return mapTemplate
-    }
-    
-    /**
-     * Build rule template for basic types
-     */
-    private fun buildRuleTemplate(rule: MockProperty.Rule, propertyClass: KClass<*>): String {
-        val baseTemplate = getDefaultTemplateValue(propertyClass)
-        val ruleString = buildRuleString(rule)
-        
-        return if (ruleString.isNotEmpty()) {
-            when (propertyClass) {
-                Int::class, Integer::class, Long::class, java.lang.Long::class -> {
-                    when {
-                        rule.min != -1 && rule.max != -1 -> "@natural(${rule.min},${rule.max})"
-                        rule.count != -1 -> rule.count.toString()
-                        rule.step != -1 -> "@increment(${rule.step})"
-                        else -> baseTemplate
-                    }
-                }
-                Float::class, java.lang.Float::class, Double::class, java.lang.Double::class -> {
-                    when {
-                        rule.min != -1 && rule.max != -1 -> {
-                            val dPart = when {
-                                rule.dcount != -1 -> ".${rule.dcount}"
-                                rule.dmin != -1 && rule.dmax != -1 -> ".${rule.dmin}-${rule.dmax}"
-                                else -> ""
-                            }
-                            "@float(${rule.min}.0,${rule.max}.0$dPart)"
-                        }
-                        rule.count != -1 -> rule.count.toString()
-                        else -> baseTemplate
-                    }
-                }
-                String::class -> {
-                    when {
-                        rule.count != -1 -> "@string(${rule.count})"
-                        rule.min != -1 && rule.max != -1 -> "@string(${rule.min},${rule.max})"
-                        else -> baseTemplate
-                    }
-                }
-                Boolean::class, java.lang.Boolean::class -> {
-                    if (rule.count != -1) {
-                        if (rule.count == 1) "true" else "false"
-                    } else baseTemplate
-                }
-                java.math.BigInteger::class -> {
-                    when {
-                        rule.min != -1 && rule.max != -1 -> "@natural(${rule.min},${rule.max})"
-                        rule.count != -1 -> rule.count.toString()
-                        rule.step != -1 -> "@increment(${rule.step})"
-                        else -> baseTemplate
-                    }
-                }
-                java.math.BigDecimal::class -> {
-                    when {
-                        rule.min != -1 && rule.max != -1 -> {
-                            val dPart = when {
-                                rule.dcount != -1 -> ".${rule.dcount}"
-                                rule.dmin != -1 && rule.dmax != -1 -> ".${rule.dmin}-${rule.dmax}"
-                                else -> ""
-                            }
-                            "@float(${rule.min}.0,${rule.max}.0$dPart)"
-                        }
-                        rule.count != -1 -> rule.count.toString()
-                        else -> baseTemplate
-                    }
-                }
-                else -> baseTemplate
+
+        // Priority 3: range and decimal
+        if (rule.min >= 0 && rule.max >= 0) {
+            val rangePart = "${rule.min}-${rule.max}"
+            val decimalPart = getDecimalPart(rule)
+            return if (decimalPart != null) {
+                "$baseName|$rangePart.$decimalPart"
+            } else {
+                "$baseName|$rangePart"
             }
-        } else {
-            baseTemplate
         }
+
+        return baseName
     }
 
     /**
-     * Build value by property type
+     * Extract decimal part from rule
      */
-    private fun buildValueByType(type: KClass<*>, kType: KType, config: BeanMockConfig): Any? {
+    private fun getDecimalPart(rule: Mock.Rule): String? {
         return when {
-            // Handle List types
-            type == List::class || type == MutableList::class -> {
-                buildListValue(kType, config)
-            }
-            // Handle Set types
-            type == Set::class || type == MutableSet::class -> {
-                buildSetValue(kType, config)
-            }
-            // Handle Map types
-            type == Map::class || type == MutableMap::class -> {
-                buildMapValue(kType, config)
-            }
-            // Handle custom classes (potential nested beans)
-            isCustomClass(type) -> {
-                analyzeBean(type, config)
-            }
-            // Handle basic types
-            else -> {
-                getDefaultTemplateValue(type)
-            }
+            rule.dmin >= 0 && rule.dmax >= 0 -> "${rule.dmin}-${rule.dmax}"
+            rule.dcount >= 0 -> rule.dcount.toString()
+            else -> null
         }
     }
 
     /**
-     * Build List value structure
+     * Analyze property type and convert to appropriate placeholder or structure
      */
-    private fun buildListValue(kType: KType, config: BeanMockConfig): List<Any?> {
-        val elementTemplate = extractCollectionElementTemplate(kType, config) ?: return emptyList()
-        
-        // Create a template list with one element
-        return listOf(elementTemplate)
-    }
+    private fun analyzePropertyType(
+        type: KType,
+        annotation: Mock.Property?,
+        propertyBeanAnnotation: Mock.Bean? = null
+    ): Any? {
+        val kClass = type.classifier as? KClass<*> ?: return "@STRING"
 
-    /**
-     * Build Set value structure
-     */
-    private fun buildSetValue(kType: KType, config: BeanMockConfig): List<Any?> {
-        // Use List structure for Set, MockEngine will handle the generation
-        return buildListValue(kType, config)
-    }
+        // Check for custom placeholder first
+        val placeholder = annotation?.placeholder
+        if (placeholder != null && placeholder.value.isNotEmpty() && isBasicType(kClass)) {
+            return placeholder.value
+        }
 
-    /**
-     * Build Map value structure
-     */
-    private fun buildMapValue(kType: KType, config: BeanMockConfig): Map<String, Any?> {
-        val (keyTemplate, valueTemplate) = extractMapTemplates(kType, config) ?: return emptyMap()
-        
-        // Use MockEngine's map generation pattern
-        return mapOf(
-            "key|1-3" to keyTemplate,
-            "value|1-3" to valueTemplate
-        )
-    }
-
-    /**
-     * Check if a class is a collection type
-     */
-    private fun isCollectionType(type: KClass<*>?): Boolean {
-        return type != null && (
-            type == List::class || type == MutableList::class ||
-            type == Set::class || type == MutableSet::class ||
-            type == Map::class || type == MutableMap::class
-        )
-    }
-    
-    /**
-     * Build rule string from rule annotation
-     */
-    private fun buildRuleString(rule: MockProperty.Rule): String {
         return when {
-            rule.count != -1 -> rule.count.toString()
-            rule.min != -1 && rule.max != -1 -> "${rule.min}-${rule.max}"
-            rule.step != -1 -> "+${rule.step}"
-            else -> ""
+            // Category 1: Basic types
+            isBasicType(kClass) -> getBasicTypePlaceholder(kClass)
+
+            // Category 2: Collections
+            isCollectionType(kClass) -> analyzeCollectionType(type, annotation, propertyBeanAnnotation)
+
+            // Advanced: Container objects
+            isContainerType(kClass) -> analyzeContainerType(type, annotation, propertyBeanAnnotation)
+
+            // Category 3: Custom objects
+            isCustomClass(kClass) -> analyzeCustomObject(kClass, propertyBeanAnnotation)
+
+            else -> "@STRING"
         }
     }
 
-    /**
-     * Extract collection element template
-     */
-    private fun extractCollectionElementTemplate(kType: KType, config: BeanMockConfig): Any? {
-        val elementType = getGenericTypeArgument(kType, 0) ?: return null
-        val elementClass = elementType.classifier as? KClass<*> ?: return null
-        
-        return buildValueByType(elementClass, elementType, config)
-    }
 
     /**
-     * Extract Map key and value templates
+     * Check if type is a collection type (Category 2)
      */
-    private fun extractMapTemplates(kType: KType, config: BeanMockConfig): Pair<Any?, Any?>? {
-        val keyType = getGenericTypeArgument(kType, 0) ?: return null
-        val valueType = getGenericTypeArgument(kType, 1) ?: return null
-        val keyClass = keyType.classifier as? KClass<*> ?: return null
-        val valueClass = valueType.classifier as? KClass<*> ?: return null
-        
-        val keyTemplate = buildValueByType(keyClass, keyType, config)
-        val valueTemplate = buildValueByType(valueClass, valueType, config)
-        
-        return Pair(keyTemplate, valueTemplate)
-    }
-
-    /**
-     * Get generic type argument at specified index
-     */
-    private fun getGenericTypeArgument(kType: KType, index: Int): KType? {
-        return kType.arguments.getOrNull(index)?.type
-    }
-
-    /**
-     * Check if a class is a custom class (not a basic type)
-     */
-    private fun isCustomClass(type: KClass<*>): Boolean {
+    private fun isCollectionType(kClass: KClass<*>): Boolean {
         return when {
-            type.java.isPrimitive -> false
-            type.java.isEnum -> false
-            type.java.packageName.startsWith("java.") -> false
-            type.java.packageName.startsWith("kotlin.") -> false
-            type == String::class -> false
-            type == Int::class || type == Integer::class -> false
-            type == Long::class || type == java.lang.Long::class -> false
-            type == Float::class || type == java.lang.Float::class -> false
-            type == Double::class || type == java.lang.Double::class -> false
-            type == Boolean::class || type == java.lang.Boolean::class -> false
-            type == java.math.BigDecimal::class -> false
-            type == java.math.BigInteger::class -> false
-            isDateTimeType(type) -> false
-            else -> true
-        }
-    }
-
-    /**
-     * Check if a class is a date/time type (both legacy and Java 8+ types)
-     */
-    private fun isDateTimeType(type: KClass<*>): Boolean {
-        return when (type) {
-            // Legacy date/time types (before Java 8)
-            java.util.Date::class -> true
-            java.sql.Date::class -> true
-            java.sql.Time::class -> true
-            java.sql.Timestamp::class -> true
-            java.util.Calendar::class -> true
-            // Java 8+ date/time types
-            java.time.LocalDate::class -> true
-            java.time.LocalTime::class -> true
-            java.time.LocalDateTime::class -> true
-            java.time.ZonedDateTime::class -> true
-            java.time.OffsetDateTime::class -> true
-            java.time.OffsetTime::class -> true
-            java.time.Instant::class -> true
-            java.time.Duration::class -> true
-            java.time.Period::class -> true
-            java.time.Year::class -> true
-            java.time.YearMonth::class -> true
-            java.time.MonthDay::class -> true
+            List::class.java.isAssignableFrom(kClass.java) -> true
+            Set::class.java.isAssignableFrom(kClass.java) -> true
+            Map::class.java.isAssignableFrom(kClass.java) -> true
+            kClass.java.isArray -> true
             else -> false
         }
     }
 
     /**
-     * Get default template for a property
+     * Check if type is a container type (Advanced)
      */
-    private fun getDefaultTemplate(property: KProperty<*>): String {
-        val type = property.returnType.classifier as? KClass<*> ?: return "@word"
-        return getDefaultTemplateValue(type)
-    }
-
-    /**
-     * Get default template value for a type
-     */
-    private fun getDefaultTemplateValue(type: KClass<*>): String {
-        return when (type) {
-            String::class -> "@word"
-            Int::class, Integer::class -> "@natural(1,100)"
-            Long::class, java.lang.Long::class -> "@natural(1,1000)"
-            Float::class, java.lang.Float::class -> "@float(1.0,100.0)"
-            Double::class, java.lang.Double::class -> "@float(1.0,100.0)"
-            Boolean::class, java.lang.Boolean::class -> "@boolean"
-            java.math.BigDecimal::class -> "@float(1.0,1000.0)"
-            java.math.BigInteger::class -> "@natural(1,10000)"
-            // Time and date types before Java 8
-            java.util.Date::class -> "@date"
-            java.sql.Date::class -> "@date"
-            java.sql.Time::class -> "@time"
-            java.sql.Timestamp::class -> "@datetime"
-            java.util.Calendar::class -> "@datetime"
-            // Java 8 new time and date types
-            java.time.LocalDate::class -> "@date"
-            java.time.LocalTime::class -> "@time"
-            java.time.LocalDateTime::class -> "@datetime"
-            java.time.ZonedDateTime::class -> "@datetime"
-            java.time.OffsetDateTime::class -> "@datetime"
-            java.time.OffsetTime::class -> "@time"
-            java.time.Instant::class -> "@datetime"
-            java.time.Duration::class -> "@natural(1,86400)"
-            java.time.Period::class -> "@natural(1,365)"
-            java.time.Year::class -> "@natural(1970,2030)"
-            java.time.YearMonth::class -> "@date"
-            java.time.MonthDay::class -> "@date"
+    private fun isContainerType(kClass: KClass<*>): Boolean {
+        return when {
+            // Java standard container types
+            Optional::class.java.isAssignableFrom(kClass.java) -> true
+            CompletableFuture::class.java.isAssignableFrom(kClass.java) -> true
+            java.util.concurrent.Future::class.java.isAssignableFrom(kClass.java) -> true
+            java.util.concurrent.Callable::class.java.isAssignableFrom(kClass.java) -> true
+            java.util.function.Supplier::class.java.isAssignableFrom(kClass.java) -> true
+            // Kotlin standard container types
+            kotlin.Lazy::class.java.isAssignableFrom(kClass.java) -> true
             else -> {
-                if (type.java.isEnum) {
-                    // For enums, pick a random enum value
-                    val enumConstants = type.java.enumConstants
-                    return enumConstants?.random()?.toString() ?: "@word"
+                val qualifiedName = kClass.qualifiedName ?: return false
+                // Check for third-party library container types using string comparison to avoid dependency issues
+                when {
+                    // Kotlin Coroutines
+                    qualifiedName.startsWith("kotlinx.coroutines.Deferred") -> true
+                    // Project Reactor
+                    qualifiedName.startsWith("reactor.core.publisher.Mono") -> true
+                    qualifiedName.startsWith("reactor.core.publisher.Flux") -> true
+                    // RxJava 2/3
+                    qualifiedName.startsWith("io.reactivex.Observable") -> true
+                    qualifiedName.startsWith("io.reactivex.Single") -> true
+                    qualifiedName.startsWith("io.reactivex.Maybe") -> true
+                    qualifiedName.startsWith("io.reactivex.Completable") -> true
+                    qualifiedName.startsWith("io.reactivex.Flowable") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Observable") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Single") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Maybe") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Completable") -> true
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Flowable") -> true
+                    // Vavr (formerly Javaslang)
+                    qualifiedName.startsWith("io.vavr.control.Option") -> true
+                    qualifiedName.startsWith("io.vavr.control.Try") -> true
+                    qualifiedName.startsWith("io.vavr.control.Either") -> true
+                    qualifiedName.startsWith("io.vavr.control.Validation") -> true
+                    qualifiedName.startsWith("io.vavr.Lazy") -> true
+                    qualifiedName.startsWith("io.vavr.concurrent.Future") -> true
+                    // Arrow (Kotlin functional programming)
+                    qualifiedName.startsWith("arrow.core.Option") -> true
+                    qualifiedName.startsWith("arrow.core.Either") -> true
+                    qualifiedName.startsWith("arrow.core.Try") -> true
+                    qualifiedName.startsWith("arrow.core.Validated") -> true
+                    qualifiedName.startsWith("arrow.fx.coroutines.Resource") -> true
+                    else -> false
                 }
-                "@word"
             }
         }
     }
 
+    /**
+     * Get placeholder for basic types
+     */
+    private fun getBasicTypePlaceholder(kClass: KClass<*>): String {
+        return when (kClass) {
+            String::class -> "@STRING"
+            Int::class, Integer::class -> "@INTEGER"
+            Long::class, java.lang.Long::class -> "@LONG"
+            Float::class, java.lang.Float::class -> "@FLOAT"
+            Double::class, java.lang.Double::class -> "@DOUBLE"
+            Boolean::class, java.lang.Boolean::class -> "@BOOLEAN"
+            Char::class, Character::class -> "@CHARACTER"
+            Byte::class, java.lang.Byte::class -> "@INTEGER"
+            Short::class, java.lang.Short::class -> "@INTEGER"
+            BigDecimal::class -> "@FLOAT"
+            BigInteger::class -> "@INTEGER"
+            Date::class -> "@DATE"
+            java.sql.Date::class -> "@DATE"
+            java.sql.Time::class -> "@TIME"
+            java.sql.Timestamp::class -> "@DATETIME"
+            java.time.LocalDate::class -> "@DATE"
+            java.time.LocalTime::class -> "@TIME"
+            java.time.LocalDateTime::class -> "@DATETIME"
+            java.time.ZonedDateTime::class -> "@DATETIME"
+            java.time.OffsetDateTime::class -> "@DATETIME"
+            java.time.Instant::class -> "@DATETIME"
+            Pair::class -> "@STRING"
+            else -> "@STRING"
+        }
+    }
+
+
+    /**
+     * Analyze collection type and return appropriate structure
+     */
+    private fun analyzeCollectionType(
+        type: KType,
+        annotation: Mock.Property?,
+        propertyBeanAnnotation: Mock.Bean? = null
+    ): Any {
+        val kClass = type.classifier as KClass<*>
+        val length = annotation?.length?.value ?: 1
+        val fill = annotation?.length?.fill ?: FillStrategy.RANDOM
+
+        return when {
+            List::class.java.isAssignableFrom(kClass.java)
+                    || kClass.java.isArray
+                    || Set::class.java.isAssignableFrom(kClass.java) -> {
+                val elementType = type.arguments.firstOrNull()?.type
+
+                when (fill) {
+                    FillStrategy.REPEAT -> {
+                        // REPEAT: use the same element for all positions
+                        val elementValue = if (elementType != null) {
+                            analyzePropertyType(elementType, null, propertyBeanAnnotation)
+                        } else {
+                            "@STRING"
+                        }
+                        List(length) { elementValue }
+                    }
+
+                    FillStrategy.RANDOM -> {
+                        // RANDOM: generate different elements for each position
+                        List(length) {
+                            if (elementType != null) {
+                                analyzePropertyType(elementType, null, propertyBeanAnnotation)
+                            } else {
+                                "@STRING"
+                            }
+                        }
+                    }
+                }
+            }
+
+            Map::class.java.isAssignableFrom(kClass.java) -> {
+                val keyType = type.arguments.getOrNull(0)?.type
+                val valueType = type.arguments.getOrNull(1)?.type
+
+                // Generate random key-value pairs based on length
+                (1..length).associate {
+                    val keyValue = if (keyType != null) {
+                        val keyClass = keyType.classifier as? KClass<*>
+                        if (keyClass == String::class) {
+                            "@STRING"
+                        } else {
+                            analyzePropertyType(keyType, null, propertyBeanAnnotation).toString()
+                        }
+                    } else {
+                        "@STRING"
+                    }
+
+                    val valueValue = if (valueType != null) {
+                        analyzePropertyType(valueType, null, propertyBeanAnnotation)
+                    } else {
+                        "@STRING"
+                    }
+
+                    keyValue to valueValue
+                }
+            }
+
+            else -> emptyList<Any>()
+        }
+    }
+
+    /**
+     * Analyze custom object recursively
+     */
+    private fun analyzeCustomObject(kClass: KClass<*>, propertyBeanAnnotation: Mock.Bean? = null): Map<String, Any?> {
+        return try {
+            // Property-level @Mock.Bean annotation has higher priority than class-level annotation
+            val effectiveBeanAnnotation = propertyBeanAnnotation ?: kClass.findAnnotation<Mock.Bean>()
+            val config = if (effectiveBeanAnnotation != null) {
+                // Use annotation configuration if present (property-level takes precedence)
+                BeanMockConfig(
+                    includePrivate = effectiveBeanAnnotation.includePrivate,
+                    includeStatic = effectiveBeanAnnotation.includeStatic,
+                    includeTransient = effectiveBeanAnnotation.includeTransient
+                )
+            } else {
+                // Use default configuration if no annotation
+                BeanMockConfig()
+            }
+            analyzeBean(kClass, config)
+        } catch (e: Exception) {
+            logger.warn("Failed to analyze custom object ${kClass.simpleName}: ${e.message}")
+            mapOf("value" to "@STRING")
+        }
+    }
+
+    /**
+     * Container type behavior enumeration
+     */
+    private enum class ContainerBehavior {
+        SINGLE_VALUE,    // Returns single wrapped value
+        STREAM_VALUES,   // Returns list of values (for streams like Flux, Observable)
+        RIGHT_TYPE,      // Uses second type parameter (for Either, Validation)
+        NO_VALUE         // Returns null (for Completable)
+    }
+
+    /**
+     * Analyze container types (Optional, CompletableFuture, Future, Callable, Supplier, Lazy, Deferred, Reactor, RxJava, Vavr, Arrow, etc.)
+     */
+    private fun analyzeContainerType(
+        type: KType,
+        annotation: Mock.Property?,
+        propertyBeanAnnotation: Mock.Bean? = null
+    ): Any? {
+        val kClass = type.classifier as KClass<*>
+        val qualifiedName = kClass.qualifiedName ?: ""
+
+        val behavior = getContainerBehavior(kClass, qualifiedName)
+
+        return when (behavior) {
+            ContainerBehavior.SINGLE_VALUE -> {
+                val wrappedType = type.arguments.firstOrNull()?.type
+                analyzeWrappedType(wrappedType, annotation, propertyBeanAnnotation)
+            }
+
+            ContainerBehavior.STREAM_VALUES -> {
+                val elementType = type.arguments.firstOrNull()?.type
+                val elementValue = analyzeWrappedType(elementType, annotation, propertyBeanAnnotation)
+                listOf(elementValue)
+            }
+
+            ContainerBehavior.RIGHT_TYPE -> {
+                val rightType = type.arguments.getOrNull(1)?.type
+                analyzeWrappedType(rightType, annotation, propertyBeanAnnotation)
+            }
+
+            ContainerBehavior.NO_VALUE -> null
+        }
+    }
+
+    /**
+     * Determine container behavior based on class type
+     */
+    private fun getContainerBehavior(kClass: KClass<*>, qualifiedName: String): ContainerBehavior {
+        return when {
+            // Java standard types - single value
+            Optional::class.java.isAssignableFrom(kClass.java) ||
+                    CompletableFuture::class.java.isAssignableFrom(kClass.java) ||
+                    java.util.concurrent.Future::class.java.isAssignableFrom(kClass.java) ||
+                    java.util.concurrent.Callable::class.java.isAssignableFrom(kClass.java) ||
+                    java.util.function.Supplier::class.java.isAssignableFrom(kClass.java) ||
+                    kotlin.Lazy::class.java.isAssignableFrom(kClass.java) -> ContainerBehavior.SINGLE_VALUE
+
+            // Stream types - multiple values
+            qualifiedName.startsWith("reactor.core.publisher.Flux") ||
+                    qualifiedName.startsWith("io.reactivex.Observable") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Observable") ||
+                    qualifiedName.startsWith("io.reactivex.Flowable") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Flowable") -> ContainerBehavior.STREAM_VALUES
+
+            // Either-like types - use right/second type parameter
+            qualifiedName.startsWith("io.vavr.control.Either") ||
+                    qualifiedName.startsWith("io.vavr.control.Validation") ||
+                    qualifiedName.startsWith("arrow.core.Either") -> ContainerBehavior.RIGHT_TYPE
+
+            // Completable types - no value
+            qualifiedName.startsWith("io.reactivex.Completable") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Completable") -> ContainerBehavior.NO_VALUE
+
+            // Single value types (third-party libraries)
+            qualifiedName.startsWith("kotlinx.coroutines.Deferred") ||
+                    qualifiedName.startsWith("reactor.core.publisher.Mono") ||
+                    qualifiedName.startsWith("io.reactivex.Single") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Single") ||
+                    qualifiedName.startsWith("io.reactivex.Maybe") ||
+                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Maybe") ||
+                    qualifiedName.startsWith("io.vavr.control.Option") ||
+                    qualifiedName.startsWith("io.vavr.control.Try") ||
+                    qualifiedName.startsWith("io.vavr.Lazy") ||
+                    qualifiedName.startsWith("io.vavr.concurrent.Future") ||
+                    qualifiedName.startsWith("arrow.core.Option") ||
+                    qualifiedName.startsWith("arrow.core.Try") ||
+                    qualifiedName.startsWith("arrow.core.Validated") ||
+                    qualifiedName.startsWith("arrow.fx.coroutines.Resource") -> ContainerBehavior.SINGLE_VALUE
+
+            else -> ContainerBehavior.SINGLE_VALUE
+        }
+    }
+
+    /**
+     * Analyze wrapped type with fallback to default value
+     */
+    private fun analyzeWrappedType(
+        wrappedType: KType?,
+        annotation: Mock.Property?,
+        propertyBeanAnnotation: Mock.Bean?
+    ): Any {
+        return if (wrappedType != null) {
+            analyzePropertyType(wrappedType, annotation, propertyBeanAnnotation)
+        } else {
+            "@STRING"
+        }
+    }
 }
