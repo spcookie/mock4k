@@ -15,7 +15,7 @@ import kotlin.test.assertNotNull
 class DataTypesAndEdgeCasesTest {
 
     private val logger = LoggerFactory.getLogger(DataTypesAndEdgeCasesTest::class.java)
-    private val beanMock = BeanMock()
+    // 使用Mocks对象代替BeanMock实例
 
     // ==================== 基本数据类型测试 ====================
 
@@ -47,7 +47,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<PrimitiveTypesBean>(template)
+        val bean = Mocks.mock<PrimitiveTypesBean>(template)
 
         assertNotNull(bean, "基本类型Bean不应为null")
         assertTrue(bean.byteValue is Byte, "byteValue应该是Byte类型")
@@ -92,7 +92,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<WrapperTypesBean>(template)
+        val bean = Mocks.mock<WrapperTypesBean>(template)
 
         assertNotNull(bean, "包装类型Bean不应为null")
         assertNotNull(bean.byteWrapper, "byteWrapper不应为null")
@@ -124,7 +124,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<WrapperTypesBean>(template)
+        val bean = Mocks.mock<WrapperTypesBean>(template)
 
         assertNotNull(bean, "包装类型Bean不应为null")
         assertNull(bean.byteWrapper, "byteWrapper应为null")
@@ -157,7 +157,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<BigNumberBean>(template)
+        val bean = Mocks.mock<BigNumberBean>(template)
 
         assertNotNull(bean, "大数类型Bean不应为null")
         assertNotNull(bean.bigInteger, "bigInteger不应为null")
@@ -194,7 +194,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<TimeTypesBean>(template)
+        val bean = Mocks.mock<TimeTypesBean>(template)
 
         assertNotNull(bean, "时间类型Bean不应为null")
         assertNotNull(bean.date, "date不应为null")
@@ -240,7 +240,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<CollectionEdgeCasesBean>(template)
+        val bean = Mocks.mock<CollectionEdgeCasesBean>(template)
 
         assertNotNull(bean, "集合边界Bean不应为null")
         assertTrue(bean.emptyList.isEmpty(), "emptyList应该为空")
@@ -285,7 +285,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<CollectionEdgeCasesBean>(simpleTemplate)
+        val bean = Mocks.mock<CollectionEdgeCasesBean>(simpleTemplate)
 
         assertNotNull(bean, "大集合Bean不应为null")
         assertTrue(bean.emptyList.isNotEmpty(), "emptyList应该不为空")
@@ -343,7 +343,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<Level1>(template)
+        val bean = Mocks.mock<Level1>(template)
 
         assertNotNull(bean, "深度嵌套Bean不应为null")
         assertEquals("level1", bean.value, "level1值应该正确")
@@ -370,7 +370,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<Level1>(template)
+        val bean = Mocks.mock<Level1>(template)
 
         assertNotNull(bean, "null嵌套Bean不应为null")
         assertEquals("level1", bean.value, "level1值应该正确")
@@ -405,7 +405,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<CircularA>(template)
+        val bean = Mocks.mock<CircularA>(template)
 
         assertNotNull(bean, "循环引用Bean不应为null")
         assertEquals("A", bean.name, "A的名称应该正确")
@@ -432,7 +432,7 @@ class DataTypesAndEdgeCasesTest {
 
         invalidTemplates.forEach { template ->
             assertThrows(Exception::class.java) {
-                beanMock.mock<SimpleBean>(template)
+                Mocks.mock<SimpleBean>(template)
             }
         }
 
@@ -456,7 +456,7 @@ class DataTypesAndEdgeCasesTest {
         """.trimIndent()
 
         // 应该尝试类型转换或抛出异常
-        val bean = beanMock.mock<SimpleBean>(template)
+        val bean = Mocks.mock<SimpleBean>(template)
 
         assertNotNull(bean, "类型不匹配Bean不应为null")
         // 验证类型转换是否正确
@@ -480,12 +480,12 @@ class DataTypesAndEdgeCasesTest {
             if (template.trim() == "{}") {
                 // 空对象应该能创建Bean（使用默认值）
                 assertDoesNotThrow {
-                    beanMock.mock<SimpleBean>(template)
+                    Mocks.mock<SimpleBean>(template)
                 }
             } else {
                 // 完全空的模板应该抛出异常
                 assertThrows(Exception::class.java) {
-                    beanMock.mock<SimpleBean>(template)
+                    Mocks.mock<SimpleBean>(template)
                 }
             }
         }
@@ -513,7 +513,7 @@ class DataTypesAndEdgeCasesTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<SpecialCharBean>(template)
+        val bean = Mocks.mock<SpecialCharBean>(template)
 
         assertNotNull(bean, "特殊字符Bean不应为null")
         assertNotNull(bean.unicodeString, "unicodeString不应为null")
@@ -541,7 +541,7 @@ class DataTypesAndEdgeCasesTest {
         """.trimIndent()
 
         val startTime = System.currentTimeMillis()
-        val bean = beanMock.mock<SimpleBean>(template)
+        val bean = Mocks.mock<SimpleBean>(template)
         val endTime = System.currentTimeMillis()
 
         assertNotNull(bean, "大字符串Bean不应为null")
@@ -574,7 +574,7 @@ class DataTypesAndEdgeCasesTest {
         """.trimIndent()
 
         val startTime = System.currentTimeMillis()
-        val bean = beanMock.mock<ManyFieldsBean>(template)
+        val bean = Mocks.mock<ManyFieldsBean>(template)
         val endTime = System.currentTimeMillis()
 
         assertNotNull(bean, "多字段Bean不应为null")
@@ -607,7 +607,7 @@ class DataTypesAndEdgeCasesTest {
         // 创建大量Bean实例
         val beans = mutableListOf<SimpleBean>()
         repeat(1000) {
-            beans.add(beanMock.mock<SimpleBean>(template))
+            beans.add(Mocks.mock<SimpleBean>(template))
         }
 
         val finalMemory = runtime.totalMemory() - runtime.freeMemory()

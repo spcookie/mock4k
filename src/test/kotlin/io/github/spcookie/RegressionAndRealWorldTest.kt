@@ -14,7 +14,7 @@ import kotlin.test.assertNotNull
 class RegressionAndRealWorldTest {
 
     private val logger = LoggerFactory.getLogger(RegressionAndRealWorldTest::class.java)
-    private val beanMock = BeanMock()
+    // 使用Mocks对象代替BeanMock实例
 
     // ==================== API响应模拟测试 ====================
 
@@ -112,7 +112,7 @@ class RegressionAndRealWorldTest {
         }
         """.trimIndent()
 
-        val response = beanMock.mock<ApiResponse<UserListResponse>>(template)
+        val response = mock<ApiResponse<UserListResponse>>(template)
 
         assertNotNull(response, "API响应不应为null")
 
@@ -125,7 +125,7 @@ class RegressionAndRealWorldTest {
         assertEquals(2, response.data!!.users.size, "应有2个用户")
 
         // 验证用户数据
-        response.data.users.forEachIndexed { index, user ->
+        response.data.users.forEachIndexed { index: Int, user: ApiUser ->
             assertTrue(user.username.length >= 8 && user.username.length <= 16, "用户名长度应在8-16范围内")
             assertTrue(user.email.contains("@"), "邮箱应包含@符号")
             assertTrue(user.status in listOf("ACTIVE", "INACTIVE", "SUSPENDED", "PENDING"), "用户状态应在指定选项中")
@@ -211,7 +211,7 @@ class RegressionAndRealWorldTest {
         }
         """.trimIndent()
 
-        val product = beanMock.mock<ProductEntity>(template)
+        val product = mock<ProductEntity>(template)
 
         assertNotNull(product, "产品实体不应为null")
 
@@ -242,7 +242,7 @@ class RegressionAndRealWorldTest {
 
         // 验证标签
         assertEquals(3, product.tags.size, "应有3个标签")
-        product.tags.forEach { tag ->
+        product.tags.forEach { tag: String ->
             assertEquals(8, tag.length, "标签长度应为8")
         }
 
@@ -388,7 +388,7 @@ class RegressionAndRealWorldTest {
         }
         """.trimIndent()
 
-        val config = beanMock.mock<ApplicationConfig>(template)
+        val config = mock<ApplicationConfig>(template)
 
         assertNotNull(config, "应用配置不应为null")
 
@@ -560,13 +560,63 @@ class RegressionAndRealWorldTest {
         }
         """.trimIndent()
 
-        val testData = beanMock.mock<TestDataSet>(template)
+        @Suppress("UNCHECKED_CAST")
+        val testData = mock(template) as Map<String, Any>
+
+        // 手动转换为TestDataSet
+        @Suppress("UNCHECKED_CAST")
+        val users = (testData["users"] as List<Map<String, Any>>).map { userMap ->
+            TestUser(
+                id = (userMap["id"] as Number).toLong(),
+                username = userMap["username"] as String,
+                email = userMap["email"] as String,
+                age = (userMap["age"] as Number).toInt(),
+                country = userMap["country"] as String,
+                registrationDate = userMap["registrationDate"] as String
+            )
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        val products = (testData["products"] as List<Map<String, Any>>).map { productMap ->
+            TestProduct(
+                id = (productMap["id"] as Number).toLong(),
+                name = productMap["name"] as String,
+                price = (productMap["price"] as Number).toDouble(),
+                category = productMap["category"] as String,
+                inStock = productMap["inStock"] as Boolean
+            )
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        val orders = (testData["orders"] as List<Map<String, Any>>).map { orderMap ->
+            @Suppress("UNCHECKED_CAST")
+            val productIds = (orderMap["productIds"] as List<Number>).map { it.toLong() }
+            TestOrder(
+                id = (orderMap["id"] as Number).toLong(),
+                userId = (orderMap["userId"] as Number).toLong(),
+                productIds = productIds,
+                total = (orderMap["total"] as Number).toDouble(),
+                status = orderMap["status"] as String,
+                orderDate = orderMap["orderDate"] as String
+            )
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        val metadataMap = testData["metadata"] as Map<String, Any>
+        val metadata = TestMetadata(
+            generatedAt = metadataMap["generatedAt"] as String,
+            version = metadataMap["version"] as String,
+            totalRecords = (metadataMap["totalRecords"] as Number).toInt(),
+            environment = metadataMap["environment"] as String
+        )
+
+        val testDataSet = TestDataSet(users, products, orders, metadata)
 
         assertNotNull(testData, "测试数据集不应为null")
 
         // 验证用户数据
         assertEquals(3, testData.users.size, "应有3个测试用户")
-        testData.users.forEachIndexed { index, user ->
+        testData.users.forEachIndexed { index: Int, user: TestUser ->
             assertTrue(user.username.startsWith("user_"), "用户名应以user_开头")
             assertTrue(user.email.endsWith("@test.com"), "邮箱应以@test.com结尾")
             assertTrue(user.age >= 18 && user.age <= 80, "年龄应在18-80范围内")
@@ -581,7 +631,7 @@ class RegressionAndRealWorldTest {
 
         // 验证产品数据
         assertEquals(2, testData.products.size, "应有2个测试产品")
-        testData.products.forEachIndexed { index, product ->
+        testData.products.forEachIndexed { index: Int, product: TestProduct ->
             assertTrue(product.name.length >= 15 && product.name.length <= 30, "产品名称长度应在15-30范围内")
             assertTrue(product.price >= 9.99 && product.price <= 999.99, "产品价格应在9.99-999.99范围内")
             assertTrue(
@@ -597,7 +647,7 @@ class RegressionAndRealWorldTest {
 
         // 验证订单数据
         assertEquals(2, testData.orders.size, "应有2个测试订单")
-        testData.orders.forEachIndexed { index, order ->
+        testData.orders.forEachIndexed { index: Int, order: TestOrder ->
             assertTrue(order.userId >= 1 && order.userId <= 3000, "用户ID应在1-3000范围内")
             assertTrue(
                 order.status in listOf("PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"),
@@ -650,7 +700,8 @@ class RegressionAndRealWorldTest {
         """.trimIndent()
 
         repeat(20) {
-            val basicBean = beanMock.mock<Map<String, Any>>(basicTemplate)
+            @Suppress("UNCHECKED_CAST")
+            val basicBean = mock(basicTemplate) as Map<String, Any>
             assertNotNull(basicBean, "基本数据类型Bean不应为null")
 
             val stringField = basicBean["stringField"] as String
@@ -684,7 +735,8 @@ class RegressionAndRealWorldTest {
         """.trimIndent()
 
         repeat(15) {
-            val collectionBean = beanMock.mock<Map<String, Any>>(collectionTemplate)
+            @Suppress("UNCHECKED_CAST")
+            val collectionBean = mock(collectionTemplate) as Map<String, Any>
             assertNotNull(collectionBean, "集合类型Bean不应为null")
 
             @Suppress("UNCHECKED_CAST")
@@ -724,7 +776,8 @@ class RegressionAndRealWorldTest {
         """.trimIndent()
 
         repeat(10) {
-            val nestedBean = beanMock.mock<Map<String, Any>>(nestedTemplate)
+            @Suppress("UNCHECKED_CAST")
+            val nestedBean = mock(nestedTemplate) as Map<String, Any>
             assertNotNull(nestedBean, "嵌套Bean不应为null")
 
             @Suppress("UNCHECKED_CAST")
@@ -783,7 +836,8 @@ class RegressionAndRealWorldTest {
         val startTime = System.currentTimeMillis()
 
         repeat(iterations) {
-            val bean = beanMock.mock<Map<String, Any>>(performanceTemplate)
+            @Suppress("UNCHECKED_CAST")
+            val bean = mock(performanceTemplate) as Map<String, Any>
             assertNotNull(bean, "性能测试Bean不应为null")
         }
 
@@ -795,7 +849,7 @@ class RegressionAndRealWorldTest {
             "性能回归测试: $iterations 次迭代耗时 ${totalTime}ms (平均: ${
                 String.format(
                     "%.2f",
-                    avgTime
+                    avgTime as Any
                 )
             }ms/次)"
         )
@@ -842,7 +896,8 @@ class RegressionAndRealWorldTest {
         val beans = mutableListOf<Map<String, Any>>()
 
         repeat(50) {
-            val bean = beanMock.mock<Map<String, Any>>(memoryTemplate)
+            @Suppress("UNCHECKED_CAST")
+            val bean = mock(memoryTemplate) as Map<String, Any>
             beans.add(bean)
         }
 

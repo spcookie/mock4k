@@ -14,7 +14,7 @@ import kotlin.test.assertNotNull
 class IntegrationScenariosTest {
 
     private val logger = LoggerFactory.getLogger(IntegrationScenariosTest::class.java)
-    private val beanMock = BeanMock()
+    // 使用Mocks对象代替BeanMock实例
 
     // ==================== 电商系统场景 ====================
 
@@ -268,7 +268,7 @@ class IntegrationScenariosTest {
         """.trimIndent()
 
         val startTime = System.currentTimeMillis()
-        val user = beanMock.mock<ECommerceUser>(template)
+        val user = mock<ECommerceUser>(template)
         val endTime = System.currentTimeMillis()
 
         assertNotNull(user, "电商用户不应为null")
@@ -531,7 +531,7 @@ class IntegrationScenariosTest {
         }
         """.trimIndent()
 
-        val user = beanMock.mock<SocialMediaUser>(template)
+        val user = mock<SocialMediaUser>(template)
 
         assertNotNull(user, "社交媒体用户不应为null")
 
@@ -882,7 +882,7 @@ class IntegrationScenariosTest {
         }
         """.trimIndent()
 
-        val employee = beanMock.mock<Employee>(template)
+        val employee = mock<Employee>(template)
 
         assertNotNull(employee, "员工信息不应为null")
 
@@ -968,7 +968,8 @@ class IntegrationScenariosTest {
             val startTime = System.currentTimeMillis()
 
             repeat(iterations) {
-                val bean = beanMock.mock<Map<String, Any>>(template)
+                @Suppress("UNCHECKED_CAST")
+                val bean = mock(template) as Map<String, Any>
                 assertNotNull(bean, "$scenarioName Bean不应为null")
             }
 

@@ -261,13 +261,7 @@ class BeanMockComprehensiveTest {
     fun testBeanWithLargeData() {
         logger.info("测试包含大数据的Bean生成...")
 
-        val config = BeanMockConfig(
-            includePrivate = true,
-            maxCollectionSize = 100,
-            maxStringLength = 1000
-        )
-
-        val bean = mock(LargeDataBean::class, config)
+        val bean = mock(LargeDataBean::class, includePrivate = true)
 
         assertNotNull(bean, "大数据Bean不应为null")
         assertNotNull(bean.largeString, "大字符串不应为null")
@@ -407,14 +401,14 @@ class BeanMockComprehensiveTest {
         val configs = listOf(
             BeanMockConfig(includePrivate = true, includeStatic = false),
             BeanMockConfig(includePrivate = false, includeStatic = true),
-            BeanMockConfig(maxDepth = 1, maxCollectionSize = 5),
-            BeanMockConfig(maxDepth = 5, maxCollectionSize = 20)
+            BeanMockConfig(depth = 1),
+            BeanMockConfig(depth = 5)
         )
 
         configs.forEach { config ->
             val user = mock(ComplexUser::class, config)
             assertNotNull(user, "使用配置 $config 生成的用户不应为null")
-            logger.info("配置 $config 生成的用户: ${user.javaClass.simpleName}")
+            logger.info("配置 $config 生成的用户: ${(user as Any).javaClass.simpleName}")
         }
     }
 

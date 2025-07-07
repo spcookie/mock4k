@@ -14,7 +14,6 @@ import kotlin.test.assertNotNull
 class ConcurrencyAndThreadSafetyTest {
 
     private val logger = LoggerFactory.getLogger(ConcurrencyAndThreadSafetyTest::class.java)
-    private val beanMock = BeanMock()
 
     // ==================== 基本线程安全测试 ====================
 
@@ -49,7 +48,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = beanMock.mock<ThreadSafeBean>(template)
+                        val bean = mock<ThreadSafeBean>(template)
                         results.add(bean)
                     }
                 } catch (e: Exception) {
@@ -107,7 +106,8 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = beanMock.mock<Map<String, Any>>(template)
+                        @Suppress("UNCHECKED_CAST")
+                        val bean = mock(template) as Map<String, Any>
                         assertNotNull(bean)
                         successCount.incrementAndGet()
                     }
@@ -146,7 +146,7 @@ class ConcurrencyAndThreadSafetyTest {
     fun testSharedResourceAccess() {
         logger.info("测试共享资源访问...")
 
-        val sharedBeanMock = BeanMock() // 共享实例
+        // 使用Mocks对象代替BeanMock实例
         val template = """
         {
             "id": "{{int(1,10000)}}",
@@ -165,7 +165,7 @@ class ConcurrencyAndThreadSafetyTest {
                 try {
                     val threadResults = mutableListOf<Map<String, Any>>()
                     repeat(iterationsPerThread) {
-                        val bean = sharedBeanMock.mock<Map<String, Any>>(template)
+                        val bean = sharedmock<Map<String, Any>>(template)
                         threadResults.add(bean)
                     }
                     results[threadIndex] = threadResults
@@ -259,7 +259,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val user = beanMock.mock<UserBean>(userTemplate)
+                        val user = mock<UserBean>(userTemplate)
                         users.add(user)
                     }
                 } finally {
@@ -273,7 +273,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val product = beanMock.mock<ProductBean>(productTemplate)
+                        val product = mock<ProductBean>(productTemplate)
                         products.add(product)
                     }
                 } finally {
@@ -287,7 +287,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val order = beanMock.mock<OrderBean>(orderTemplate)
+                        val order = mock<OrderBean>(orderTemplate)
                         orders.add(order)
                     }
                 } finally {
@@ -363,7 +363,8 @@ class ConcurrencyAndThreadSafetyTest {
 
                 try {
                     while (System.currentTimeMillis() - threadStartTime < runTimeSeconds * 1000) {
-                        val bean = beanMock.mock<Map<String, Any>>(template)
+                        @Suppress("UNCHECKED_CAST")
+                        val bean = mock(template) as Map<String, Any>
                         assertNotNull(bean)
                         threadOperations++
                         totalOperations.incrementAndGet()
@@ -438,7 +439,8 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = beanMock.mock<Map<String, Any>>(template)
+                        @Suppress("UNCHECKED_CAST")
+                        val bean = mock(template) as Map<String, Any>
                         results.add(bean)
 
                         // 偶尔触发GC
@@ -506,7 +508,9 @@ class ConcurrencyAndThreadSafetyTest {
                         try {
                             // 交替使用有效和无效模板
                             val template = if (iteration % 2 == 0) validTemplate else invalidTemplate
-                            val bean = beanMock.mock<Map<String, Any>>(template)
+
+                            @Suppress("UNCHECKED_CAST")
+                            val bean = mock(template) as Map<String, Any>
 
                             if (iteration % 2 == 0) {
                                 // 有效模板应该成功

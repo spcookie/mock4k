@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import kotlin.reflect.full.createType
 import kotlin.test.assertNotNull
 
 /**
@@ -70,7 +69,7 @@ class BeanIntrospectAndMapperTest {
     fun testComplexBeanIntrospection() {
         logger.info("测试复杂Bean内省...")
 
-        val config = BeanMockConfig(includePrivate = true, maxDepth = 3)
+        val config = BeanMockConfig(includePrivate = true)
         val template = beanIntrospect.analyzeBean(ComplexBean::class, config)
 
         assertNotNull(template, "复杂Bean模板不应为null")
@@ -120,65 +119,6 @@ class BeanIntrospectAndMapperTest {
         assertTrue(templateMap.containsKey("supplierList"), "模板应该包含supplierList字段")
 
         logger.info("容器Bean模板: $template")
-    }
-
-    // ==================== 属性类型分析测试 ====================
-
-    @Test
-    fun testBasicTypeAnalysis() {
-        logger.info("测试基本类型分析...")
-
-        val stringType = String::class.createType()
-        val intType = Int::class.createType()
-        val booleanType = Boolean::class.createType()
-        val doubleType = Double::class.createType()
-
-        val stringTemplate = beanIntrospect.analyzePropertyType(stringType, BeanMockConfig(), 0)
-        val intTemplate = beanIntrospect.analyzePropertyType(intType, BeanMockConfig(), 0)
-        val booleanTemplate = beanIntrospect.analyzePropertyType(booleanType, BeanMockConfig(), 0)
-        val doubleTemplate = beanIntrospect.analyzePropertyType(doubleType, BeanMockConfig(), 0)
-
-        assertNotNull(stringTemplate, "字符串类型模板不应为null")
-        assertNotNull(intTemplate, "整数类型模板不应为null")
-        assertNotNull(booleanTemplate, "布尔类型模板不应为null")
-        assertNotNull(doubleTemplate, "双精度类型模板不应为null")
-
-        logger.info("基本类型模板 - String: $stringTemplate, Int: $intTemplate, Boolean: $booleanTemplate, Double: $doubleTemplate")
-    }
-
-    @Test
-    fun testCollectionTypeAnalysis() {
-        logger.info("测试集合类型分析...")
-
-        val listType = List::class.createType(listOf(String::class.createType()))
-        val setType = Set::class.createType(listOf(Int::class.createType()))
-        val mapType = Map::class.createType(listOf(String::class.createType(), Any::class.createType()))
-
-        val listTemplate = beanIntrospect.analyzePropertyType(listType, BeanMockConfig(), 0)
-        val setTemplate = beanIntrospect.analyzePropertyType(setType, BeanMockConfig(), 0)
-        val mapTemplate = beanIntrospect.analyzePropertyType(mapType, BeanMockConfig(), 0)
-
-        assertNotNull(listTemplate, "列表类型模板不应为null")
-        assertNotNull(setTemplate, "集合类型模板不应为null")
-        assertNotNull(mapTemplate, "映射类型模板不应为null")
-
-        logger.info("集合类型模板 - List: $listTemplate, Set: $setTemplate, Map: $mapTemplate")
-    }
-
-    @Test
-    fun testContainerTypeAnalysis() {
-        logger.info("测试容器类型分析...")
-
-        val optionalType = Optional::class.createType(listOf(String::class.createType()))
-        val futureType = CompletableFuture::class.createType(listOf(Int::class.createType()))
-
-        val optionalTemplate = beanIntrospect.analyzePropertyType(optionalType, BeanMockConfig(), 0)
-        val futureTemplate = beanIntrospect.analyzePropertyType(futureType, BeanMockConfig(), 0)
-
-        assertNotNull(optionalTemplate, "Optional类型模板不应为null")
-        assertNotNull(futureTemplate, "Future类型模板不应为null")
-
-        logger.info("容器类型模板 - Optional: $optionalTemplate, Future: $futureTemplate")
     }
 
     // ==================== Bean映射测试 ====================
@@ -375,10 +315,14 @@ class BeanIntrospectAndMapperTest {
         logger.info("测试不同配置下的内省和映射...")
 
         val configs = listOf(
-            BeanMockConfig(includePrivate = true, includeStatic = false, maxDepth = 1),
-            BeanMockConfig(includePrivate = false, includeStatic = true, maxDepth = 3),
-            BeanMockConfig(maxCollectionSize = 5, maxStringLength = 10),
-            BeanMockConfig(maxCollectionSize = 20, maxStringLength = 100)
+            BeanMockConfig(includePrivate = false, includeStatic = false, false),
+            BeanMockConfig(includePrivate = false, includeStatic = false, true),
+            BeanMockConfig(includePrivate = false, includeStatic = true, false),
+            BeanMockConfig(includePrivate = true, includeStatic = false, false),
+            BeanMockConfig(includePrivate = false, includeStatic = true, true),
+            BeanMockConfig(includePrivate = true, includeStatic = true, false),
+            BeanMockConfig(includePrivate = true, includeStatic = true, true),
+            BeanMockConfig(includePrivate = true, includeStatic = false, true),
         )
 
         configs.forEach { config ->

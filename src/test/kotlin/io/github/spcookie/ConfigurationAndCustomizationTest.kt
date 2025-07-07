@@ -12,7 +12,6 @@ import kotlin.test.assertNotNull
 class ConfigurationAndCustomizationTest {
 
     private val logger = LoggerFactory.getLogger(ConfigurationAndCustomizationTest::class.java)
-    private val beanMock = BeanMock()
 
     // ==================== 基本配置测试 ====================
 
@@ -56,7 +55,7 @@ class ConfigurationAndCustomizationTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<ConfigurableBean>(template)
+        val bean = Mocks.mock<ConfigurableBean>(template)
 
         assertNotNull(bean, "配置Bean不应为null")
 
@@ -116,7 +115,7 @@ class ConfigurationAndCustomizationTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<CustomPlaceholderBean>(template)
+        val bean = Mocks.mock<CustomPlaceholderBean>(template)
 
         assertNotNull(bean, "自定义占位符Bean不应为null")
 
@@ -177,7 +176,7 @@ class ConfigurationAndCustomizationTest {
 
         // 生成多个实例来测试条件逻辑
         repeat(10) {
-            val bean = beanMock.mock<ConditionalBean>(template)
+            val bean = Mocks.mock<ConditionalBean>(template)
 
             assertNotNull(bean, "条件Bean不应为null")
 
@@ -236,7 +235,7 @@ class ConfigurationAndCustomizationTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<TypeConversionBean>(template)
+        val bean = Mocks.mock<TypeConversionBean>(template)
 
         assertNotNull(bean, "类型转换Bean不应为null")
 
@@ -312,7 +311,7 @@ class ConfigurationAndCustomizationTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<ComplexNestedBean>(template)
+        val bean = Mocks.mock<ComplexNestedBean>(template)
 
         assertNotNull(bean, "复杂嵌套Bean不应为null")
 
@@ -392,7 +391,7 @@ class ConfigurationAndCustomizationTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<CollectionConfigBean>(template)
+        val bean = Mocks.mock<CollectionConfigBean>(template)
 
         assertNotNull(bean, "集合配置Bean不应为null")
 
@@ -452,7 +451,8 @@ class ConfigurationAndCustomizationTest {
         // 测试简单配置性能
         val simpleStartTime = System.currentTimeMillis()
         repeat(100) {
-            val bean = beanMock.mock<Map<String, Any>>(simpleTemplate)
+            @Suppress("UNCHECKED_CAST")
+            val bean = Mocks.mock(simpleTemplate) as Map<String, Any>
             assertNotNull(bean, "简单配置Bean不应为null")
         }
         val simpleEndTime = System.currentTimeMillis()
@@ -461,7 +461,8 @@ class ConfigurationAndCustomizationTest {
         // 测试复杂配置性能
         val complexStartTime = System.currentTimeMillis()
         repeat(50) {
-            val bean = beanMock.mock<Map<String, Any>>(complexTemplate)
+            @Suppress("UNCHECKED_CAST")
+            val bean = Mocks.mock(complexTemplate) as Map<String, Any>
             assertNotNull(bean, "复杂配置Bean不应为null")
         }
         val complexEndTime = System.currentTimeMillis()
@@ -484,7 +485,8 @@ class ConfigurationAndCustomizationTest {
         val invalidTemplate1 = "{\"field\": \"{{invalidPlaceholder}}\"}"
 
         try {
-            val bean = beanMock.mock<Map<String, Any>>(invalidTemplate1)
+            @Suppress("UNCHECKED_CAST")
+            val bean = Mocks.mock(invalidTemplate1) as Map<String, Any>
             // 如果没有抛出异常，验证是否有合理的默认处理
             assertNotNull(bean, "即使有无效占位符，Bean也不应为null")
             logger.info("无效占位符被合理处理")
@@ -496,7 +498,8 @@ class ConfigurationAndCustomizationTest {
         val invalidTemplate2 = "{\"field\": \"{{string(10)}}\", \"invalidJson\"}"
 
         try {
-            val bean = beanMock.mock<Map<String, Any>>(invalidTemplate2)
+            @Suppress("UNCHECKED_CAST")
+            val bean = Mocks.mock(invalidTemplate2) as Map<String, Any>
             logger.info("格式错误的JSON被合理处理")
         } catch (e: Exception) {
             logger.info("格式错误的JSON正确抛出异常: ${e.message}")
@@ -506,7 +509,8 @@ class ConfigurationAndCustomizationTest {
         val emptyTemplate = ""
 
         try {
-            val bean = beanMock.mock<Map<String, Any>>(emptyTemplate)
+            @Suppress("UNCHECKED_CAST")
+            val bean = Mocks.mock(emptyTemplate) as Map<String, Any>
             logger.info("空模板被合理处理")
         } catch (e: Exception) {
             logger.info("空模板正确抛出异常: ${e.message}")
@@ -545,7 +549,7 @@ class ConfigurationAndCustomizationTest {
         }
         """.trimIndent()
 
-        val bean = beanMock.mock<BoundaryValueBean>(template)
+        val bean = Mocks.mock<BoundaryValueBean>(template)
 
         assertNotNull(bean, "边界值Bean不应为null")
 
