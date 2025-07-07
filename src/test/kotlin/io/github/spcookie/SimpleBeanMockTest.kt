@@ -1,9 +1,9 @@
 package io.github.spcookie
 
 import org.junit.jupiter.api.Test
+import org.slf4j.LoggerFactory
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.slf4j.LoggerFactory
 
 /**
  * 简化的Bean Mock测试，用于验证基本功能
@@ -21,8 +21,19 @@ class SimpleBeanMockTest {
     @Test
     fun testBasicBeanMock() {
         logger.info("开始测试基本Bean Mock功能...")
-        
-        val user = mock(TestUser::class)
+
+        // 测试模板生成
+        val beanIntrospect = BeanIntrospect()
+        val config = BeanMockConfig(includePrivate = true) // 包含私有属性
+        val template = beanIntrospect.analyzeBean(TestUser::class, config)
+        logger.info("生成的模板: $template")
+
+        // 测试MockEngine生成
+        val mockEngine = MockEngine()
+        val generatedData = MockEngine().generate(template)
+        logger.info("MockEngine生成的数据: $generatedData")
+
+        val user = mock(TestUser::class, includePrivate = true)
         
         logger.info("生成的用户: $user")
         
