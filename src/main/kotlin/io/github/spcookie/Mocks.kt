@@ -121,6 +121,20 @@ fun <T : Any> mock(
 }
 
 /**
+ * Generate mock bean object with reified type
+ *
+ * @return Generated mock bean object
+ */
+@JvmSynthetic
+inline fun <reified T : Any> mock(
+    includePrivate: Boolean? = null,
+    includeStatic: Boolean? = null,
+    includeTransient: Boolean? = null
+): T {
+    return mock(T::class, includePrivate, includeStatic, includeTransient)
+}
+
+/**
  * Generate mock bean object (Java-friendly version)
  *
  * @param clazz The Java class to mock
