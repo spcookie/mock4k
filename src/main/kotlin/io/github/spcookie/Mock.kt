@@ -1,24 +1,6 @@
 package io.github.spcookie
 
 /**
- * Fill strategy enumeration for collection generation
- *
- * @author spcookie
- * @since 1.2.0
- */
-enum class FillStrategy {
-    /**
-     * Repeat the same element for all positions
-     */
-    REPEAT,
-
-    /**
-     * Generate different random elements for each position
-     */
-    RANDOM
-}
-
-/**
  * Mock annotation container for bean and property configurations
  *
  * @author spcookie
@@ -27,6 +9,24 @@ enum class FillStrategy {
 @Target()
 @Retention(AnnotationRetention.RUNTIME)
 annotation class Mock {
+
+    /**
+     * Fill strategy enumeration for collection generation
+     *
+     * @author spcookie
+     * @since 1.2.0
+     */
+    enum class FillStrategy {
+        /**
+         * Repeat the same element for all positions
+         */
+        REPEAT,
+
+        /**
+         * Generate different random elements for each position
+         */
+        RANDOM
+    }
 
     /**
      * Configuration for bean mock generation
