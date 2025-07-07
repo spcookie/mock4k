@@ -55,6 +55,7 @@ object Mocks {
      * @param includePrivate Whether to mock private properties
      * @param includeStatic Whether to mock static properties
      * @param includeTransient Whether to mock transient properties
+     * @param depth Maximum depth for recursive bean generation
      * @return Generated mock bean object
      */
     @JvmSynthetic
@@ -62,9 +63,10 @@ object Mocks {
         clazz: kotlin.reflect.KClass<T>,
         includePrivate: Boolean? = null,
         includeStatic: Boolean? = null,
-        includeTransient: Boolean? = null
+        includeTransient: Boolean? = null,
+        depth: Int? = null
     ): T {
-        return beanMockEngine.mockBean(clazz, includePrivate, includeStatic, includeTransient)
+        return beanMockEngine.mockBean(clazz, includePrivate, includeStatic, includeTransient, depth)
     }
 
 }
@@ -108,6 +110,7 @@ fun mock(template: String): Any {
  * @param includePrivate Whether to mock private properties (default: null, uses annotation value)
  * @param includeStatic Whether to mock static properties (default: null, uses annotation value)
  * @param includeTransient Whether to mock transient properties (default: null, uses annotation value)
+ * @param depth Maximum depth for recursive bean generation (default: null, uses annotation value or 3)
  * @return Generated mock bean object
  */
 @JvmSynthetic
@@ -115,9 +118,10 @@ fun <T : Any> mock(
     clazz: kotlin.reflect.KClass<T>,
     includePrivate: Boolean? = null,
     includeStatic: Boolean? = null,
-    includeTransient: Boolean? = null
+    includeTransient: Boolean? = null,
+    depth: Int? = null
 ): T {
-    return Mocks.bg(clazz, includePrivate, includeStatic, includeTransient)
+    return Mocks.bg(clazz, includePrivate, includeStatic, includeTransient, depth)
 }
 
 /**
@@ -129,9 +133,10 @@ fun <T : Any> mock(
 inline fun <reified T : Any> mock(
     includePrivate: Boolean? = null,
     includeStatic: Boolean? = null,
-    includeTransient: Boolean? = null
+    includeTransient: Boolean? = null,
+    depth: Int? = null
 ): T {
-    return mock(T::class, includePrivate, includeStatic, includeTransient)
+    return mock(T::class, includePrivate, includeStatic, includeTransient, depth)
 }
 
 /**
@@ -141,6 +146,7 @@ inline fun <reified T : Any> mock(
  * @param includePrivate Whether to mock private properties (default: null, uses annotation value)
  * @param includeStatic Whether to mock static properties (default: null, uses annotation value)
  * @param includeTransient Whether to mock transient properties (default: null, uses annotation value)
+ * @param depth Maximum depth for recursive bean generation (default: null, uses annotation value or 3)
  * @return Generated mock bean object
  */
 @JvmOverloads
@@ -148,7 +154,8 @@ fun <T : Any> mock(
     clazz: Class<T>,
     includePrivate: Boolean? = null,
     includeStatic: Boolean? = null,
-    includeTransient: Boolean? = null
+    includeTransient: Boolean? = null,
+    depth: Int? = null
 ): T {
-    return mock(clazz.kotlin, includePrivate, includeStatic, includeTransient)
+    return mock(clazz.kotlin, includePrivate, includeStatic, includeTransient, depth)
 }

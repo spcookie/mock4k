@@ -27,7 +27,20 @@ internal class BeanIntrospect {
      * Analyze Bean class and convert to MapList structure for MockEngine
      */
     fun <T : Any> analyzeBean(clazz: KClass<T>, config: BeanMockConfig): Map<String, Any?> {
-        logger.debug("Analyzing bean class: ${clazz.simpleName}")
+        return analyzeBean(clazz, config, 0)
+    }
+
+    /**
+     * Analyze Bean class and convert to MapList structure for MockEngine with depth tracking
+     */
+    private fun <T : Any> analyzeBean(clazz: KClass<T>, config: BeanMockConfig, currentDepth: Int): Map<String, Any?> {
+        logger.debug("Analyzing bean class: ${clazz.simpleName} at depth $currentDepth")
+
+        // Check depth limit to avoid infinite recursion
+        if (currentDepth >= config.depth) {
+            logger.debug("Reached maximum depth ${config.depth} for ${clazz.simpleName}, returning empty map")
+            return emptyMap()
+        }
 
         val result = mutableMapOf<String, Any?>()
 
@@ -46,7 +59,13 @@ internal class BeanIntrospect {
                 }
 
                 val key = buildPropertyKey(property, propertyAnnotation)
-                val value = analyzePropertyType(property.returnType, propertyAnnotation, propertyBeanAnnotation)
+                val value = analyzePropertyType(
+                    property.returnType,
+                    propertyAnnotation,
+                    propertyBeanAnnotation,
+                    config,
+                    currentDepth
+                )
 
                 result[key] = value
             } catch (e: Exception) {
@@ -191,7 +210,9 @@ internal class BeanIntrospect {
     private fun analyzePropertyType(
         type: KType,
         annotation: Mock.Property?,
-        propertyBeanAnnotation: Mock.Bean? = null
+        propertyBeanAnnotation: Mock.Bean? = null,
+        config: BeanMockConfig = BeanMockConfig(),
+        currentDepth: Int = 0
     ): Any? {
         val kClass = type.classifier as? KClass<*> ?: return "@STRING"
 
@@ -206,13 +227,25 @@ internal class BeanIntrospect {
             isBasicType(kClass) -> getBasicTypePlaceholder(kClass)
 
             // Category 2: Collections
-            isCollectionType(kClass) -> analyzeCollectionType(type, annotation, propertyBeanAnnotation)
+            isCollectionType(kClass) -> analyzeCollectionType(
+                type,
+                annotation,
+                propertyBeanAnnotation,
+                config,
+                currentDepth
+            )
 
             // Advanced: Container objects
-            isContainerType(kClass) -> analyzeContainerType(type, annotation, propertyBeanAnnotation)
+            isContainerType(kClass) -> analyzeContainerType(
+                type,
+                annotation,
+                propertyBeanAnnotation,
+                config,
+                currentDepth
+            )
 
             // Category 3: Custom objects
-            isCustomClass(kClass) -> analyzeCustomObject(kClass, propertyBeanAnnotation)
+            isCustomClass(kClass) -> analyzeCustomObject(kClass, propertyBeanAnnotation, config, currentDepth)
 
             else -> "@STRING"
         }
@@ -259,7 +292,9 @@ internal class BeanIntrospect {
     private fun analyzeCollectionType(
         type: KType,
         annotation: Mock.Property?,
-        propertyBeanAnnotation: Mock.Bean? = null
+        propertyBeanAnnotation: Mock.Bean? = null,
+        config: BeanMockConfig = BeanMockConfig(),
+        currentDepth: Int = 0
     ): Any {
         val kClass = type.classifier as KClass<*>
         val length = annotation?.length?.value ?: 1
@@ -275,7 +310,7 @@ internal class BeanIntrospect {
                     Mock.FillStrategy.REPEAT -> {
                         // REPEAT: use the same element for all positions
                         val elementValue = if (elementType != null) {
-                            analyzePropertyType(elementType, null, propertyBeanAnnotation)
+                            analyzePropertyType(elementType, null, propertyBeanAnnotation, config, currentDepth)
                         } else {
                             "@STRING"
                         }
@@ -286,7 +321,7 @@ internal class BeanIntrospect {
                         // RANDOM: generate different elements for each position
                         List(length) {
                             if (elementType != null) {
-                                analyzePropertyType(elementType, null, propertyBeanAnnotation)
+                                analyzePropertyType(elementType, null, propertyBeanAnnotation, config, currentDepth)
                             } else {
                                 "@STRING"
                             }
@@ -306,14 +341,14 @@ internal class BeanIntrospect {
                         if (keyClass == String::class) {
                             "@STRING"
                         } else {
-                            analyzePropertyType(keyType, null, propertyBeanAnnotation).toString()
+                            analyzePropertyType(keyType, null, propertyBeanAnnotation, config, currentDepth).toString()
                         }
                     } else {
                         "@STRING"
                     }
 
                     val valueValue = if (valueType != null) {
-                        analyzePropertyType(valueType, null, propertyBeanAnnotation)
+                        analyzePropertyType(valueType, null, propertyBeanAnnotation, config, currentDepth)
                     } else {
                         "@STRING"
                     }
@@ -329,7 +364,12 @@ internal class BeanIntrospect {
     /**
      * Analyze custom object recursively
      */
-    private fun analyzeCustomObject(kClass: KClass<*>, propertyBeanAnnotation: Mock.Bean? = null): Map<String, Any?> {
+    private fun analyzeCustomObject(
+        kClass: KClass<*>,
+        propertyBeanAnnotation: Mock.Bean? = null,
+        parentConfig: BeanMockConfig = BeanMockConfig(),
+        currentDepth: Int = 0
+    ): Map<String, Any?> {
         return try {
             // Property-level @Mock.Bean annotation has higher priority than class-level annotation
             val effectiveBeanAnnotation = propertyBeanAnnotation ?: kClass.findAnnotation<Mock.Bean>()
@@ -338,13 +378,14 @@ internal class BeanIntrospect {
                 BeanMockConfig(
                     includePrivate = effectiveBeanAnnotation.includePrivate,
                     includeStatic = effectiveBeanAnnotation.includeStatic,
-                    includeTransient = effectiveBeanAnnotation.includeTransient
+                    includeTransient = effectiveBeanAnnotation.includeTransient,
+                    depth = effectiveBeanAnnotation.depth
                 )
             } else {
-                // Use default configuration if no annotation
-                BeanMockConfig()
+                // Use parent configuration if no annotation
+                parentConfig
             }
-            analyzeBean(kClass, config)
+            analyzeBean(kClass, config, currentDepth + 1)
         } catch (e: Exception) {
             logger.warn("Failed to analyze custom object ${kClass.simpleName}: ${e.message}")
             mapOf("value" to "@STRING")
@@ -367,7 +408,9 @@ internal class BeanIntrospect {
     private fun analyzeContainerType(
         type: KType,
         annotation: Mock.Property?,
-        propertyBeanAnnotation: Mock.Bean? = null
+        propertyBeanAnnotation: Mock.Bean? = null,
+        config: BeanMockConfig = BeanMockConfig(),
+        currentDepth: Int = 0
     ): Any? {
         val kClass = type.classifier as KClass<*>
         val qualifiedName = kClass.qualifiedName ?: ""
@@ -377,18 +420,19 @@ internal class BeanIntrospect {
         return when (behavior) {
             ContainerBehavior.SINGLE_VALUE -> {
                 val wrappedType = type.arguments.firstOrNull()?.type
-                analyzeWrappedType(wrappedType, annotation, propertyBeanAnnotation)
+                analyzeWrappedType(wrappedType, annotation, propertyBeanAnnotation, config, currentDepth)
             }
 
             ContainerBehavior.STREAM_VALUES -> {
                 val elementType = type.arguments.firstOrNull()?.type
-                val elementValue = analyzeWrappedType(elementType, annotation, propertyBeanAnnotation)
+                val elementValue =
+                    analyzeWrappedType(elementType, annotation, propertyBeanAnnotation, config, currentDepth)
                 listOf(elementValue)
             }
 
             ContainerBehavior.RIGHT_TYPE -> {
                 val rightType = type.arguments.getOrNull(1)?.type
-                analyzeWrappedType(rightType, annotation, propertyBeanAnnotation)
+                analyzeWrappedType(rightType, annotation, propertyBeanAnnotation, config, currentDepth)
             }
 
             ContainerBehavior.NO_VALUE -> null
@@ -450,10 +494,12 @@ internal class BeanIntrospect {
     private fun analyzeWrappedType(
         wrappedType: KType?,
         annotation: Mock.Property?,
-        propertyBeanAnnotation: Mock.Bean?
+        propertyBeanAnnotation: Mock.Bean?,
+        config: BeanMockConfig = BeanMockConfig(),
+        currentDepth: Int = 0
     ): Any? {
         return if (wrappedType != null) {
-            analyzePropertyType(wrappedType, annotation, propertyBeanAnnotation)
+            analyzePropertyType(wrappedType, annotation, propertyBeanAnnotation, config, currentDepth)
         } else {
             "@STRING"
         }

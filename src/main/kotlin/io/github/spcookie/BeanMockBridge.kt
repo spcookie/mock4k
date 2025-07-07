@@ -24,7 +24,8 @@ internal class BeanMockBridge(private val mockEngine: MockEngine, private val ty
         clazz: KClass<T>,
         includePrivate: Boolean? = null,
         includeStatic: Boolean? = null,
-        includeTransient: Boolean? = null
+        includeTransient: Boolean? = null,
+        depth: Int? = null
     ): T {
         val mockBeanAnnotation = clazz.findAnnotation<Mock.Bean>()
         val config = BeanMockConfig(
@@ -32,7 +33,8 @@ internal class BeanMockBridge(private val mockEngine: MockEngine, private val ty
             // If method parameter is null, use annotation value; otherwise use method parameter
             includePrivate = includePrivate ?: (mockBeanAnnotation?.includePrivate ?: false),
             includeStatic = includeStatic ?: (mockBeanAnnotation?.includeStatic ?: false),
-            includeTransient = includeTransient ?: (mockBeanAnnotation?.includeTransient ?: false)
+            includeTransient = includeTransient ?: (mockBeanAnnotation?.includeTransient ?: false),
+            depth = depth ?: (mockBeanAnnotation?.depth ?: 3)
         )
 
         return mockBeanInternal(clazz, config)

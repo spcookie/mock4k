@@ -34,6 +34,7 @@ annotation class Mock {
      * @param includePrivate Whether to include private properties in mock generation
      * @param includeStatic Whether to include static properties in mock generation
      * @param includeTransient Whether to include transient properties in mock generation
+     * @param depth Maximum depth for recursive bean generation to avoid infinite recursion (default: 3)
      *
      * @author spcookie
      * @since 1.2.0
@@ -43,7 +44,8 @@ annotation class Mock {
     annotation class Bean(
         val includePrivate: Boolean = false,
         val includeStatic: Boolean = false,
-        val includeTransient: Boolean = false
+        val includeTransient: Boolean = false,
+        val depth: Int = 6
     )
 
     /**
