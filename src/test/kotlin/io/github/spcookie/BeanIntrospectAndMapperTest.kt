@@ -133,10 +133,10 @@ class BeanIntrospectAndMapperTest {
         val booleanType = Boolean::class.createType()
         val doubleType = Double::class.createType()
 
-        val stringTemplate = beanIntrospect.analyzePropertyType(stringType, BeanMockConfig(), 0)
-        val intTemplate = beanIntrospect.analyzePropertyType(intType, BeanMockConfig(), 0)
-        val booleanTemplate = beanIntrospect.analyzePropertyType(booleanType, BeanMockConfig(), 0)
-        val doubleTemplate = beanIntrospect.analyzePropertyType(doubleType, BeanMockConfig(), 0)
+        val stringTemplate = beanIntrospect.analyzePropertyType(stringType, null, null)
+        val intTemplate = beanIntrospect.analyzePropertyType(intType, null, null)
+        val booleanTemplate = beanIntrospect.analyzePropertyType(booleanType, null, null)
+        val doubleTemplate = beanIntrospect.analyzePropertyType(doubleType, null, null)
 
         assertNotNull(stringTemplate, "字符串类型模板不应为null")
         assertNotNull(intTemplate, "整数类型模板不应为null")
@@ -154,9 +154,9 @@ class BeanIntrospectAndMapperTest {
         val setType = Set::class.createType(listOf(Int::class.createType()))
         val mapType = Map::class.createType(listOf(String::class.createType(), Any::class.createType()))
 
-        val listTemplate = beanIntrospect.analyzePropertyType(listType, BeanMockConfig(), 0)
-        val setTemplate = beanIntrospect.analyzePropertyType(setType, BeanMockConfig(), 0)
-        val mapTemplate = beanIntrospect.analyzePropertyType(mapType, BeanMockConfig(), 0)
+        val listTemplate = beanIntrospect.analyzePropertyType(listType, null, null)
+        val setTemplate = beanIntrospect.analyzePropertyType(setType, null, null)
+        val mapTemplate = beanIntrospect.analyzePropertyType(mapType, null, null)
 
         assertNotNull(listTemplate, "列表类型模板不应为null")
         assertNotNull(setTemplate, "集合类型模板不应为null")
@@ -172,8 +172,8 @@ class BeanIntrospectAndMapperTest {
         val optionalType = Optional::class.createType(listOf(String::class.createType()))
         val futureType = CompletableFuture::class.createType(listOf(Int::class.createType()))
 
-        val optionalTemplate = beanIntrospect.analyzePropertyType(optionalType, BeanMockConfig(), 0)
-        val futureTemplate = beanIntrospect.analyzePropertyType(futureType, BeanMockConfig(), 0)
+        val optionalTemplate = beanIntrospect.analyzePropertyType(optionalType, null, null)
+        val futureTemplate = beanIntrospect.analyzePropertyType(futureType, null, null)
 
         assertNotNull(optionalTemplate, "Optional类型模板不应为null")
         assertNotNull(futureTemplate, "Future类型模板不应为null")
