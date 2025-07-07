@@ -12,27 +12,30 @@ object Mocks {
     /**
      * The Random utility instance
      */
+    @JvmField
     val Random = MockRandom
 
     /**
      * The Locale utility instance
      */
+    @JvmField
     val Locale = LocaleManager
 
     /**
      * Type adapter manager for custom type conversion
      */
+    @JvmField
     val TypeAdapter = TypeAdapter()
 
     /**
      * Singleton MockEngine instance to maintain state across calls
      */
-    internal val mockEngine = MockEngine()
+    private val mockEngine = MockEngine()
 
     /**
      * BeanMockBridge instance
      */
-    internal val beanMockEngine = BeanMockBridge(mockEngine, TypeAdapter)
+    private val beanMockEngine = BeanMockBridge(mockEngine, TypeAdapter)
 
     /**
      * Generate mock data based on template
@@ -40,7 +43,8 @@ object Mocks {
      * @param template The data template
      * @return Generated mock data
      */
-    fun g(template: Any): Any {
+    @JvmSynthetic
+    internal fun g(template: Any): Any {
         return mockEngine.generate(template)!!
     }
 
@@ -53,7 +57,8 @@ object Mocks {
      * @param includeTransient Whether to mock transient properties
      * @return Generated mock bean object
      */
-    fun <T : Any> bg(
+    @JvmSynthetic
+    internal fun <T : Any> bg(
         clazz: kotlin.reflect.KClass<T>,
         includePrivate: Boolean? = null,
         includeStatic: Boolean? = null,
@@ -105,6 +110,7 @@ fun mock(template: String): Any {
  * @param includeTransient Whether to mock transient properties (default: null, uses annotation value)
  * @return Generated mock bean object
  */
+@JvmSynthetic
 fun <T : Any> mock(
     clazz: kotlin.reflect.KClass<T>,
     includePrivate: Boolean? = null,
@@ -123,6 +129,7 @@ fun <T : Any> mock(
  * @param includeTransient Whether to mock transient properties (default: null, uses annotation value)
  * @return Generated mock bean object
  */
+@JvmOverloads
 fun <T : Any> mock(
     clazz: Class<T>,
     includePrivate: Boolean? = null,
