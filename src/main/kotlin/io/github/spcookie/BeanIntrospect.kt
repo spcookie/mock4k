@@ -263,7 +263,7 @@ internal class BeanIntrospect {
     ): Any {
         val kClass = type.classifier as KClass<*>
         val length = annotation?.length?.value ?: 1
-        val fill = annotation?.length?.fill ?: FillStrategy.RANDOM
+        val fill = annotation?.length?.fill ?: Mock.FillStrategy.RANDOM
 
         return when {
             List::class.java.isAssignableFrom(kClass.java)
@@ -272,7 +272,7 @@ internal class BeanIntrospect {
                 val elementType = type.arguments.firstOrNull()?.type
 
                 when (fill) {
-                    FillStrategy.REPEAT -> {
+                    Mock.FillStrategy.REPEAT -> {
                         // REPEAT: use the same element for all positions
                         val elementValue = if (elementType != null) {
                             analyzePropertyType(elementType, null, propertyBeanAnnotation)
@@ -282,7 +282,7 @@ internal class BeanIntrospect {
                         List(length) { elementValue }
                     }
 
-                    FillStrategy.RANDOM -> {
+                    Mock.FillStrategy.RANDOM -> {
                         // RANDOM: generate different elements for each position
                         List(length) {
                             if (elementType != null) {
