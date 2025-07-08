@@ -129,19 +129,16 @@ fun isCollectionType(kClass: KClass<*>): Boolean {
  */
 fun isCustomClass(type: KClass<*>): Boolean {
     return when {
-        type.java.isPrimitive -> false
+        isBasicType(type) -> false
+        isCollectionType(type) -> false
+        isContainerType(type) -> false
         type.java.isEnum -> false
+        type.java.isInterface -> false
+        type.isAbstract -> false
+        type == Any::class -> false
+        type.isSealed -> false
         type.java.packageName.startsWith("java.") -> false
         type.java.packageName.startsWith("kotlin.") -> false
-        type == String::class -> false
-        type == Int::class || type == Integer::class -> false
-        type == Long::class || type == java.lang.Long::class -> false
-        type == Float::class || type == java.lang.Float::class -> false
-        type == Double::class || type == java.lang.Double::class -> false
-        type == Boolean::class || type == java.lang.Boolean::class -> false
-        type == java.math.BigDecimal::class -> false
-        type == java.math.BigInteger::class -> false
-        isDateTimeType(type) -> false
         else -> true
     }
 }

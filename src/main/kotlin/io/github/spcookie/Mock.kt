@@ -78,7 +78,8 @@ annotation class Mock {
     @Target()
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Placeholder(
-        val value: String = ""
+        val value: String = "",
+        val regex: String = ""
     )
 
     /**

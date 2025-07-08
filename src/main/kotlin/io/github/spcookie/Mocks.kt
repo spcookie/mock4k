@@ -139,6 +139,29 @@ inline fun <reified T : Any> mock(
     return mock(T::class, includePrivate, includeStatic, includeTransient, depth)
 }
 
+@JvmSynthetic
+fun <T : Any> mock(
+    clazz: kotlin.reflect.KClass<T>,
+    config: BeanMockConfig? = null
+): T {
+    val includePrivate = config?.includePrivate
+    val includeStatic = config?.includeStatic
+    val includeTransient = config?.includeTransient
+    val depth = config?.depth
+    return mock(clazz, includePrivate, includeStatic, includeTransient, depth)
+}
+
+@JvmSynthetic
+inline fun <reified T : Any> mock(
+    config: BeanMockConfig? = null
+): T {
+    val includePrivate = config?.includePrivate
+    val includeStatic = config?.includeStatic
+    val includeTransient = config?.includeTransient
+    val depth = config?.depth
+    return mock(T::class, includePrivate, includeStatic, includeTransient, depth)
+}
+
 /**
  * Generate mock bean object (Java-friendly version)
  *
@@ -158,4 +181,15 @@ fun <T : Any> mock(
     depth: Int? = null
 ): T {
     return mock(clazz.kotlin, includePrivate, includeStatic, includeTransient, depth)
+}
+
+fun <T : Any> mock(
+    clazz: Class<T>,
+    config: BeanMockConfig? = null
+): T {
+    val includePrivate = config?.includePrivate
+    val includeStatic = config?.includeStatic
+    val includeTransient = config?.includeTransient
+    val depth = config?.depth
+    return mock(clazz, includePrivate, includeStatic, includeTransient, depth)
 }
