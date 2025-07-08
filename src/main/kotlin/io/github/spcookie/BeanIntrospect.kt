@@ -190,6 +190,12 @@ internal class BeanIntrospect {
             }
         }
 
+        // Priority 4: only decimal
+        val decimalPart = getDecimalPart(rule)
+        if (decimalPart != null) {
+            return "$baseName|1.$decimalPart"
+        }
+
         return baseName
     }
 
@@ -207,14 +213,14 @@ internal class BeanIntrospect {
     /**
      * Analyze property type and convert to appropriate placeholder or structure
      */
-    private fun analyzePropertyType(
+    internal fun analyzePropertyType(
         type: KType,
         annotation: Mock.Property?,
         propertyBeanAnnotation: Mock.Bean? = null,
         config: BeanMockConfig = BeanMockConfig(),
         currentDepth: Int = 0
     ): Any? {
-        val kClass = type.classifier as? KClass<*> ?: return "@STRING"
+        val kClass = type.classifier as? KClass<*> ?: return "@string"
 
         // Check for custom placeholder first
         val placeholder = annotation?.placeholder
@@ -247,41 +253,38 @@ internal class BeanIntrospect {
             // Category 3: Custom objects
             isCustomClass(kClass) -> analyzeCustomObject(kClass, propertyBeanAnnotation, config, currentDepth)
 
-            else -> "@STRING"
+            else -> "@string"
         }
     }
-
-
-
 
     /**
      * Get placeholder for basic types
      */
     private fun getBasicTypePlaceholder(kClass: KClass<*>): String {
         return when (kClass) {
-            String::class -> "@STRING"
-            Int::class, Integer::class -> "@INTEGER"
-            Long::class, java.lang.Long::class -> "@LONG"
-            Float::class, java.lang.Float::class -> "@FLOAT"
-            Double::class, java.lang.Double::class -> "@DOUBLE"
-            Boolean::class, java.lang.Boolean::class -> "@BOOLEAN"
-            Char::class, Character::class -> "@CHARACTER"
-            Byte::class, java.lang.Byte::class -> "@INTEGER"
-            Short::class, java.lang.Short::class -> "@INTEGER"
-            BigDecimal::class -> "@FLOAT"
-            BigInteger::class -> "@INTEGER"
-            Date::class -> "@DATE"
-            java.sql.Date::class -> "@DATE"
-            java.sql.Time::class -> "@TIME"
-            java.sql.Timestamp::class -> "@DATETIME"
-            java.time.LocalDate::class -> "@DATE"
-            java.time.LocalTime::class -> "@TIME"
-            java.time.LocalDateTime::class -> "@DATETIME"
-            java.time.ZonedDateTime::class -> "@DATETIME"
-            java.time.OffsetDateTime::class -> "@DATETIME"
-            java.time.Instant::class -> "@DATETIME"
-            Pair::class -> "@STRING"
-            else -> "@STRING"
+            String::class -> "@string"
+            Int::class, Integer::class -> "@integer"
+            Long::class, java.lang.Long::class -> "@long"
+            Float::class, java.lang.Float::class -> "@float"
+            Double::class, java.lang.Double::class -> "@float"
+            Boolean::class, java.lang.Boolean::class -> "@boolean"
+            Char::class, Character::class -> "@character"
+            Byte::class, java.lang.Byte::class -> "@integer"
+            Short::class, java.lang.Short::class -> "@integer"
+            BigDecimal::class -> "@float"
+            BigInteger::class -> "@integer"
+            Date::class -> "@date"
+            java.sql.Date::class -> "@date"
+            java.sql.Time::class -> "@time"
+            java.sql.Timestamp::class -> "@datetime"
+            java.time.LocalDate::class -> "@date"
+            java.time.LocalTime::class -> "@time"
+            java.time.LocalDateTime::class -> "@datetime"
+            java.time.ZonedDateTime::class -> "@datetime"
+            java.time.OffsetDateTime::class -> "@datetime"
+            java.time.Instant::class -> "@datetime"
+            Pair::class -> "@string"
+            else -> "@string"
         }
     }
 
@@ -312,7 +315,7 @@ internal class BeanIntrospect {
                         val elementValue = if (elementType != null) {
                             analyzePropertyType(elementType, null, propertyBeanAnnotation, config, currentDepth)
                         } else {
-                            "@STRING"
+                            "@string"
                         }
                         List(length) { elementValue }
                     }
@@ -323,7 +326,7 @@ internal class BeanIntrospect {
                             if (elementType != null) {
                                 analyzePropertyType(elementType, null, propertyBeanAnnotation, config, currentDepth)
                             } else {
-                                "@STRING"
+                                "@string"
                             }
                         }
                     }
@@ -339,18 +342,18 @@ internal class BeanIntrospect {
                     val keyValue = if (keyType != null) {
                         val keyClass = keyType.classifier as? KClass<*>
                         if (keyClass == String::class) {
-                            "@STRING"
+                            "@string"
                         } else {
                             analyzePropertyType(keyType, null, propertyBeanAnnotation, config, currentDepth).toString()
                         }
                     } else {
-                        "@STRING"
+                        "@string"
                     }
 
                     val valueValue = if (valueType != null) {
                         analyzePropertyType(valueType, null, propertyBeanAnnotation, config, currentDepth)
                     } else {
-                        "@STRING"
+                        "@string"
                     }
 
                     keyValue to valueValue
@@ -388,7 +391,7 @@ internal class BeanIntrospect {
             analyzeBean(kClass, config, currentDepth + 1)
         } catch (e: Exception) {
             logger.warn("Failed to analyze custom object ${kClass.simpleName}: ${e.message}")
-            mapOf("value" to "@STRING")
+            mapOf("value" to "@string")
         }
     }
 
@@ -501,7 +504,7 @@ internal class BeanIntrospect {
         return if (wrappedType != null) {
             analyzePropertyType(wrappedType, annotation, propertyBeanAnnotation, config, currentDepth)
         } else {
-            "@STRING"
+            "@string"
         }
     }
 }

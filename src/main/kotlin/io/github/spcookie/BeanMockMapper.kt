@@ -30,13 +30,10 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
      * Map generated data to Bean instance
      */
     fun <T : Any> mapToBean(clazz: KClass<T>, data: Map<String, Any?>, config: BeanMockConfig): T {
-        logger.debug("Mapping data to bean class: ${clazz.simpleName}")
-
         return try {
             // Try constructor-based creation first
             createInstanceWithConstructor(clazz, data, config)
-        } catch (e: Exception) {
-            logger.debug("Constructor-based creation failed, trying property-based creation: ${e.message}")
+        } catch (_: Exception) {
             // Fallback to property-based creation
             createInstanceWithProperties(clazz, data, config)
         }
@@ -103,7 +100,6 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
                 if (rawValue != null) {
                     val convertedValue = convertValue(rawValue, property.returnType, config)
                     setPropertyValue(instance, property, convertedValue)
-                    logger.debug("Set property ${property.name} = $convertedValue")
                 }
             } catch (e: Exception) {
                 logger.warn("Failed to set property ${property.name}: ${e.message}")
@@ -160,38 +156,12 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
         if (value == null) return null
 
         val targetClass = targetType.classifier as? KClass<*> ?: return value
-        
+
         return when {
-            // Handle Pair type specially
-            targetClass == Pair::class -> {
-                when (value) {
-                    is String -> {
-                        // Parse from string like "first,second" or use default
-                        val parts = value.split(",")
-                        if (parts.size >= 2) {
-                            Pair(parts[0].trim(), parts[1].trim())
-                        } else {
-                            Pair(value, "")
-                        }
-                    }
-
-                    is Pair<*, *> -> value
-                    else -> Pair(value.toString(), "")
-                }
-            }
-
             // Handle basic types with TypeAdapter
             isBasicType(targetClass) -> {
-                // If value is a placeholder string with rules, generate actual value first
-                val actualValue = if (value is String && value.startsWith("@")) {
-                    val mockEngine = MockEngine()
-                    mockEngine.generate(value)
-                } else {
-                    value
-                }
-
                 val adapter = typeAdapter.get(targetClass)
-                adapter?.invoke(actualValue) ?: actualValue
+                adapter?.invoke(value) ?: value
             }
 
             // Handle collections
@@ -208,25 +178,6 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
     }
 
     /**
-     * Check if type is a custom class (Category 3)
-     */
-    private fun isCustomClass(kClass: KClass<*>): Boolean {
-        return when {
-            isBasicType(kClass) -> false
-            isCollectionType(kClass) -> false
-            isContainerType(kClass) -> false
-            kClass.java.isEnum -> false
-            kClass.java.isPrimitive -> false
-            kClass.java.isInterface -> false
-            kClass.java.isArray -> false
-            kClass.isAbstract -> false
-            kClass.isSealed -> false
-            kClass == Any::class -> false
-            else -> true
-        }
-    }
-
-    /**
      * Convert collection values
      */
     private fun convertCollectionValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
@@ -238,7 +189,7 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
             List::class.java.isAssignableFrom(targetClass.java) -> {
                 val elementType = targetType.arguments.firstOrNull()?.type
                 when (value) {
-                    is List<*> -> {
+                    is Collection<*> -> {
                         if (elementType != null) {
                             value.map { convertValue(it, elementType, config) }
                         } else {
@@ -253,15 +204,13 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
             Set::class.java.isAssignableFrom(targetClass.java) -> {
                 val elementType = targetType.arguments.firstOrNull()?.type
                 when (value) {
-                    is List<*> -> {
+                    is Collection<*> -> {
                         if (elementType != null) {
                             value.map { convertValue(it, elementType, config) }.toSet()
                         } else {
                             value.toSet()
                         }
                     }
-
-                    is Set<*> -> value
                     else -> setOf(value)
                 }
             }
@@ -269,7 +218,7 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
             Map::class.java.isAssignableFrom(targetClass.java) -> {
                 val keyType = targetType.arguments.getOrNull(0)?.type
                 val valueType = targetType.arguments.getOrNull(1)?.type
-                
+
                 when (value) {
                     is Map<*, *> -> {
                         if (keyType != null && valueType != null) {
@@ -336,7 +285,7 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
                 java.util.function.Supplier { wrappedValue }
             }
 
-            kotlin.Lazy::class.java.isAssignableFrom(targetClass.java) -> {
+            Lazy::class.java.isAssignableFrom(targetClass.java) -> {
                 val wrappedValue = convertWrappedValue(value, wrappedType, config)
                 lazy { wrappedValue }
             }
@@ -418,6 +367,7 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
                     null
                 }
             }
+
             else -> {
                 // Try to use TypeAdapter if available
                 val adapter = typeAdapter.get(targetClass)
@@ -464,7 +414,6 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
             else -> null
         }
     }
-
 
 
 }

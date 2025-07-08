@@ -289,12 +289,7 @@ class BeanMockComprehensiveTest {
     fun testBeanWithPotentialCircularReference() {
         logger.info("测试可能存在循环引用的Bean生成...")
 
-        val config = BeanMockConfig(
-            maxDepth = 3, // 限制深度避免无限递归
-            maxCollectionSize = 5
-        )
-
-        val node = mock(Node::class, config)
+        val node = mock(Node::class, depth = 3)
 
         assertNotNull(node, "节点不应为null")
         assertNotNull(node.id, "节点ID不应为null")

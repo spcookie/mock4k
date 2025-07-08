@@ -1,6 +1,7 @@
 package io.github.spcookie
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.util.concurrent.*
@@ -48,7 +49,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = mock<ThreadSafeBean>(template)
+                        val bean = mock(template) as ThreadSafeBean
                         results.add(bean)
                     }
                 } catch (e: Exception) {
@@ -106,7 +107,6 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        @Suppress("UNCHECKED_CAST")
                         val bean = mock(template) as Map<String, Any>
                         assertNotNull(bean)
                         successCount.incrementAndGet()
@@ -146,7 +146,7 @@ class ConcurrencyAndThreadSafetyTest {
     fun testSharedResourceAccess() {
         logger.info("测试共享资源访问...")
 
-        // 使用Mocks对象代替BeanMock实例
+        // 使用直接的mock函数调用，无需共享实例
         val template = """
         {
             "id": "{{int(1,10000)}}",
@@ -165,7 +165,7 @@ class ConcurrencyAndThreadSafetyTest {
                 try {
                     val threadResults = mutableListOf<Map<String, Any>>()
                     repeat(iterationsPerThread) {
-                        val bean = sharedmock<Map<String, Any>>(template)
+                        val bean = mock(template) as Map<String, Any>
                         threadResults.add(bean)
                     }
                     results[threadIndex] = threadResults
@@ -259,7 +259,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val user = mock<UserBean>(userTemplate)
+                        val user = mock(userTemplate) as UserBean
                         users.add(user)
                     }
                 } finally {
@@ -273,7 +273,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val product = mock<ProductBean>(productTemplate)
+                        val product = mock(productTemplate) as ProductBean
                         products.add(product)
                     }
                 } finally {
@@ -287,7 +287,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val order = mock<OrderBean>(orderTemplate)
+                        val order = mock(orderTemplate) as OrderBean
                         orders.add(order)
                     }
                 } finally {
@@ -363,7 +363,6 @@ class ConcurrencyAndThreadSafetyTest {
 
                 try {
                     while (System.currentTimeMillis() - threadStartTime < runTimeSeconds * 1000) {
-                        @Suppress("UNCHECKED_CAST")
                         val bean = mock(template) as Map<String, Any>
                         assertNotNull(bean)
                         threadOperations++
@@ -439,7 +438,6 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        @Suppress("UNCHECKED_CAST")
                         val bean = mock(template) as Map<String, Any>
                         results.add(bean)
 
@@ -508,8 +506,6 @@ class ConcurrencyAndThreadSafetyTest {
                         try {
                             // 交替使用有效和无效模板
                             val template = if (iteration % 2 == 0) validTemplate else invalidTemplate
-
-                            @Suppress("UNCHECKED_CAST")
                             val bean = mock(template) as Map<String, Any>
 
                             if (iteration % 2 == 0) {

@@ -1,6 +1,7 @@
 package io.github.spcookie
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.util.*
@@ -350,10 +351,8 @@ class ContainerTypesTest {
         logger.info("测试不同配置下的容器类型生成...")
 
         val configs = listOf(
-            BeanMockConfig(includePrivate = true, maxDepth = 1),
-            BeanMockConfig(includePrivate = false, maxDepth = 3),
-            BeanMockConfig(maxCollectionSize = 5, maxStringLength = 10),
-            BeanMockConfig(maxCollectionSize = 20, maxStringLength = 100)
+            BeanMockConfig(includePrivate = true, depth = 1),
+            BeanMockConfig(includePrivate = false, depth = 3)
         )
 
         configs.forEach { config ->
