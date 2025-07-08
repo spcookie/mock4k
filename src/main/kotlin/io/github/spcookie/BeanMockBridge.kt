@@ -11,11 +11,15 @@ import kotlin.reflect.full.findAnnotation
  * @author spcookie
  * @since 1.2.0
  */
-internal class BeanMockBridge(private val mockEngine: MockEngine, private val typeAdapter: TypeAdapter) {
+internal class BeanMockBridge(
+    private val mockEngine: MockEngine,
+    typeAdapter: TypeAdapter,
+    containerAdapter: ContainerAdapter
+) {
 
     private val logger = LoggerFactory.getLogger(BeanMockBridge::class.java)
-    private val beanIntrospect = BeanIntrospect()
-    private val beanMockMapper = BeanMockMapper(typeAdapter)
+    private val beanIntrospect = BeanIntrospect(containerAdapter)
+    private val beanMockMapper = BeanMockMapper(typeAdapter, containerAdapter)
 
     /**
      * Mock a bean object with optional configuration

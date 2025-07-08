@@ -4,7 +4,6 @@ import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
-import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
@@ -19,7 +18,7 @@ import kotlin.reflect.jvm.javaField
  * @author spcookie
  * @since 1.2.0
  */
-internal class BeanIntrospect {
+internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
 
     private val logger = LoggerFactory.getLogger(BeanIntrospect::class.java)
 
@@ -34,11 +33,9 @@ internal class BeanIntrospect {
      * Analyze Bean class and convert to MapList structure for MockEngine with depth tracking
      */
     private fun <T : Any> analyzeBean(clazz: KClass<T>, config: BeanMockConfig, currentDepth: Int): Map<String, Any?> {
-        logger.debug("Analyzing bean class: ${clazz.simpleName} at depth $currentDepth")
 
         // Check depth limit to avoid infinite recursion
         if (currentDepth >= config.depth) {
-            logger.debug("Reached maximum depth ${config.depth} for ${clazz.simpleName}, returning empty map")
             return emptyMap()
         }
 
@@ -242,7 +239,7 @@ internal class BeanIntrospect {
             )
 
             // Advanced: Container objects
-            isContainerType(kClass) -> analyzeContainerType(
+            isContainerType(kClass, containerAdapter) -> analyzeContainerType(
                 type,
                 annotation,
                 propertyBeanAnnotation,
@@ -251,7 +248,12 @@ internal class BeanIntrospect {
             )
 
             // Category 3: Custom objects
-            isCustomClass(kClass) -> analyzeCustomObject(kClass, propertyBeanAnnotation, config, currentDepth)
+            isCustomClass(kClass, containerAdapter) -> analyzeCustomObject(
+                kClass,
+                propertyBeanAnnotation,
+                config,
+                currentDepth
+            )
 
             else -> "@string"
         }
@@ -396,17 +398,7 @@ internal class BeanIntrospect {
     }
 
     /**
-     * Container type behavior enumeration
-     */
-    private enum class ContainerBehavior {
-        SINGLE_VALUE,    // Returns single wrapped value
-        STREAM_VALUES,   // Returns list of values (for streams like Flux, Observable)
-        RIGHT_TYPE,      // Uses second type parameter (for Either, Validation)
-        NO_VALUE         // Returns null (for Completable)
-    }
-
-    /**
-     * Analyze container types (Optional, CompletableFuture, Future, Callable, Supplier, Lazy, Deferred, Reactor, RxJava, Vavr, Arrow, etc.)
+     * Analyze container types using ContainerAdapter
      */
     private fun analyzeContainerType(
         type: KType,
@@ -415,79 +407,14 @@ internal class BeanIntrospect {
         config: BeanMockConfig = BeanMockConfig(),
         currentDepth: Int = 0
     ): Any? {
-        val kClass = type.classifier as KClass<*>
-        val qualifiedName = kClass.qualifiedName ?: ""
-
-        val behavior = getContainerBehavior(kClass, qualifiedName)
-
-        return when (behavior) {
-            ContainerBehavior.SINGLE_VALUE -> {
-                val wrappedType = type.arguments.firstOrNull()?.type
-                analyzeWrappedType(wrappedType, annotation, propertyBeanAnnotation, config, currentDepth)
-            }
-
-            ContainerBehavior.STREAM_VALUES -> {
-                val elementType = type.arguments.firstOrNull()?.type
-                val elementValue =
-                    analyzeWrappedType(elementType, annotation, propertyBeanAnnotation, config, currentDepth)
-                listOf(elementValue)
-            }
-
-            ContainerBehavior.RIGHT_TYPE -> {
-                val rightType = type.arguments.getOrNull(1)?.type
-                analyzeWrappedType(rightType, annotation, propertyBeanAnnotation, config, currentDepth)
-            }
-
-            ContainerBehavior.NO_VALUE -> null
-        }
-    }
-
-    /**
-     * Determine container behavior based on class type
-     */
-    private fun getContainerBehavior(kClass: KClass<*>, qualifiedName: String): ContainerBehavior {
-        return when {
-            // Java standard types - single value
-            Optional::class.java.isAssignableFrom(kClass.java) ||
-                    CompletableFuture::class.java.isAssignableFrom(kClass.java) ||
-                    java.util.concurrent.Future::class.java.isAssignableFrom(kClass.java) ||
-                    java.util.concurrent.Callable::class.java.isAssignableFrom(kClass.java) ||
-                    java.util.function.Supplier::class.java.isAssignableFrom(kClass.java) ||
-                    kotlin.Lazy::class.java.isAssignableFrom(kClass.java) -> ContainerBehavior.SINGLE_VALUE
-
-            // Stream types - multiple values
-            qualifiedName.startsWith("reactor.core.publisher.Flux") ||
-                    qualifiedName.startsWith("io.reactivex.Observable") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Observable") ||
-                    qualifiedName.startsWith("io.reactivex.Flowable") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Flowable") -> ContainerBehavior.STREAM_VALUES
-
-            // Either-like types - use right/second type parameter
-            qualifiedName.startsWith("io.vavr.control.Either") ||
-                    qualifiedName.startsWith("io.vavr.control.Validation") ||
-                    qualifiedName.startsWith("arrow.core.Either") -> ContainerBehavior.RIGHT_TYPE
-
-            // Completable types - no value
-            qualifiedName.startsWith("io.reactivex.Completable") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Completable") -> ContainerBehavior.NO_VALUE
-
-            // Single value types (third-party libraries)
-            qualifiedName.startsWith("kotlinx.coroutines.Deferred") ||
-                    qualifiedName.startsWith("reactor.core.publisher.Mono") ||
-                    qualifiedName.startsWith("io.reactivex.Single") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Single") ||
-                    qualifiedName.startsWith("io.reactivex.Maybe") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Maybe") ||
-                    qualifiedName.startsWith("io.vavr.control.Option") ||
-                    qualifiedName.startsWith("io.vavr.control.Try") ||
-                    qualifiedName.startsWith("io.vavr.Lazy") ||
-                    qualifiedName.startsWith("io.vavr.concurrent.Future") ||
-                    qualifiedName.startsWith("arrow.core.Option") ||
-                    qualifiedName.startsWith("arrow.core.Try") ||
-                    qualifiedName.startsWith("arrow.core.Validated") ||
-                    qualifiedName.startsWith("arrow.fx.coroutines.Resource") -> ContainerBehavior.SINGLE_VALUE
-
-            else -> ContainerBehavior.SINGLE_VALUE
+        return containerAdapter.analyzeContainerType(
+            type,
+            annotation,
+            propertyBeanAnnotation,
+            config,
+            currentDepth
+        ) { wrappedType, ann, beanAnn, cfg, depth ->
+            analyzeWrappedType(wrappedType, ann, beanAnn, cfg, depth)
         }
     }
 

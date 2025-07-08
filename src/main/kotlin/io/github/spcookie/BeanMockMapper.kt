@@ -3,8 +3,6 @@ package io.github.spcookie
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.math.BigInteger
-import java.util.*
-import java.util.concurrent.CompletableFuture
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
@@ -22,7 +20,10 @@ import kotlin.reflect.jvm.javaField
  * @author spcookie
  * @since 1.2.0
  */
-internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
+internal class BeanMockMapper(
+    private val typeAdapter: TypeAdapter,
+    private val containerAdapter: ContainerAdapter
+) {
 
     private val logger = LoggerFactory.getLogger(BeanMockMapper::class.java)
 
@@ -168,10 +169,10 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
             isCollectionType(targetClass) -> convertCollectionValue(value, targetType, config)
 
             // Handle container types
-            isContainerType(targetClass) -> convertContainerValue(value, targetType, config)
+            isContainerType(targetClass, containerAdapter) -> convertContainerValue(value, targetType, config)
 
             // Handle custom objects
-            isCustomClass(targetClass) -> convertCustomObjectValue(value, targetClass, config)
+            isCustomClass(targetClass, containerAdapter) -> convertCustomObjectValue(value, targetClass, config)
 
             else -> value
         }
@@ -253,89 +254,16 @@ internal class BeanMockMapper(private val typeAdapter: TypeAdapter) {
     }
 
     /**
-     * Convert container values (Optional, CompletableFuture, Future, Callable, Supplier, Lazy, Deferred, Reactor, RxJava, Vavr, Arrow, etc.)
+     * Convert container values using ContainerAdapter
      */
     private fun convertContainerValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
-        if (value == null) return null
-
-        val targetClass = targetType.classifier as KClass<*>
-        val qualifiedName = targetClass.qualifiedName ?: ""
-        val wrappedType = targetType.arguments.firstOrNull()?.type
-
-        return when {
-            // Java standard container types
-            Optional::class.java.isAssignableFrom(targetClass.java) -> {
-                val wrappedValue = convertWrappedValue(value, wrappedType, config)
-                Optional.ofNullable(wrappedValue)
-            }
-
-            CompletableFuture::class.java.isAssignableFrom(targetClass.java) ||
-                    java.util.concurrent.Future::class.java.isAssignableFrom(targetClass.java) -> {
-                val wrappedValue = convertWrappedValue(value, wrappedType, config)
-                CompletableFuture.completedFuture(wrappedValue)
-            }
-
-            java.util.concurrent.Callable::class.java.isAssignableFrom(targetClass.java) -> {
-                val wrappedValue = convertWrappedValue(value, wrappedType, config)
-                java.util.concurrent.Callable { wrappedValue }
-            }
-
-            java.util.function.Supplier::class.java.isAssignableFrom(targetClass.java) -> {
-                val wrappedValue = convertWrappedValue(value, wrappedType, config)
-                java.util.function.Supplier { wrappedValue }
-            }
-
-            Lazy::class.java.isAssignableFrom(targetClass.java) -> {
-                val wrappedValue = convertWrappedValue(value, wrappedType, config)
-                lazy { wrappedValue }
-            }
-
-            // Third-party library container types (using string comparison to avoid dependency issues)
-            // For these types, we return the converted value directly since we can't create instances without dependencies
-            qualifiedName.startsWith("kotlinx.coroutines.Deferred") ||
-                    qualifiedName.startsWith("reactor.core.publisher.Mono") ||
-                    qualifiedName.startsWith("io.reactivex.Single") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Single") ||
-                    qualifiedName.startsWith("io.reactivex.Maybe") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Maybe") ||
-                    qualifiedName.startsWith("io.vavr.control.Option") ||
-                    qualifiedName.startsWith("io.vavr.control.Try") ||
-                    qualifiedName.startsWith("io.vavr.Lazy") ||
-                    qualifiedName.startsWith("io.vavr.concurrent.Future") ||
-                    qualifiedName.startsWith("arrow.core.Option") ||
-                    qualifiedName.startsWith("arrow.core.Try") ||
-                    qualifiedName.startsWith("arrow.core.Validated") ||
-                    qualifiedName.startsWith("arrow.fx.coroutines.Resource") -> {
-                convertWrappedValue(value, wrappedType, config)
-            }
-
-            // Stream types - return as list
-            qualifiedName.startsWith("reactor.core.publisher.Flux") ||
-                    qualifiedName.startsWith("io.reactivex.Observable") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Observable") ||
-                    qualifiedName.startsWith("io.reactivex.Flowable") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Flowable") -> {
-                when (value) {
-                    is List<*> -> value.map { convertWrappedValue(it, wrappedType, config) }
-                    else -> listOf(convertWrappedValue(value, wrappedType, config))
-                }
-            }
-
-            // Either-like types - use right/second type parameter
-            qualifiedName.startsWith("io.vavr.control.Either") ||
-                    qualifiedName.startsWith("io.vavr.control.Validation") ||
-                    qualifiedName.startsWith("arrow.core.Either") -> {
-                val rightType = targetType.arguments.getOrNull(1)?.type
-                convertWrappedValue(value, rightType, config)
-            }
-
-            // Completable types - return null
-            qualifiedName.startsWith("io.reactivex.Completable") ||
-                    qualifiedName.startsWith("io.reactivex.rxjava3.core.Completable") -> {
-                null
-            }
-
-            else -> value
+        return Mocks.ContainerAdapter.convertContainerValue(
+            value,
+            targetType,
+            config,
+            typeAdapter
+        ) { v, wrappedType, cfg ->
+            convertWrappedValue(v, wrappedType, cfg)
         }
     }
 

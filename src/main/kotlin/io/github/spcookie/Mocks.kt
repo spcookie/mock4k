@@ -28,6 +28,12 @@ object Mocks {
     val TypeAdapter = TypeAdapter()
 
     /**
+     * Container adapter manager for custom container type handling
+     */
+    @JvmField
+    val ContainerAdapter = ContainerAdapter()
+
+    /**
      * Singleton MockEngine instance to maintain state across calls
      */
     private val mockEngine = MockEngine()
@@ -35,7 +41,7 @@ object Mocks {
     /**
      * BeanMockBridge instance
      */
-    private val beanMockEngine = BeanMockBridge(mockEngine, TypeAdapter)
+    private val beanMockEngine = BeanMockBridge(mockEngine, TypeAdapter, ContainerAdapter)
 
     /**
      * Generate mock data based on template
