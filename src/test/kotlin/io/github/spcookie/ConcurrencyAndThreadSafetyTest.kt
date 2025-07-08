@@ -1,6 +1,7 @@
 package io.github.spcookie
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import java.util.concurrent.*
@@ -48,7 +49,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = mock<ThreadSafeBean>(template)
+                        val bean = mock(template) as ThreadSafeBean
                         results.add(bean)
                     }
                 } catch (e: Exception) {
@@ -106,7 +107,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = mock<Map<String, Any>>(template)
+                        val bean = mock(template) as Map<String, Any>
                         assertNotNull(bean)
                         successCount.incrementAndGet()
                     }
@@ -164,7 +165,7 @@ class ConcurrencyAndThreadSafetyTest {
                 try {
                     val threadResults = mutableListOf<Map<String, Any>>()
                     repeat(iterationsPerThread) {
-                        val bean = mock<Map<String, Any>>(template)
+                        val bean = mock(template) as Map<String, Any>
                         threadResults.add(bean)
                     }
                     results[threadIndex] = threadResults
@@ -258,7 +259,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val user = mock<UserBean>(userTemplate)
+                        val user = mock(userTemplate) as UserBean
                         users.add(user)
                     }
                 } finally {
@@ -272,7 +273,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val product = mock<ProductBean>(productTemplate)
+                        val product = mock(productTemplate) as ProductBean
                         products.add(product)
                     }
                 } finally {
@@ -286,7 +287,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val order = mock<OrderBean>(orderTemplate)
+                        val order = mock(orderTemplate) as OrderBean
                         orders.add(order)
                     }
                 } finally {
@@ -362,7 +363,7 @@ class ConcurrencyAndThreadSafetyTest {
 
                 try {
                     while (System.currentTimeMillis() - threadStartTime < runTimeSeconds * 1000) {
-                        val bean = mock<Map<String, Any>>(template)
+                        val bean = mock(template) as Map<String, Any>
                         assertNotNull(bean)
                         threadOperations++
                         totalOperations.incrementAndGet()
@@ -437,7 +438,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = mock<Map<String, Any>>(template)
+                        val bean = mock(template) as Map<String, Any>
                         results.add(bean)
 
                         // 偶尔触发GC
@@ -505,7 +506,7 @@ class ConcurrencyAndThreadSafetyTest {
                         try {
                             // 交替使用有效和无效模板
                             val template = if (iteration % 2 == 0) validTemplate else invalidTemplate
-                            val bean = mock<Map<String, Any>>(template)
+                            val bean = mock(template) as Map<String, Any>
 
                             if (iteration % 2 == 0) {
                                 // 有效模板应该成功

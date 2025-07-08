@@ -35,7 +35,7 @@ class BeanIntrospectEnhancedTest {
         @Mock.Property(rule = Mock.Rule(count = 5))
         val tags: List<String>,
 
-        @Mock.Property(length = Mock.Length(value = 3, fill = FillStrategy.REPEAT))
+        @Mock.Property(length = Mock.Length(value = 3, fill = Mock.FillStrategy.REPEAT))
         val scores: Set<Int>
     )
 
@@ -303,21 +303,21 @@ class BeanIntrospectEnhancedTest {
 
         // 测试不同的最大深度设置
         val configs = listOf(
-            BeanMockConfig(maxDepth = 1),
-            BeanMockConfig(maxDepth = 2),
-            BeanMockConfig(maxDepth = 3),
-            BeanMockConfig(maxDepth = 4)
+            BeanMockConfig(depth = 1),
+            BeanMockConfig(depth = 2),
+            BeanMockConfig(depth = 3),
+            BeanMockConfig(depth = 4)
         )
 
         configs.forEach { config ->
             val template = beanIntrospect.analyzeBean(Level1::class, config)
-            assertNotNull(template, "深度嵌套Bean模板不应为null（深度=${config.maxDepth}）")
+            assertNotNull(template, "深度嵌套Bean模板不应为null（深度=${config.depth}）")
 
             val templateMap = template as Map<String, Any>
             assertTrue(templateMap.containsKey("id"), "ID字段应该存在")
             assertTrue(templateMap.containsKey("level2"), "level2字段应该存在")
 
-            logger.info("深度嵌套Bean模板（深度=${config.maxDepth}）: $template")
+            logger.info("深度嵌套Bean模板（深度=${config.depth}）: $template")
         }
     }
 
@@ -337,7 +337,7 @@ class BeanIntrospectEnhancedTest {
     fun testCircularReferenceBeanIntrospection() {
         logger.info("测试循环引用Bean的内省...")
 
-        val config = BeanMockConfig(maxDepth = 3)
+        val config = BeanMockConfig(depth = 3)
 
         // 测试NodeA
         val templateA = beanIntrospect.analyzeBean(NodeA::class, config)

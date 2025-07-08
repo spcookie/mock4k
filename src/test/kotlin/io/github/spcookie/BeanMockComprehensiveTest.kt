@@ -261,13 +261,7 @@ class BeanMockComprehensiveTest {
     fun testBeanWithLargeData() {
         logger.info("测试包含大数据的Bean生成...")
 
-        val config = BeanMockConfig(
-            includePrivate = true,
-            maxCollectionSize = 100,
-            maxStringLength = 1000
-        )
-
-        val bean = mock(LargeDataBean::class, config)
+        val bean = mock(LargeDataBean::class, includePrivate = true)
 
         assertNotNull(bean, "大数据Bean不应为null")
         assertNotNull(bean.largeString, "大字符串不应为null")
@@ -295,12 +289,7 @@ class BeanMockComprehensiveTest {
     fun testBeanWithPotentialCircularReference() {
         logger.info("测试可能存在循环引用的Bean生成...")
 
-        val config = BeanMockConfig(
-            maxDepth = 3, // 限制深度避免无限递归
-            maxCollectionSize = 5
-        )
-
-        val node = mock(Node::class, config)
+        val node = mock(Node::class, depth = 3)
 
         assertNotNull(node, "节点不应为null")
         assertNotNull(node.id, "节点ID不应为null")
@@ -407,8 +396,8 @@ class BeanMockComprehensiveTest {
         val configs = listOf(
             BeanMockConfig(includePrivate = true, includeStatic = false),
             BeanMockConfig(includePrivate = false, includeStatic = true),
-            BeanMockConfig(maxDepth = 1, maxCollectionSize = 5),
-            BeanMockConfig(maxDepth = 5, maxCollectionSize = 20)
+            BeanMockConfig(depth = 1),
+            BeanMockConfig(depth = 5)
         )
 
         configs.forEach { config ->
