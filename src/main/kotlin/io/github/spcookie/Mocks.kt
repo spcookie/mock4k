@@ -12,27 +12,30 @@ object Mocks {
     /**
      * The Random utility instance
      */
+    @JvmField
     val Random = MockRandom
 
     /**
      * The Locale utility instance
      */
+    @JvmField
     val Locale = LocaleManager
 
     /**
      * Type adapter manager for custom type conversion
      */
+    @JvmField
     val TypeAdapter = TypeAdapter()
 
     /**
      * Singleton MockEngine instance to maintain state across calls
      */
-    internal val mockEngine = MockEngine()
+    private val mockEngine = MockEngine()
 
     /**
      * BeanMockBridge instance
      */
-    internal val beanMockEngine = BeanMockBridge(mockEngine, TypeAdapter)
+    private val beanMockEngine = BeanMockBridge(mockEngine, TypeAdapter)
 
     /**
      * Generate mock data based on template
@@ -40,7 +43,8 @@ object Mocks {
      * @param template The data template
      * @return Generated mock data
      */
-    fun g(template: Any): Any {
+    @JvmSynthetic
+    internal fun g(template: Any): Any {
         return mockEngine.generate(template)!!
     }
 
@@ -51,15 +55,18 @@ object Mocks {
      * @param includePrivate Whether to mock private properties
      * @param includeStatic Whether to mock static properties
      * @param includeTransient Whether to mock transient properties
+     * @param depth Maximum depth for recursive bean generation
      * @return Generated mock bean object
      */
-    fun <T : Any> bg(
+    @JvmSynthetic
+    internal fun <T : Any> bg(
         clazz: kotlin.reflect.KClass<T>,
         includePrivate: Boolean? = null,
         includeStatic: Boolean? = null,
-        includeTransient: Boolean? = null
+        includeTransient: Boolean? = null,
+        depth: Int? = null
     ): T {
-        return beanMockEngine.mockBean(clazz, includePrivate, includeStatic, includeTransient)
+        return beanMockEngine.mockBean(clazz, includePrivate, includeStatic, includeTransient, depth)
     }
 
 }
@@ -103,15 +110,33 @@ fun mock(template: String): Any {
  * @param includePrivate Whether to mock private properties (default: null, uses annotation value)
  * @param includeStatic Whether to mock static properties (default: null, uses annotation value)
  * @param includeTransient Whether to mock transient properties (default: null, uses annotation value)
+ * @param depth Maximum depth for recursive bean generation (default: null, uses annotation value or 3)
  * @return Generated mock bean object
  */
+@JvmSynthetic
 fun <T : Any> mock(
     clazz: kotlin.reflect.KClass<T>,
     includePrivate: Boolean? = null,
     includeStatic: Boolean? = null,
-    includeTransient: Boolean? = null
+    includeTransient: Boolean? = null,
+    depth: Int? = null
 ): T {
-    return Mocks.bg(clazz, includePrivate, includeStatic, includeTransient)
+    return Mocks.bg(clazz, includePrivate, includeStatic, includeTransient, depth)
+}
+
+/**
+ * Generate mock bean object with reified type
+ *
+ * @return Generated mock bean object
+ */
+@JvmSynthetic
+inline fun <reified T : Any> mock(
+    includePrivate: Boolean? = null,
+    includeStatic: Boolean? = null,
+    includeTransient: Boolean? = null,
+    depth: Int? = null
+): T {
+    return mock(T::class, includePrivate, includeStatic, includeTransient, depth)
 }
 
 /**
@@ -121,13 +146,16 @@ fun <T : Any> mock(
  * @param includePrivate Whether to mock private properties (default: null, uses annotation value)
  * @param includeStatic Whether to mock static properties (default: null, uses annotation value)
  * @param includeTransient Whether to mock transient properties (default: null, uses annotation value)
+ * @param depth Maximum depth for recursive bean generation (default: null, uses annotation value or 3)
  * @return Generated mock bean object
  */
+@JvmOverloads
 fun <T : Any> mock(
     clazz: Class<T>,
     includePrivate: Boolean? = null,
     includeStatic: Boolean? = null,
-    includeTransient: Boolean? = null
+    includeTransient: Boolean? = null,
+    depth: Int? = null
 ): T {
-    return mock(clazz.kotlin, includePrivate, includeStatic, includeTransient)
+    return mock(clazz.kotlin, includePrivate, includeStatic, includeTransient, depth)
 }
