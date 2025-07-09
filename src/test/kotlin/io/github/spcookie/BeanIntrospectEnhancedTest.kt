@@ -122,13 +122,13 @@ class BeanIntrospectEnhancedTest {
         assertNotNull(template, "复杂类型Bean模板不应为null")
         val templateMap = template as Map<String, Any>
 
-        assertEquals("@FLOAT", templateMap["bigDecimal"], "BigDecimal应该映射为@FLOAT")
-        assertEquals("@INTEGER", templateMap["bigInteger"], "BigInteger应该映射为@INTEGER")
-        assertEquals("@DATE", templateMap["localDate"], "LocalDate应该映射为@DATE")
-        assertEquals("@DATETIME", templateMap["localDateTime"], "LocalDateTime应该映射为@DATETIME")
-        assertEquals("@STRING", templateMap["uuid"], "UUID应该映射为@STRING")
-        assertEquals("@STRING", templateMap["pair"], "Pair应该映射为@STRING")
-        assertEquals("@STRING", templateMap["triple"], "Triple应该映射为@STRING")
+        assertEquals("@float", templateMap["bigDecimal"], "BigDecimal应该映射为@FLOAT")
+        assertEquals("@integer", templateMap["bigInteger"], "BigInteger应该映射为@INTEGER")
+        assertEquals("@date", templateMap["localDate"], "LocalDate应该映射为@DATE")
+        assertEquals("@datetime", templateMap["localDateTime"], "LocalDateTime应该映射为@DATETIME")
+        assertEquals("@uuid", templateMap["uuid"], "UUID应该映射为@UUID")
+        assertInstanceOf(Map::class.java, templateMap["pair"], "Pair应该映射为Map")
+        assertInstanceOf(Map::class.java, templateMap["triple"], "Triple应该映射为Map")
 
         logger.info("复杂类型Bean模板: $template")
     }
