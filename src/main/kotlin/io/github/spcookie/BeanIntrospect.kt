@@ -239,6 +239,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
             Short::class, java.lang.Short::class -> "@integer"
             BigDecimal::class -> "@float"
             BigInteger::class -> "@integer"
+            UUID::class -> "@uuid"
             Date::class -> "@date"
             java.sql.Date::class -> "@date"
             java.sql.Time::class -> "@time"
@@ -249,7 +250,6 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
             java.time.ZonedDateTime::class -> "@datetime"
             java.time.OffsetDateTime::class -> "@datetime"
             java.time.Instant::class -> "@datetime"
-            Pair::class -> "@string"
             else -> "@string"
         }
     }

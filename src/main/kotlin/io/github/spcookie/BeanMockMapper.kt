@@ -30,21 +30,20 @@ internal class BeanMockMapper(
      * Map generated data to Bean instance
      */
     fun <T : Any> mapToBean(clazz: KClass<T>, data: Map<String, Any?>, config: BeanMockConfig): T {
-        // Check if this is a data class
         val isDataClass = clazz.isData
-        
-        return try {
-            // Try constructor-based creation first
-            createInstanceWithConstructor(clazz, data, config)
-        } catch (e: Exception) {
-            // For data classes, don't fallback to property-based creation
-            // because data class properties are typically immutable
-            if (isDataClass) {
-                throw IllegalArgumentException("Cannot create data class instance using constructor: ${e.message}", e)
+        val isJavaRecord = clazz.java.isRecord
+
+        return when {
+            // For Kotlin data class or Java record, use constructor-based creation
+            isDataClass || isJavaRecord -> {
+                val instance = createInstanceWithConstructor(clazz, data, config)
+                // After constructor creation, map any remaining unmapped properties
+                mapRemainingProperties(instance, clazz, data, config)
+                instance
             }
 
-            // Fallback to property-based creation for regular classes
-            createInstanceWithProperties(clazz, data, config)
+            // For regular beans, use property-based creation
+            else -> createInstanceWithProperties(clazz, data, config)
         }
     }
 
@@ -61,6 +60,12 @@ internal class BeanMockMapper(
 
         val args = constructor.parameters.map { param ->
             val propertyName = param.name ?: throw IllegalArgumentException("Parameter name not available")
+
+            val mockProperty = param.findAnnotation<Mock.Property>()
+
+            if (mockProperty?.enabled == false) {
+                return@map
+            }
             val rawValue = findValueForProperty(propertyName, data)
 
             if (rawValue != null) {
@@ -70,7 +75,7 @@ internal class BeanMockMapper(
                 if (param.isOptional) {
                     null
                 } else {
-                    getDefaultValueForType(param.type)
+                    generateValueForType(param.type, config)
                 }
             }
         }.toTypedArray()
@@ -87,24 +92,56 @@ internal class BeanMockMapper(
         config: BeanMockConfig
     ): T {
         val instance = clazz.createInstance()
+        mapPropertiesToInstance(instance, clazz, data, config)
+        return instance
+    }
 
-        // Get all mutable properties
-        val mutableProperties = getEligibleProperties(clazz, config)
+    /**
+     * Map remaining properties that were not handled by constructor
+     */
+    private fun <T : Any> mapRemainingProperties(
+        instance: T,
+        clazz: KClass<T>,
+        data: Map<String, Any?>,
+        config: BeanMockConfig
+    ) {
+        val constructor = clazz.primaryConstructor
+        val constructorParamNames = constructor?.parameters?.mapNotNull { it.name }?.toSet() ?: emptySet()
 
-        for (property in mutableProperties) {
+        // Get properties that were not mapped by constructor
+        val eligibleProperties = getEligibleProperties(clazz, config)
+        val unmappedProperties = eligibleProperties.filter { property ->
+            // Only include properties that are not handled by constructor
+            property.name !in constructorParamNames
+        }
+
+        mapPropertiesToInstance(instance, unmappedProperties, data, config)
+    }
+
+    /**
+     * Map properties to instance
+     */
+    private fun mapPropertiesToInstance(
+        instance: Any,
+        clazz: KClass<*>,
+        data: Map<String, Any?>,
+        config: BeanMockConfig
+    ) {
+        val eligibleProperties = getEligibleProperties(clazz, config)
+        mapPropertiesToInstance(instance, eligibleProperties, data, config)
+    }
+
+    /**
+     * Map specific properties to instance
+     */
+    private fun mapPropertiesToInstance(
+        instance: Any,
+        properties: List<KProperty<*>>,
+        data: Map<String, Any?>,
+        config: BeanMockConfig
+    ) {
+        for (property in properties) {
             try {
-                val propertyAnnotation = property.findAnnotation<Mock.Property>()
-
-                // Skip if property is disabled
-                if (propertyAnnotation?.enabled == false) {
-                    continue
-                }
-
-                // Check if property should be included based on config
-                if (!shouldIncludeProperty(property, config)) {
-                    continue
-                }
-
                 val rawValue = findValueForProperty(property.name, data)
                 if (rawValue != null) {
                     val convertedValue = convertValue(rawValue, property.returnType, config)
@@ -114,8 +151,6 @@ internal class BeanMockMapper(
                 logger.warn("Failed to set property ${property.name}: ${e.message}")
             }
         }
-
-        return instance
     }
 
     /**
@@ -322,7 +357,51 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Get default value for type
+     * Generate appropriate value for type, including recursive object creation
+     */
+    private fun generateValueForType(type: KType, config: BeanMockConfig): Any? {
+        val kClass = type.classifier as? KClass<*> ?: return null
+
+        return when {
+            // Handle basic types and collections
+            isBasicType(kClass) || isCollectionType(kClass) -> getDefaultValueForType(type)
+
+            // Handle container types
+            isContainerType(kClass, containerAdapter) -> {
+                // For container types, try to create with default wrapped value
+                val wrappedType = type.arguments.firstOrNull()?.type
+                if (wrappedType != null && config.depth > 0) {
+                    val reducedConfig = config.copy(depth = config.depth - 1)
+                    val wrappedValue = generateValueForType(wrappedType, reducedConfig)
+                    convertContainerValue(wrappedValue, type, reducedConfig)
+                } else {
+                    null
+                }
+            }
+
+            // Handle custom objects - recursively create them
+            isCustomClass(kClass, containerAdapter) -> {
+                // Check depth to prevent infinite recursion
+                if (config.depth <= 0) {
+                    return null
+                }
+
+                try {
+                    // Recursively create the custom object with empty data and reduced depth
+                    val reducedConfig = config.copy(depth = config.depth - 1)
+                    mapToBean(kClass, emptyMap(), reducedConfig)
+                } catch (e: Exception) {
+                    logger.warn("Failed to recursively create ${kClass.simpleName}: ${e.message}")
+                    null
+                }
+            }
+
+            else -> getDefaultValueForType(type)
+        }
+    }
+
+    /**
+     * Get default value for basic types
      */
     private fun getDefaultValueForType(type: KType): Any? {
         val kClass = type.classifier as? KClass<*> ?: return null

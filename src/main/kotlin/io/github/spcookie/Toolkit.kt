@@ -3,10 +3,8 @@ package io.github.spcookie
 import java.lang.reflect.Modifier
 import java.math.BigDecimal
 import java.math.BigInteger
-import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KProperty
-import kotlin.reflect.KVisibility
+import java.util.*
+import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
@@ -35,7 +33,8 @@ fun isBasicType(kClass: KClass<*>): Boolean {
         Short::class, java.lang.Short::class -> true
         BigDecimal::class -> true
         BigInteger::class -> true
-        else -> isDateTimeType(kClass) || kClass == Pair::class
+        UUID::class -> true
+        else -> isDateTimeType(kClass)
     }
 }
 
@@ -154,12 +153,7 @@ fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KPrope
                     val javaFieldAnnotation = javaField?.getAnnotation(Mock.Property::class.java)
 
                     // Try to get annotation from constructor parameter
-                    val constructorParam = constructor?.parameters?.find { it.name == property.name }
-                    val constructorAnnotation = constructorParam?.findAnnotation<Mock.Property>()
-
-                    val finalAnnotation = mockParam ?: javaFieldAnnotation ?: constructorAnnotation
-                    val enabled = finalAnnotation?.enabled != false
-                    enabled
+                    getConstructorAnnotation(constructor, property, mockParam, javaFieldAnnotation)
                 }
             }
 
@@ -190,14 +184,23 @@ fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KPrope
                 val javaFieldAnnotation = javaField.getAnnotation(Mock.Property::class.java)
 
                 // Try to get annotation from constructor parameter
-                val constructorParam = constructor?.parameters?.find { it.name == property.name }
-                val constructorAnnotation = constructorParam?.findAnnotation<Mock.Property>()
-
-                val finalAnnotation = mockParam ?: javaFieldAnnotation ?: constructorAnnotation
-                val enabled = finalAnnotation?.enabled != false
-                enabled
+                getConstructorAnnotation(constructor, property, mockParam, javaFieldAnnotation)
             }
         }
     }
     return properties
+}
+
+private fun getConstructorAnnotation(
+    constructor: KFunction<Any>?,
+    property: KProperty1<out Any, *>,
+    mockParam: Mock.Property?,
+    javaFieldAnnotation: Mock.Property?
+): Boolean {
+    val constructorParam = constructor?.parameters?.find { it.name == property.name }
+    val constructorAnnotation = constructorParam?.findAnnotation<Mock.Property>()
+
+    val finalAnnotation = mockParam ?: javaFieldAnnotation ?: constructorAnnotation
+    val enabled = finalAnnotation?.enabled != false
+    return enabled
 }
