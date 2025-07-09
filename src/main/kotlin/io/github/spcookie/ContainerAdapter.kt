@@ -18,10 +18,8 @@ class ContainerAdapter {
      * Container type behavior enumeration
      */
     enum class ContainerBehavior {
-        SINGLE_VALUE,    // Returns single wrapped value
-        STREAM_VALUES,   // Returns list of values (for streams like Flux, Observable)
-        RIGHT_TYPE,      // Uses second type parameter (for Either, Validation)
-        NO_VALUE         // Returns null (for Completable)
+        SINGLE_VALUE,    // Container returns a single value
+        STREAM_VALUES    // Container returns multiple values
     }
 
     /**
@@ -29,62 +27,11 @@ class ContainerAdapter {
      */
     data class ContainerHandler(
         val behavior: ContainerBehavior,
-        val analyzer: ((KType, Any?, BeanMockConfig, Int) -> Any?)? = null,
-        val mapper: ((Any?, KType, BeanMockConfig) -> Any?)? = null
+        val analyzer: ((List<KType>, Any?, BeanMockConfig, Int) -> Any?)? = null,
+        val mapper: ((Any?, List<KType>, BeanMockConfig) -> Any?)? = null
     )
 
     private val handlers = mutableMapOf<String, ContainerHandler>()
-
-    init {
-        registerDefaultHandlers()
-    }
-
-    /**
-     * Register default container handlers
-     */
-    private fun registerDefaultHandlers() {
-        // Java standard container types
-        register("java.util.Optional", ContainerBehavior.SINGLE_VALUE)
-        register("java.util.concurrent.CompletableFuture", ContainerBehavior.SINGLE_VALUE)
-        register("java.util.concurrent.Future", ContainerBehavior.SINGLE_VALUE)
-        register("java.util.concurrent.Callable", ContainerBehavior.SINGLE_VALUE)
-        register("java.util.function.Supplier", ContainerBehavior.SINGLE_VALUE)
-        register("kotlin.Lazy", ContainerBehavior.SINGLE_VALUE)
-
-        // Kotlin Coroutines
-        register("kotlinx.coroutines.Deferred", ContainerBehavior.SINGLE_VALUE)
-
-        // Project Reactor
-        register("reactor.core.publisher.Mono", ContainerBehavior.SINGLE_VALUE)
-        register("reactor.core.publisher.Flux", ContainerBehavior.STREAM_VALUES)
-
-        // RxJava 2/3
-        register("io.reactivex.Single", ContainerBehavior.SINGLE_VALUE)
-        register("io.reactivex.Maybe", ContainerBehavior.SINGLE_VALUE)
-        register("io.reactivex.Observable", ContainerBehavior.STREAM_VALUES)
-        register("io.reactivex.Flowable", ContainerBehavior.STREAM_VALUES)
-        register("io.reactivex.Completable", ContainerBehavior.NO_VALUE)
-        register("io.reactivex.rxjava3.core.Single", ContainerBehavior.SINGLE_VALUE)
-        register("io.reactivex.rxjava3.core.Maybe", ContainerBehavior.SINGLE_VALUE)
-        register("io.reactivex.rxjava3.core.Observable", ContainerBehavior.STREAM_VALUES)
-        register("io.reactivex.rxjava3.core.Flowable", ContainerBehavior.STREAM_VALUES)
-        register("io.reactivex.rxjava3.core.Completable", ContainerBehavior.NO_VALUE)
-
-        // Vavr (formerly Javaslang)
-        register("io.vavr.control.Option", ContainerBehavior.SINGLE_VALUE)
-        register("io.vavr.control.Try", ContainerBehavior.SINGLE_VALUE)
-        register("io.vavr.control.Either", ContainerBehavior.RIGHT_TYPE)
-        register("io.vavr.control.Validation", ContainerBehavior.RIGHT_TYPE)
-        register("io.vavr.Lazy", ContainerBehavior.SINGLE_VALUE)
-        register("io.vavr.concurrent.Future", ContainerBehavior.SINGLE_VALUE)
-
-        // Arrow (Kotlin functional programming)
-        register("arrow.core.Option", ContainerBehavior.SINGLE_VALUE)
-        register("arrow.core.Either", ContainerBehavior.RIGHT_TYPE)
-        register("arrow.core.Try", ContainerBehavior.SINGLE_VALUE)
-        register("arrow.core.Validated", ContainerBehavior.RIGHT_TYPE)
-        register("arrow.fx.coroutines.Resource", ContainerBehavior.SINGLE_VALUE)
-    }
 
     /**
      * Register a container handler by qualified name prefix
@@ -99,8 +46,8 @@ class ContainerAdapter {
     fun register(
         qualifiedNamePrefix: String,
         behavior: ContainerBehavior,
-        analyzer: ((KType, Any?, BeanMockConfig, Int) -> Any?)? = null,
-        mapper: ((Any?, KType, BeanMockConfig) -> Any?)? = null
+        analyzer: ((List<KType>, Any?, BeanMockConfig, Int) -> Any?)? = null,
+        mapper: ((Any?, List<KType>, BeanMockConfig) -> Any?)? = null
     ) {
         handlers[qualifiedNamePrefix] = ContainerHandler(behavior, analyzer, mapper)
     }
@@ -154,10 +101,11 @@ class ContainerAdapter {
     ): Any? {
         val kClass = type.classifier as KClass<*>
         val handler = getContainerHandler(kClass)
+        val typeArguments = type.arguments.mapNotNull { it.type }
 
         // Use custom analyzer if available
         if (handler?.analyzer != null) {
-            return handler.analyzer.invoke(type, null, config, currentDepth)
+            return handler.analyzer.invoke(typeArguments, null, config, currentDepth)
         }
 
         val behavior = getContainerBehavior(kClass)
@@ -173,13 +121,6 @@ class ContainerAdapter {
                     analyzeWrappedType(elementType, annotation, propertyBeanAnnotation, config, currentDepth)
                 listOf(elementValue)
             }
-
-            ContainerBehavior.RIGHT_TYPE -> {
-                val rightType = type.arguments.getOrNull(1)?.type
-                analyzeWrappedType(rightType, annotation, propertyBeanAnnotation, config, currentDepth)
-            }
-
-            ContainerBehavior.NO_VALUE -> null
         }
     }
 
@@ -197,10 +138,11 @@ class ContainerAdapter {
 
         val targetClass = targetType.classifier as KClass<*>
         val handler = getContainerHandler(targetClass)
+        val typeArguments = targetType.arguments.mapNotNull { it.type }
 
         // Use custom mapper if available
         if (handler?.mapper != null) {
-            return handler.mapper.invoke(value, targetType, config)
+            return handler.mapper.invoke(value, typeArguments, config)
         }
 
         // Try to use TypeAdapter first for third-party types
@@ -252,13 +194,6 @@ class ContainerAdapter {
                     else -> listOf(convertWrappedValue(value, wrappedType, config))
                 }
             }
-
-            ContainerBehavior.RIGHT_TYPE -> {
-                val rightType = targetType.arguments.getOrNull(1)?.type
-                convertWrappedValue(value, rightType, config)
-            }
-
-            ContainerBehavior.NO_VALUE -> null
         }
     }
 }

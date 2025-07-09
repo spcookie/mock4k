@@ -5,12 +5,10 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty1
+import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.jvm.javaField
 
 /**
  * Analyzes Bean properties and converts them to Map structure for MockEngine
@@ -42,7 +40,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
         val result = mutableMapOf<String, Any?>()
 
         // Get all properties based on configuration
-        val properties = getFilteredProperties(clazz, config)
+        val properties = getEligibleProperties(clazz, config)
 
         for (property in properties) {
             try {
@@ -76,7 +74,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     /**
      * Get property annotation from constructor parameter or property itself
      */
-    private fun <T : Any> getPropertyAnnotation(clazz: KClass<T>, property: KProperty1<T, *>): Mock.Property? {
+    private fun <T : Any> getPropertyAnnotation(clazz: KClass<T>, property: KProperty<*>): Mock.Property? {
         // First try to get annotation from constructor parameter
         val constructor = clazz.primaryConstructor
         if (constructor != null) {
@@ -97,7 +95,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
      * Get property-level @Mock.Bean annotation from constructor parameter or property itself
      * Property-level annotation has higher priority than class-level annotation
      */
-    private fun <T : Any> getPropertyBeanAnnotation(clazz: KClass<T>, property: KProperty1<T, *>): Mock.Bean? {
+    private fun <T : Any> getPropertyBeanAnnotation(clazz: KClass<T>, property: KProperty<*>): Mock.Bean? {
         // First try to get annotation from constructor parameter
         val constructor = clazz.primaryConstructor
         if (constructor != null) {
@@ -115,44 +113,10 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     }
 
     /**
-     * Get filtered properties based on configuration
-     */
-    private fun <T : Any> getFilteredProperties(
-        clazz: KClass<T>,
-        config: BeanMockConfig
-    ): Collection<KProperty1<T, *>> {
-        return clazz.memberProperties.filter { property ->
-            val javaField = property.javaField
-
-            // For properties without backing field (like computed properties), include them by default
-            if (javaField == null) {
-                return@filter true
-            }
-
-            // Check private access
-            if (!config.includePrivate && !java.lang.reflect.Modifier.isPublic(javaField.modifiers)) {
-                return@filter false
-            }
-
-            // Check static access
-            if (!config.includeStatic && java.lang.reflect.Modifier.isStatic(javaField.modifiers)) {
-                return@filter false
-            }
-
-            // Check transient access
-            if (!config.includeTransient && java.lang.reflect.Modifier.isTransient(javaField.modifiers)) {
-                return@filter false
-            }
-
-            true
-        }
-    }
-
-    /**
      * Build property key with rules from annotation
      * Rule priority: step > count > range and decimal > range > decimal
      */
-    private fun buildPropertyKey(property: KProperty1<*, *>, annotation: Mock.Property?): String {
+    private fun buildPropertyKey(property: KProperty<*>, annotation: Mock.Property?): String {
         val baseName = property.name
         val rule = annotation?.rule
 
@@ -303,7 +267,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     ): Any {
         val kClass = type.classifier as KClass<*>
         val length = annotation?.length?.value ?: 1
-        val fill = annotation?.length?.fill ?: Mock.FillStrategy.RANDOM
+        val fill = annotation?.length?.fill ?: Mock.Fill.RANDOM
 
         return when {
             List::class.java.isAssignableFrom(kClass.java)
@@ -312,7 +276,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 val elementType = type.arguments.firstOrNull()?.type
 
                 when (fill) {
-                    Mock.FillStrategy.REPEAT -> {
+                    Mock.Fill.REPEAT -> {
                         // REPEAT: use the same element for all positions
                         val elementValue = if (elementType != null) {
                             analyzePropertyType(elementType, null, propertyBeanAnnotation, config, currentDepth)
@@ -322,7 +286,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                         List(length) { elementValue }
                     }
 
-                    Mock.FillStrategy.RANDOM -> {
+                    Mock.Fill.RANDOM -> {
                         // RANDOM: generate different elements for each position
                         List(length) {
                             if (elementType != null) {

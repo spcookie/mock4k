@@ -9,7 +9,6 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
 import kotlin.reflect.jvm.javaField
@@ -31,11 +30,20 @@ internal class BeanMockMapper(
      * Map generated data to Bean instance
      */
     fun <T : Any> mapToBean(clazz: KClass<T>, data: Map<String, Any?>, config: BeanMockConfig): T {
+        // Check if this is a data class
+        val isDataClass = clazz.isData
+        
         return try {
             // Try constructor-based creation first
             createInstanceWithConstructor(clazz, data, config)
-        } catch (_: Exception) {
-            // Fallback to property-based creation
+        } catch (e: Exception) {
+            // For data classes, don't fallback to property-based creation
+            // because data class properties are typically immutable
+            if (isDataClass) {
+                throw IllegalArgumentException("Cannot create data class instance using constructor: ${e.message}", e)
+            }
+
+            // Fallback to property-based creation for regular classes
             createInstanceWithProperties(clazz, data, config)
         }
     }
@@ -81,7 +89,7 @@ internal class BeanMockMapper(
         val instance = clazz.createInstance()
 
         // Get all mutable properties
-        val mutableProperties = clazz.memberProperties.filterIsInstance<KMutableProperty<*>>()
+        val mutableProperties = getEligibleProperties(clazz, config)
 
         for (property in mutableProperties) {
             try {
@@ -257,7 +265,7 @@ internal class BeanMockMapper(
      * Convert container values using ContainerAdapter
      */
     private fun convertContainerValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
-        return Mocks.ContainerAdapter.convertContainerValue(
+        return containerAdapter.convertContainerValue(
             value,
             targetType,
             config,
@@ -307,15 +315,10 @@ internal class BeanMockMapper(
     /**
      * Set property value on instance
      */
-    private fun setPropertyValue(instance: Any, property: KMutableProperty<*>, value: Any?) {
-        try {
-            property.isAccessible = true
-            @Suppress("UNCHECKED_CAST")
-            (property as KMutableProperty<Any?>).setter.call(instance, value)
-        } catch (e: Exception) {
-            logger.warn("Failed to set property ${property.name}: ${e.message}")
-            throw e
-        }
+    private fun setPropertyValue(instance: Any, property: KProperty<*>, value: Any?) {
+        property.isAccessible = true
+        @Suppress("UNCHECKED_CAST")
+        (property as KMutableProperty<Any?>).setter.call(instance, value)
     }
 
     /**

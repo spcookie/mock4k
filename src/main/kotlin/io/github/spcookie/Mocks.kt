@@ -105,8 +105,8 @@ fun mock(template: List<*>): List<*> {
  * @param template The data template as string
  * @return Generated mock data
  */
-fun mock(template: String): Any {
-    return Mocks.g(template as Any)
+fun mock(template: String): String {
+    return Mocks.g(template as Any) as String
 }
 
 /**

@@ -1,8 +1,16 @@
 package io.github.spcookie
 
+import java.lang.reflect.Modifier
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KProperty
+import kotlin.reflect.KVisibility
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.javaField
 
 /**
  * Utility functions for common operations
@@ -70,7 +78,7 @@ fun isContainerType(kClass: KClass<*>, containerAdapter: ContainerAdapter): Bool
         java.util.concurrent.Future::class.java.isAssignableFrom(kClass.java) -> return true
         java.util.concurrent.Callable::class.java.isAssignableFrom(kClass.java) -> return true
         java.util.function.Supplier::class.java.isAssignableFrom(kClass.java) -> return true
-        kotlin.Lazy::class.java.isAssignableFrom(kClass.java) -> return true
+        Lazy::class.java.isAssignableFrom(kClass.java) -> return true
     }
 
     // Then check registered third-party types
@@ -108,4 +116,88 @@ fun isCustomClass(type: KClass<*>, containerAdapter: ContainerAdapter): Boolean 
         type.java.packageName.startsWith("kotlin.") -> false
         else -> true
     }
+}
+
+/**
+ * Get eligible properties for mocking based on configuration
+ */
+fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KProperty<*>> {
+    val constructor = clazz.primaryConstructor
+    val isDataClass = clazz.isData
+    val isJavaRecord = clazz.java.isRecord
+
+    val properties = clazz.memberProperties.filter { property ->
+        val javaField = property.javaField
+
+        // For Kotlin data class, all val properties from primary constructor should be included
+        val isDataClassProperty = isDataClass && constructor?.parameters?.any { it.name == property.name } == true
+
+        // For Java record, all properties should be included (they don't have javaField)
+        val isRecordProperty = isJavaRecord && javaField == null
+
+        // For Kotlin properties, check if they are mutable (var) rather than field visibility
+        val isMutableProperty = property is KMutableProperty<*>
+
+        // For Kotlin properties, check if it's actually a private property
+        val isKotlinPrivateProperty = property.visibility == KVisibility.PRIVATE
+
+        // Check if property should be included based on configuration
+        when {
+            // Special handling for data class and record properties
+            isDataClassProperty || isRecordProperty -> {
+                // For data class and record, check privacy settings
+                if (!config.includePrivate && isKotlinPrivateProperty) {
+                    false
+                } else {
+                    // Check if Mock annotation is present and enabled
+                    val mockParam = property.findAnnotation<Mock.Property>()
+                    val javaFieldAnnotation = javaField?.getAnnotation(Mock.Property::class.java)
+
+                    // Try to get annotation from constructor parameter
+                    val constructorParam = constructor?.parameters?.find { it.name == property.name }
+                    val constructorAnnotation = constructorParam?.findAnnotation<Mock.Property>()
+
+                    val finalAnnotation = mockParam ?: javaFieldAnnotation ?: constructorAnnotation
+                    val enabled = finalAnnotation?.enabled != false
+                    enabled
+                }
+            }
+
+            // Regular property handling
+            javaField == null -> {
+                false
+            }
+
+            !isMutableProperty -> {
+                false
+            }
+
+            !config.includePrivate && isKotlinPrivateProperty -> {
+                false
+            }
+
+            !config.includeStatic && Modifier.isStatic(javaField.modifiers) -> {
+                false
+            }
+
+            !config.includeTransient && Modifier.isTransient(javaField.modifiers) -> {
+                false
+            }
+
+            else -> {
+                // Check if Mock annotation is present and enabled
+                val mockParam = property.findAnnotation<Mock.Property>()
+                val javaFieldAnnotation = javaField.getAnnotation(Mock.Property::class.java)
+
+                // Try to get annotation from constructor parameter
+                val constructorParam = constructor?.parameters?.find { it.name == property.name }
+                val constructorAnnotation = constructorParam?.findAnnotation<Mock.Property>()
+
+                val finalAnnotation = mockParam ?: javaFieldAnnotation ?: constructorAnnotation
+                val enabled = finalAnnotation?.enabled != false
+                enabled
+            }
+        }
+    }
+    return properties
 }

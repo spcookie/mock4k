@@ -16,7 +16,7 @@ annotation class Mock {
      * @author spcookie
      * @since 1.2.0
      */
-    enum class FillStrategy {
+    enum class Fill {
         /**
          * Repeat the same element for all positions
          */
@@ -112,7 +112,7 @@ annotation class Mock {
      * Length annotation for specifying collection size and fill strategy
      *
      * @param value The size of the collection (List or Map)
-     * @param fill The fill strategy: FillStrategy.REPEAT to repeat the first element, FillStrategy.RANDOM to generate random elements
+     * @param fill The fill strategy: Fill.REPEAT to repeat the first element, Fill.RANDOM to generate random elements
      *
      * @author spcookie
      * @since 1.2.0
@@ -121,6 +121,6 @@ annotation class Mock {
     @Retention(AnnotationRetention.RUNTIME)
     annotation class Length(
         val value: Int = 1,
-        val fill: FillStrategy = FillStrategy.RANDOM
+        val fill: Fill = Fill.RANDOM
     )
 }
