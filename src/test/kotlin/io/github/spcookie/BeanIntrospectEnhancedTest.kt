@@ -17,7 +17,8 @@ import kotlin.test.assertNotNull
 class BeanIntrospectEnhancedTest {
 
     private val logger = LoggerFactory.getLogger(BeanIntrospectEnhancedTest::class.java)
-    private val beanIntrospect = BeanIntrospect()
+    private val containerAdapter = ContainerAdapter()
+    private val beanIntrospect = BeanIntrospect(containerAdapter)
 
     // ==================== 注解测试Bean ====================
 
@@ -35,7 +36,7 @@ class BeanIntrospectEnhancedTest {
         @Mock.Property(rule = Mock.Rule(count = 5))
         val tags: List<String>,
 
-        @Mock.Property(length = Mock.Length(value = 3, fill = Mock.FillStrategy.REPEAT))
+        @Mock.Property(length = Mock.Length(value = 3, fill = Mock.Fill.REPEAT))
         val scores: Set<Int>
     )
 

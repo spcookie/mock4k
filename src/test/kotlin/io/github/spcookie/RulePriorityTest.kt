@@ -34,7 +34,7 @@ class RulePriorityTest {
     fun testRulePriority() {
         logger.info("测试规则优先级...")
 
-        val beanIntrospect = BeanIntrospect()
+        val beanIntrospect = BeanIntrospect(ContainerAdapter())
         val config = BeanMockConfig(includePrivate = true)
         val template = beanIntrospect.analyzeBean(TestRulePriority::class, config)
 
@@ -67,7 +67,7 @@ class RulePriorityTest {
             val value: Int = 0
         )
 
-        val beanIntrospect = BeanIntrospect()
+        val beanIntrospect = BeanIntrospect(ContainerAdapter())
         val template = beanIntrospect.analyzeBean(StepTest::class, BeanMockConfig(includePrivate = true))
 
         logger.info("Step规则测试模板: $template")
@@ -87,7 +87,7 @@ class RulePriorityTest {
             val value: Double = 0.0
         )
 
-        val beanIntrospect = BeanIntrospect()
+        val beanIntrospect = BeanIntrospect(ContainerAdapter())
         val template = beanIntrospect.analyzeBean(CountTest::class, BeanMockConfig(includePrivate = true))
 
         logger.info("Count规则测试模板: $template")
@@ -110,7 +110,7 @@ class RulePriorityTest {
             val value2: Double = 0.0
         )
 
-        val beanIntrospect = BeanIntrospect()
+        val beanIntrospect = BeanIntrospect(ContainerAdapter())
         val template = beanIntrospect.analyzeBean(DecimalTest::class, BeanMockConfig(includePrivate = true))
 
         logger.info("Decimal规则测试模板: $template")

@@ -15,9 +15,10 @@ import kotlin.test.assertNotNull
 class BeanIntrospectAndMapperTest {
 
     private val logger = LoggerFactory.getLogger(BeanIntrospectAndMapperTest::class.java)
-    private val beanIntrospect = BeanIntrospect()
+    private val containerAdapter = ContainerAdapter()
     private val typeAdapter = TypeAdapter()
-    private val beanMockMapper = BeanMockMapper(typeAdapter)
+    private val beanIntrospect = BeanIntrospect(containerAdapter)
+    private val beanMockMapper = BeanMockMapper(typeAdapter, containerAdapter)
 
     // ==================== Bean内省测试 ====================
 

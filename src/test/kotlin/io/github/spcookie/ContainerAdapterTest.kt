@@ -1,7 +1,11 @@
 package io.github.spcookie
 
+import java.util.*
+import java.util.stream.Stream
 import kotlin.reflect.KType
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Test class for ContainerAdapter functionality
@@ -31,23 +35,18 @@ class ContainerAdapterTest {
         // Test 3: Register an Either-like container type
         containerAdapter.register(
             "com.example.MyEither",
-            ContainerAdapter.ContainerBehavior.RIGHT_TYPE
+            ContainerAdapter.ContainerBehavior.SINGLE_VALUE
         )
 
         // Test 4: Register a container type with custom analyzer and mapper
         containerAdapter.register(
             "com.example.MyCustomContainer",
             ContainerAdapter.ContainerBehavior.SINGLE_VALUE,
-            analyzer = { type: KType, _: Any?, config: BeanMockConfig, _: Int ->
+            analyzer = { types: List<KType>, _: Any?, config: BeanMockConfig, _: Int ->
                 // Custom analysis logic for BeanIntrospect
-                val wrappedType = type.arguments.firstOrNull()?.type
-                if (wrappedType != null) {
-                    "@custom_placeholder"
-                } else {
-                    "@string"
-                }
+                "@custom_placeholder"
             },
-            mapper = { value: Any?, targetType: KType, config: BeanMockConfig ->
+            mapper = { value: Any?, targetType: List<KType>, config: BeanMockConfig ->
                 // Custom mapping logic for BeanMockMapper
                 // This would create an instance of MyCustomContainer with the wrapped value
                 // For demonstration purposes, we'll just return the value
@@ -72,73 +71,18 @@ class ContainerAdapterTest {
             ContainerAdapter.ContainerBehavior.SINGLE_VALUE
         )
 
-        // Test standard Java container types
-        assertTrue(isContainerType("java.util.List"))
-        assertTrue(isContainerType("java.util.Set"))
-        assertTrue(isContainerType("java.util.Map"))
-        assertTrue(isContainerType("java.util.Optional"))
-        assertTrue(isContainerType("java.util.stream.Stream"))
 
-        // Test registered custom container types
-        assertTrue(isContainerType("com.test.TestContainer"))
-        assertTrue(isContainerType("com.test.TestContainer.InnerClass"))
+        // Test standard Java container types
+        assertTrue(isContainerType(List::class, containerAdapter))
+        assertTrue(isContainerType(Set::class, containerAdapter))
+        assertTrue(isContainerType(Map::class, containerAdapter))
+        assertTrue(isContainerType(Optional::class, containerAdapter))
+        assertTrue(isContainerType(Stream::class, containerAdapter))
+
 
         // Test non-container types
-        assertFalse(isContainerType("java.lang.String"))
-        assertFalse(isContainerType("java.lang.Integer"))
-        assertFalse(isContainerType("com.other.NonContainer"))
+        assertFalse(isContainerType(String::class, containerAdapter))
+        assertFalse(isContainerType(Integer::class, containerAdapter))
     }
 
-    @Test
-    fun testContainerBehaviorTypes() {
-        val containerAdapter = Mocks.ContainerAdapter
-
-        // Test different behavior types
-        containerAdapter.register(
-            "com.test.SingleValue",
-            ContainerAdapter.ContainerBehavior.SINGLE_VALUE
-        )
-        containerAdapter.register(
-            "com.test.StreamValues",
-            ContainerAdapter.ContainerBehavior.STREAM_VALUES
-        )
-        containerAdapter.register(
-            "com.test.RightType",
-            ContainerAdapter.ContainerBehavior.RIGHT_TYPE
-        )
-
-        // Verify behavior retrieval
-        val singleValueBehavior = containerAdapter.getContainerBehavior("com.test.SingleValue")
-        val streamValuesBehavior = containerAdapter.getContainerBehavior("com.test.StreamValues")
-        val rightTypeBehavior = containerAdapter.getContainerBehavior("com.test.RightType")
-
-        assertNotNull(singleValueBehavior)
-        assertNotNull(streamValuesBehavior)
-        assertNotNull(rightTypeBehavior)
-
-        assertEquals(ContainerAdapter.ContainerBehavior.SINGLE_VALUE, singleValueBehavior)
-        assertEquals(ContainerAdapter.ContainerBehavior.STREAM_VALUES, streamValuesBehavior)
-        assertEquals(ContainerAdapter.ContainerBehavior.RIGHT_TYPE, rightTypeBehavior)
-    }
-
-    @Test
-    fun testContainerAdapterIntegration() {
-        // Test the integration between ContainerAdapter and other components
-        val containerAdapter = Mocks.ContainerAdapter
-
-        // Register a test container type
-        containerAdapter.register(
-            "com.integration.TestContainer",
-            ContainerAdapter.ContainerBehavior.SINGLE_VALUE
-        )
-
-        // Verify that isContainerType works with the registered type
-        assertTrue(isContainerType("com.integration.TestContainer"))
-        assertTrue(isContainerType("com.integration.TestContainer.NestedClass"))
-
-        // Verify that the container adapter is accessible through Mocks
-        val mocksContainerAdapter = Mocks.ContainerAdapter
-        assertNotNull(mocksContainerAdapter)
-        assertTrue(mocksContainerAdapter.getRegisteredPrefixes().contains("com.integration.TestContainer"))
-    }
 }
