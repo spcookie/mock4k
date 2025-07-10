@@ -58,27 +58,24 @@ internal class BeanMockMapper(
         val constructor = clazz.primaryConstructor
             ?: throw IllegalArgumentException("No primary constructor found for ${clazz.simpleName}")
 
-        val args = constructor.parameters.map { param ->
-            val propertyName = param.name ?: throw IllegalArgumentException("Parameter name not available")
+        val args = constructor.parameters
+            .filter { it.findAnnotation<Mock.Property>()?.enabled != false }
+            .map { param ->
+                val propertyName = param.name ?: throw IllegalArgumentException("Parameter name not available")
 
-            val mockProperty = param.findAnnotation<Mock.Property>()
+                val rawValue = findValueForProperty(propertyName, data)
 
-            if (mockProperty?.enabled == false) {
-                return@map
-            }
-            val rawValue = findValueForProperty(propertyName, data)
-
-            if (rawValue != null) {
-                convertValue(rawValue, param.type, config)
-            } else {
-                // Use default value if available
-                if (param.isOptional) {
-                    null
+                if (rawValue != null) {
+                    convertValue(rawValue, param.type, config)
                 } else {
-                    generateValueForType(param.type, config)
+                    // Use default value if available
+                    if (param.isOptional) {
+                        null
+                    } else {
+                        generateValueForType(param.type, config)
+                    }
                 }
-            }
-        }.toTypedArray()
+            }.toTypedArray()
 
         return constructor.call(*args)
     }
@@ -255,6 +252,7 @@ internal class BeanMockMapper(
                             value.toSet()
                         }
                     }
+
                     else -> setOf(value)
                 }
             }

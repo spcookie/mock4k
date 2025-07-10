@@ -33,7 +33,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     private fun <T : Any> analyzeBean(clazz: KClass<T>, config: BeanMockConfig, currentDepth: Int): Map<String, Any?> {
 
         // Check depth limit to avoid infinite recursion
-        if (currentDepth >= config.depth) {
+        if (currentDepth > config.depth) {
             return emptyMap()
         }
 
