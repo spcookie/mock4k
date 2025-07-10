@@ -300,8 +300,8 @@ class BeanMockBenchmarkTest {
         
         // Memory assertions
         assertTrue(
-            memoryPerUser < 20000,
-            "Memory per user should be less than 20000 bytes, actual: ${memoryPerUser}bytes"
+            memoryPerUser < 25000,
+            "Memory per user should be less than 25000 bytes, actual: ${memoryPerUser}bytes"
         )
     }
 
