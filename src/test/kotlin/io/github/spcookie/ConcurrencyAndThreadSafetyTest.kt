@@ -1,5 +1,6 @@
 package io.github.spcookie
 
+import com.google.gson.Gson
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -31,10 +32,10 @@ class ConcurrencyAndThreadSafetyTest {
 
         val template = """
         {
-            "id": "{{long}}",
-            "name": "{{name}}",
-            "value": "{{int(1,1000)}}",
-            "timestamp": "{{datetime}}"
+            "id": "@long",
+            "name": "@name",
+            "value": "@integer(1,1000)",
+            "timestamp": "@datetime"
         }
         """.trimIndent()
 
@@ -44,12 +45,22 @@ class ConcurrencyAndThreadSafetyTest {
         val results = ConcurrentLinkedQueue<ThreadSafeBean>()
         val exceptions = ConcurrentLinkedQueue<Exception>()
         val latch = CountDownLatch(threadCount)
+        val gson = Gson()
 
         repeat(threadCount) { threadIndex ->
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = mock(template) as ThreadSafeBean
+                        val bean = gson.fromJson(
+                            gson.toJson(
+                                mock(
+                                    gson.fromJson(
+                                        template,
+                                        Map::class.java
+                                    ) as Map<String, Any>
+                                )
+                            ), ThreadSafeBean::class.java
+                        )
                         results.add(bean)
                     }
                 } catch (e: Exception) {
@@ -88,9 +99,9 @@ class ConcurrencyAndThreadSafetyTest {
 
         val template = """
         {
-            "id": "{{long}}",
-            "name": "{{string(10)}}",
-            "active": "{{boolean}}"
+            "id": "@long",
+            "name": "@string(10)",
+            "active": "@boolean"
         }
         """.trimIndent()
 
@@ -103,11 +114,13 @@ class ConcurrencyAndThreadSafetyTest {
 
         val startTime = System.currentTimeMillis()
 
+        val gson = Gson()
+
         repeat(threadCount) { threadIndex ->
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = mock(template) as Map<String, Any>
+                        val bean = mock(gson.toJson(template)) as Map<String, Any>
                         assertNotNull(bean)
                         successCount.incrementAndGet()
                     }
@@ -486,8 +499,8 @@ class ConcurrencyAndThreadSafetyTest {
 
         val validTemplate = """
         {
-            "id": "{{long}}",
-            "name": "{{string(10)}}"
+            "id": "@long",
+            "name": "@string(10)"
         }
         """.trimIndent()
 
@@ -506,7 +519,7 @@ class ConcurrencyAndThreadSafetyTest {
                         try {
                             // 交替使用有效和无效模板
                             val template = if (iteration % 2 == 0) validTemplate else invalidTemplate
-                            val bean = mock(template) as Map<String, Any>
+                            val bean = mock(Gson().fromJson(template, Map::class.java) as Map<String, Any>)
 
                             if (iteration % 2 == 0) {
                                 // 有效模板应该成功

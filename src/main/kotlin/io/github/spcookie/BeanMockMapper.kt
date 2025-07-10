@@ -30,21 +30,21 @@ internal class BeanMockMapper(
      * Map generated data to Bean instance
      */
     fun <T : Any> mapToBean(clazz: KClass<T>, data: Map<String, Any?>, config: BeanMockConfig): T {
-        val isDataClass = clazz.isData
-        val isJavaRecord = clazz.java.isRecord
+//        val isDataClass = clazz.isData
+//        val isJavaRecord = clazz.java.isRecord
 
-        return when {
+//        return when {
             // For Kotlin data class or Java record, use constructor-based creation
-            isDataClass || isJavaRecord -> {
+//            isDataClass || isJavaRecord -> {
                 val instance = createInstanceWithConstructor(clazz, data, config)
                 // After constructor creation, map any remaining unmapped properties
                 mapRemainingProperties(instance, clazz, data, config)
-                instance
-            }
+        return instance
+//            }
 
             // For regular beans, use property-based creation
-            else -> createInstanceWithProperties(clazz, data, config)
-        }
+//            else -> createInstanceWithProperties(clazz, data, config)
+//        }
     }
 
     /**
