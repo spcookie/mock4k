@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.jvm.java
 import kotlin.test.assertNotNull
 
 /**
@@ -120,7 +121,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = mock(gson.toJson(template)) as Map<String, Any>
+                        val bean = mock(gson.fromJson(template, Map::class.java) as Map<String, Any>) as Map<String, Any>
                         assertNotNull(bean)
                         successCount.incrementAndGet()
                     }
@@ -178,7 +179,7 @@ class ConcurrencyAndThreadSafetyTest {
                 try {
                     val threadResults = mutableListOf<Map<String, Any>>()
                     repeat(iterationsPerThread) {
-                        val bean = mock(template) as Map<String, Any>
+                        val bean = mock(Gson().fromJson(template, Map::class.java) as Map<String, Any>) as Map<String, Any>
                         threadResults.add(bean)
                     }
                     results[threadIndex] = threadResults
@@ -238,26 +239,26 @@ class ConcurrencyAndThreadSafetyTest {
 
         val userTemplate = """
         {
-            "id": "{{long(1,1000)}}",
-            "name": "{{name}}",
-            "email": "{{email}}"
+            "id": "@long(1,1000)",
+            "name": "@name",
+            "email": "@email"
         }
         """.trimIndent()
 
         val productTemplate = """
         {
-            "id": "{{long(1001,2000)}}",
-            "name": "{{string(15)}}",
-            "price": "{{double(1.0,1000.0)}}"
+            "id": "@long(1001,2000)",
+            "name": "@string(15)",
+            "price": "@float(1.0,1000.0)"
         }
         """.trimIndent()
 
         val orderTemplate = """
         {
-            "id": "{{long(2001,3000)}}",
-            "userId": "{{long(1,1000)}}",
-            "productId": "{{long(1001,2000)}}",
-            "quantity": "{{int(1,10)}}"
+            "id": "@long(2001,3000)",
+            "userId": "@long(1,1000)",
+            "productId": "@long(1001,2000)",
+            "quantity": "@integer(1,10)"
         }
         """.trimIndent()
 
@@ -272,8 +273,9 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val user = mock(userTemplate) as UserBean
-                        users.add(user)
+                        val user = mock(Gson().fromJson(userTemplate, Map::class.java) as Map<String, Any>)
+                        val userBean = UserBean(user["id"] as Long, user["name"] as String, user["email"] as String)
+                        users.add(userBean)
                     }
                 } finally {
                     latch.countDown()
@@ -286,8 +288,9 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val product = mock(productTemplate) as ProductBean
-                        products.add(product)
+                        val product = mock(Gson().fromJson(productTemplate, Map::class.java) as Map<String, Any>)
+                        val productBean = ProductBean(product["id"] as Long, product["name"] as String, product["price"] as Double)
+                        products.add(productBean)
                     }
                 } finally {
                     latch.countDown()
@@ -300,10 +303,14 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(20) {
-                        val order = mock(orderTemplate) as OrderBean
-                        orders.add(order)
+                        val order = mock(Gson().fromJson(orderTemplate, Map::class.java) as Map<String, Any>)
+                        val orderBean = OrderBean(order["id"] as Long, order["userId"] as Long, order["productId"] as Long, order["quantity"] as Int)
+                        orders.add(orderBean)
                     }
-                } finally {
+                } catch (e: Exception) {
+                    logger.error("不同模板并发测试线程异常", e)
+                }
+                finally {
                     latch.countDown()
                 }
             }
@@ -376,7 +383,7 @@ class ConcurrencyAndThreadSafetyTest {
 
                 try {
                     while (System.currentTimeMillis() - threadStartTime < runTimeSeconds * 1000) {
-                        val bean = mock(template) as Map<String, Any>
+                        val bean = mock(Gson().fromJson(template, Map::class.java) as Map<String, Any>) as Map<String, Any>
                         assertNotNull(bean)
                         threadOperations++
                         totalOperations.incrementAndGet()
@@ -451,7 +458,7 @@ class ConcurrencyAndThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(iterationsPerThread) {
-                        val bean = mock(template) as Map<String, Any>
+                        val bean = mock(Gson().fromJson(template, Map::class.java) as Map<String, Any>) as Map<String, Any>
                         results.add(bean)
 
                         // 偶尔触发GC

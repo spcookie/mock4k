@@ -73,9 +73,9 @@ class ContainerAdapterTest {
 
 
         // Test standard Java container types
-        assertTrue(isContainerType(List::class, containerAdapter))
-        assertTrue(isContainerType(Set::class, containerAdapter))
-        assertTrue(isContainerType(Map::class, containerAdapter))
+        assertTrue(isCollectionType(List::class))
+        assertTrue(isCollectionType(Set::class))
+        assertTrue(isCollectionType(Map::class))
         assertTrue(isContainerType(Optional::class, containerAdapter))
         assertTrue(isContainerType(Stream::class, containerAdapter))
 

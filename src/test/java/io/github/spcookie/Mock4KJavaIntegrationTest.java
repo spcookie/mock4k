@@ -67,7 +67,7 @@ public class Mock4KJavaIntegrationTest {
                 }
                 """;
 
-        Object mockResult = mock(complexJson);
+        Object mockResult = mock(gson.fromJson(complexJson, Map.class));
         assertNotNull(mockResult);
 
         Map<?, ?> result = gson.fromJson(mockResult.toString(), Map.class);
@@ -177,7 +177,7 @@ public class Mock4KJavaIntegrationTest {
 
     @Test
     public void testErrorHandling() {
-        Object invalidJson = mock("invalid json");
+        Object invalidJson = mock(List.of("invalid json"));
         assertNotNull(invalidJson);
 
         // Test with empty JSON
@@ -192,16 +192,15 @@ public class Mock4KJavaIntegrationTest {
         // Test handling of special characters and Unicode
         Mocks.Random.extend("unicodeString", () -> "测试中文字符 🚀 Special chars: @#$%^&*()");
 
-        Object mockResult = mock("""
+        Map<?, ?> result = mock(gson.fromJson("""
                 {
                     "unicode": "@unicodeString",
                     "normal": "@string"
                 }
-                """);
+                """, Map.class));
 
-        assertNotNull(mockResult);
+        assertNotNull(result);
 
-        Map<?, ?> result = gson.fromJson(mockResult.toString(), Map.class);
         assertEquals("测试中文字符 🚀 Special chars: @#$%^&*()", result.get("unicode"));
         assertInstanceOf(String.class, result.get("normal"));
     }
@@ -243,7 +242,7 @@ public class Mock4KJavaIntegrationTest {
         for (int i = 0; i < 10; i++) {
             Thread thread = new Thread(() -> {
                 try {
-                    Object mockResult = mock("{\"id\": \"@int\", \"name\": \"@string\"}");
+                    Object mockResult = mock(gson.fromJson("{\"id\": \"@int\", \"name\": \"@string\"}", Map.class));
                     assertNotNull(mockResult);
                 } catch (Exception e) {
                     exceptions.add(e);

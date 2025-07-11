@@ -73,7 +73,7 @@ class RulePriorityTest {
         logger.info("Step规则测试模板: $template")
 
         // step规则应该忽略所有其他规则
-        assertEquals("@INTEGER", template["value|+3"], "step规则应该忽略其他所有规则")
+        assertEquals("@integer", template["value|+3"], "step规则应该忽略其他所有规则")
 
         logger.info("Step规则优先级测试通过！")
     }
@@ -93,7 +93,7 @@ class RulePriorityTest {
         logger.info("Count规则测试模板: $template")
 
         // count规则应该包含decimal但忽略range
-        assertEquals("@DOUBLE", template["value|7.1-3"], "count规则应该包含decimal但忽略range")
+        assertEquals("@float", template["value|7.1-3"], "count规则应该包含decimal但忽略range")
 
         logger.info("Count规则优先级测试通过！")
     }
@@ -116,8 +116,8 @@ class RulePriorityTest {
         logger.info("Decimal规则测试模板: $template")
 
         // decimal规则应该使用默认值1
-        assertEquals("@DOUBLE", template["value1|1.2-5"], "dmin-dmax应该使用默认值1")
-        assertEquals("@DOUBLE", template["value2|1.3"], "dcount应该使用默认值1")
+        assertEquals("@float", template["value1|1.2-5"], "dmin-dmax应该使用默认值1")
+        assertEquals("@float", template["value2|1.3"], "dcount应该使用默认值1")
 
         logger.info("Decimal规则优先级测试通过！")
     }
