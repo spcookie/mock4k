@@ -1,7 +1,11 @@
 package io.github.spcookie
 
 import java.util.*
+import java.util.concurrent.Callable
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Future
+import java.util.function.Supplier
+import java.util.stream.Stream
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
@@ -163,20 +167,24 @@ class ContainerAdapter {
                         Optional.ofNullable(wrappedValue)
                     }
 
-                    CompletableFuture::class.java.isAssignableFrom(targetClass.java) ||
-                            java.util.concurrent.Future::class.java.isAssignableFrom(targetClass.java) -> {
+                    Stream::class.java.isAssignableFrom(targetClass.java) -> {
+                        val wrappedValue = convertWrappedValue(value, wrappedType, config)
+                        Stream.ofNullable(wrappedValue)
+                    }
+
+                    Future::class.java.isAssignableFrom(targetClass.java) -> {
                         val wrappedValue = convertWrappedValue(value, wrappedType, config)
                         CompletableFuture.completedFuture(wrappedValue)
                     }
 
-                    java.util.concurrent.Callable::class.java.isAssignableFrom(targetClass.java) -> {
+                    Callable::class.java.isAssignableFrom(targetClass.java) -> {
                         val wrappedValue = convertWrappedValue(value, wrappedType, config)
-                        java.util.concurrent.Callable { wrappedValue }
+                        Callable { wrappedValue }
                     }
 
-                    java.util.function.Supplier::class.java.isAssignableFrom(targetClass.java) -> {
+                    Supplier::class.java.isAssignableFrom(targetClass.java) -> {
                         val wrappedValue = convertWrappedValue(value, wrappedType, config)
-                        java.util.function.Supplier { wrappedValue }
+                        Supplier { wrappedValue }
                     }
 
                     Lazy::class.java.isAssignableFrom(targetClass.java) -> {

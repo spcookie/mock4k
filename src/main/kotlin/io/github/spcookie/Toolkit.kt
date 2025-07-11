@@ -4,6 +4,12 @@ import java.lang.reflect.Modifier
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
+import java.util.concurrent.Callable
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Future
+import java.util.function.Supplier
+import java.util.stream.Stream
+import kotlin.jvm.java
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
@@ -72,11 +78,11 @@ fun isDateTimeType(type: KClass<*>): Boolean {
 fun isContainerType(kClass: KClass<*>, containerAdapter: ContainerAdapter): Boolean {
     // First check Java standard types
     when {
-        java.util.Optional::class.java.isAssignableFrom(kClass.java) -> return true
-        java.util.concurrent.CompletableFuture::class.java.isAssignableFrom(kClass.java) -> return true
-        java.util.concurrent.Future::class.java.isAssignableFrom(kClass.java) -> return true
-        java.util.concurrent.Callable::class.java.isAssignableFrom(kClass.java) -> return true
-        java.util.function.Supplier::class.java.isAssignableFrom(kClass.java) -> return true
+        Optional::class.java.isAssignableFrom(kClass.java) -> return true
+        Stream::class.java.isAssignableFrom(kClass.java) -> return true
+        Future::class.java.isAssignableFrom(kClass.java) -> return true
+        Callable::class.java.isAssignableFrom(kClass.java) -> return true
+        Supplier::class.java.isAssignableFrom(kClass.java) -> return true
         Lazy::class.java.isAssignableFrom(kClass.java) -> return true
     }
 
