@@ -18,6 +18,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.slf4j:slf4j-api:2.0.9")
+    implementation("net.bytebuddy:byte-buddy:1.14.10")
+    implementation("org.json:json:20240303")
 
     testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation("ch.qos.logback:logback-classic:1.4.11")

@@ -1,9 +1,12 @@
 package io.github.spcookie
 
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
+
 
 /**
  * Mock4K - A Kotlin library for generating mock data
- * 
+ *
  * This is the main entry point for the Mock4K library, providing utilities
  * for generating mock data including random values, locale-specific data,
  * and complex bean objects with customizable configurations.
@@ -15,7 +18,7 @@ object Mocks {
 
     /**
      * The Random utility instance for generating random values
-     * 
+     *
      * Provides access to various random data generation methods including
      * numbers, strings, dates, and other primitive types.
      */
@@ -24,7 +27,7 @@ object Mocks {
 
     /**
      * The Locale utility instance for locale-specific data generation
-     * 
+     *
      * Manages locale settings and provides locale-aware data generation
      * such as names, addresses, and other region-specific information.
      */
@@ -33,7 +36,7 @@ object Mocks {
 
     /**
      * Type adapter manager for custom type conversion
-     * 
+     *
      * Allows registration of custom type adapters to handle specific
      * data types during mock data generation process.
      */
@@ -42,7 +45,7 @@ object Mocks {
 
     /**
      * Container adapter manager for custom container type handling
-     * 
+     *
      * Manages adapters for container types like List, Set, Map, etc.
      * to customize how collections are populated with mock data.
      */
@@ -51,7 +54,7 @@ object Mocks {
 
     /**
      * Singleton MockEngine instance to maintain state across calls
-     * 
+     *
      * The core engine responsible for processing templates and generating
      * mock data based on various input formats and configurations.
      */
@@ -59,7 +62,7 @@ object Mocks {
 
     /**
      * BeanMockBridge instance for handling bean object generation
-     * 
+     *
      * Bridges the gap between the core mock engine and bean-specific
      * generation logic, integrating type and container adapters.
      */
@@ -67,7 +70,7 @@ object Mocks {
 
     /**
      * Generate mock data based on template (internal shorthand method)
-     * 
+     *
      * This is an internal utility method that delegates to the mock engine
      * for generating data based on the provided template.
      *
@@ -82,7 +85,7 @@ object Mocks {
 
     /**
      * Generate mock bean object (internal shorthand method)
-     * 
+     *
      * This is an internal utility method that delegates to the bean mock engine
      * for generating complex object instances with configurable property inclusion.
      *
@@ -96,7 +99,7 @@ object Mocks {
      */
     @JvmSynthetic
     internal fun <T : Any> bg(
-        clazz: kotlin.reflect.KClass<T>,
+        clazz: KClass<T>,
         includePrivate: Boolean? = null,
         includeStatic: Boolean? = null,
         includeTransient: Boolean? = null,
@@ -105,11 +108,26 @@ object Mocks {
         return beanMockEngine.mockBean(clazz, includePrivate, includeStatic, includeTransient, depth)
     }
 
+
+    /**
+     * Create a mock stub object using ByteBuddy instrumentation (Kotlin version)
+     *
+     * This method creates a dynamic subclass of the given class and intercepts
+     * all public non-void/non-Unit methods to return mock values.
+     *
+     * @param clazz The Kotlin class to create a stub for
+     * @return A stubbed instance where public methods return mock values
+     * @throws IllegalArgumentException if the class cannot be subclassed
+     */
+    internal fun <T : Any> s(clazz: KClass<T>): T {
+        return MethodMockStub.make(clazz).createInstance()
+    }
+
 }
 
 /**
  * Generate mock data based on template map
- * 
+ *
  * Creates mock data by processing a map template where keys represent
  * field names and values represent the data generation rules or patterns.
  *
@@ -124,7 +142,7 @@ fun mock(template: Map<String, *>): Map<String, *> {
 
 /**
  * Generate mock data based on template list
- * 
+ *
  * Creates mock data by processing a list template where each element
  * represents a data generation rule or pattern to be applied.
  *
@@ -135,6 +153,22 @@ fun mock(template: Map<String, *>): Map<String, *> {
 @Suppress("UNCHECKED_CAST")
 fun mock(template: List<*>): List<*> {
     return Mocks.g(template as Any) as List<*>
+}
+
+/**
+ * Generate mock data based on JSON template string
+ *
+ * Parses a JSON template string and generates mock data according to the
+ * template structure, then returns the result as a JSON string.
+ *
+ * @param template The JSON template string containing generation patterns
+ * @return Generated mock data as a JSON string
+ * @throws IllegalArgumentException if the template is not valid JSON
+ */
+fun mock(template: String): String {
+    val parse = Mson.parse(template)
+    return parse?.let { Mson.stringify(Mocks.g(parse)) }
+        ?: throw IllegalArgumentException("Invalid json template")
 }
 
 /**
@@ -149,7 +183,7 @@ fun mock(template: List<*>): List<*> {
  */
 @JvmSynthetic
 fun <T : Any> mock(
-    clazz: kotlin.reflect.KClass<T>,
+    clazz: KClass<T>,
     includePrivate: Boolean? = null,
     includeStatic: Boolean? = null,
     includeTransient: Boolean? = null,
@@ -160,7 +194,7 @@ fun <T : Any> mock(
 
 /**
  * Generate mock bean object with reified type
- * 
+ *
  * Convenience method that uses Kotlin's reified generics to automatically
  * determine the target class type, eliminating the need to pass the class explicitly.
  *
@@ -184,7 +218,7 @@ inline fun <reified T : Any> mock(
 
 /**
  * Generate mock bean object using configuration object
- * 
+ *
  * Alternative method that accepts a configuration object instead of individual
  * parameters, providing a more structured approach to bean generation settings.
  *
@@ -195,7 +229,7 @@ inline fun <reified T : Any> mock(
  */
 @JvmSynthetic
 fun <T : Any> mock(
-    clazz: kotlin.reflect.KClass<T>,
+    clazz: KClass<T>,
     config: BeanMockConfig? = null
 ): T {
     val includePrivate = config?.includePrivate
@@ -207,7 +241,7 @@ fun <T : Any> mock(
 
 /**
  * Generate mock bean object with reified type using configuration object
- * 
+ *
  * Combines the convenience of reified generics with configuration object approach,
  * providing the most flexible and type-safe way to generate mock beans.
  *
@@ -250,7 +284,7 @@ fun <T : Any> mock(
 
 /**
  * Generate mock bean object using Java Class and configuration object
- * 
+ *
  * Java-friendly version that accepts a configuration object, providing
  * a structured approach for Java developers to configure bean generation.
  *
@@ -268,4 +302,49 @@ fun <T : Any> mock(
     val includeTransient = config?.includeTransient
     val depth = config?.depth
     return mock(clazz, includePrivate, includeStatic, includeTransient, depth)
+}
+
+/**
+ * Create a mock stub object using ByteBuddy instrumentation
+ *
+ * Creates a dynamic subclass of the given class and intercepts all public
+ * non-void/non-Unit methods to return mock values. This is useful for creating
+ * test doubles where you need actual method calls to return mock data.
+ *
+ * @param clazz The Kotlin class to create a stub for
+ * @return A stubbed instance where public methods return mock values
+ * @throws IllegalArgumentException if the class cannot be subclassed
+ */
+@JvmSynthetic
+fun <T : Any> load(clazz: KClass<T>): T {
+    return Mocks.s(clazz)
+}
+
+/**
+ * Create a mock stub object using ByteBuddy instrumentation with reified type
+ *
+ * Convenience method that uses Kotlin's reified generics to automatically
+ * determine the target class type for stub creation.
+ *
+ * @param T The type to create a stub for (automatically inferred)
+ * @return A stubbed instance where public methods return mock values
+ * @throws IllegalArgumentException if the class cannot be subclassed
+ */
+@JvmSynthetic
+inline fun <reified T : Any> load(): T {
+    return load(T::class)
+}
+
+/**
+ * Create a mock stub object using ByteBuddy instrumentation (Java-friendly version)
+ *
+ * Java-compatible version that accepts a Java Class object and creates
+ * a stubbed instance with intercepted public methods.
+ *
+ * @param clazz The Java class to create a stub for
+ * @return A stubbed instance where public methods return mock values
+ * @throws IllegalArgumentException if the class cannot be subclassed
+ */
+fun <T : Any> load(clazz: Class<T>): T {
+    return load(clazz.kotlin)
 }

@@ -5,11 +5,9 @@ import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
 import java.util.concurrent.Callable
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 import java.util.function.Supplier
 import java.util.stream.Stream
-import kotlin.jvm.java
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
@@ -41,6 +39,25 @@ fun isBasicType(kClass: KClass<*>): Boolean {
         BigInteger::class -> true
         UUID::class -> true
         else -> isDateTimeType(kClass)
+    }
+}
+
+/**
+ * Check if type is a Kotlin or Java primitive type (including wrapper types)
+ */
+fun isPrimitiveType(kClass: KClass<*>): Boolean {
+    return when (kClass) {
+        // Kotlin primitive types and their Java wrapper equivalents
+        String::class -> true
+        Int::class, Integer::class -> true
+        Long::class, java.lang.Long::class -> true
+        Float::class, java.lang.Float::class -> true
+        Double::class, java.lang.Double::class -> true
+        Boolean::class, java.lang.Boolean::class -> true
+        Char::class, Character::class -> true
+        Byte::class, java.lang.Byte::class -> true
+        Short::class, java.lang.Short::class -> true
+        else -> false
     }
 }
 

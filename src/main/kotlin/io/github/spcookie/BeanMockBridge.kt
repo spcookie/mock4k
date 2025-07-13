@@ -2,6 +2,7 @@ package io.github.spcookie
 
 import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 
 /**
@@ -31,17 +32,22 @@ internal class BeanMockBridge(
         includeTransient: Boolean? = null,
         depth: Int? = null
     ): T {
-        val mockBeanAnnotation = clazz.findAnnotation<Mock.Bean>()
-        val config = BeanMockConfig(
-            // Method parameters take precedence over annotation values
-            // If method parameter is null, use annotation value; otherwise use method parameter
-            includePrivate = includePrivate ?: (mockBeanAnnotation?.includePrivate ?: false),
-            includeStatic = includeStatic ?: (mockBeanAnnotation?.includeStatic ?: false),
-            includeTransient = includeTransient ?: (mockBeanAnnotation?.includeTransient ?: false),
-            depth = depth ?: (mockBeanAnnotation?.depth ?: 3)
-        )
+        return when {
+            isPrimitiveType(clazz) -> clazz.createInstance()
+            else -> {
+                val mockBeanAnnotation = clazz.findAnnotation<Mock.Bean>()
+                val config = BeanMockConfig(
+                    // Method parameters take precedence over annotation values
+                    // If method parameter is null, use annotation value; otherwise use method parameter
+                    includePrivate = includePrivate ?: (mockBeanAnnotation?.includePrivate ?: false),
+                    includeStatic = includeStatic ?: (mockBeanAnnotation?.includeStatic ?: false),
+                    includeTransient = includeTransient ?: (mockBeanAnnotation?.includeTransient ?: false),
+                    depth = depth ?: (mockBeanAnnotation?.depth ?: 3)
+                )
 
-        return mockBeanInternal(clazz, config)
+                mockBeanInternal(clazz, config)
+            }
+        }
     }
 
     /**
