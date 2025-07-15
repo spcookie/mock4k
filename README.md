@@ -48,7 +48,7 @@
 
 ```kotlin
 dependencies {
-    implementation("io.github.spcookie:mock4k:1.1.1")
+    implementation("io.github.spcookie:mock4k:1.2.0")
 }
 ```
 
@@ -56,7 +56,7 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'io.github.spcookie:mock4k:1.1.1'
+    implementation 'io.github.spcookie:mock4k:1.2.0'
 }
 ```
 
@@ -66,7 +66,7 @@ dependencies {
 <dependency>
     <groupId>io.github.spcookie</groupId>
     <artifactId>mock4k</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
@@ -89,7 +89,7 @@ repositories {
 }
 
 dependencies {
-    implementation("io.github.spcookie:mock4k:1.1.1")
+    implementation("io.github.spcookie:mock4k:1.2.0")
 }
 ```
 
@@ -108,7 +108,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'io.github.spcookie:mock4k:1.1.1'
+    implementation 'io.github.spcookie:mock4k:1.2.0'
 }
 ```
 
@@ -127,7 +127,7 @@ Add the repository to your `pom.xml`:
 <dependency>
     <groupId>io.github.spcookie</groupId>
     <artifactId>mock4k</artifactId>
-    <version>1.1.1</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
