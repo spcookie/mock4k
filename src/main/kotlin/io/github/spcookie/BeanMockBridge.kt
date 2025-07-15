@@ -32,10 +32,14 @@ internal class BeanMockBridge(
     ): T {
         return when {
             isSingleType(clazz) -> {
+                when {
+
+                }
+                val params = clazz.typeParameters.size.downTo(0).map { Any::class.createType() }
                 @Suppress("UNCHECKED_CAST")
                 beanMockMapper.convertValue(
                     beanIntrospect.analyzePropertyType(
-                        clazz.createType(),
+                        clazz.createType(params),
                         null
                     )?.let {
                         mockEngine.generate(it)
