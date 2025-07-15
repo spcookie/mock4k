@@ -20,6 +20,7 @@
 - [📦 安装](#-安装)
 - [🚀 快速开始](#-快速开始)
 - [📚 可用规则](#-可用规则)
+- [🔄 更新日志](#-更新日志)
 - [🛠️ 开发](#-开发)
 - [🤝 贡献](#-贡献)
 - [🐛 问题反馈](#-问题反馈)
@@ -37,6 +38,10 @@
 - 📝 **模板支持**: 基于占位符的模板系统
 - 🔌 **自定义占位符**: 支持扩展和自定义占位符功能
 - 🔍 **正则表达式**: 支持基于正则表达式模式的字符串生成
+- 🏗️ **Bean Mock**: 自动生成复杂对象，支持递归深度限制和内省功能
+- 🆔 **UUID 支持**: 内置 UUID 生成器，支持标准 UUID 格式
+- 🔄 **容器类型**: 增强的数组、列表、集合等容器类型处理
+- ⚡ **性能优化**: 优化的代码结构和改进的互操作性
 
 ## 📦 安装
 
@@ -181,14 +186,6 @@ fun main() {
     val randomString = MockRandom.string(5, 15)
     println("随机整数: $randomInt, 随机字符串: $randomString")
     
-    // 国际化电话号码生成
-    val mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE.alias)
-    val landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE.alias)
-    val tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE.alias)
-    println("移动电话: $mobilePhone")
-    println("固定电话: $landlinePhone")
-    println("免费电话: $tollFreePhone")
-    
     // 设置语言环境
     MockRandom.setLocale(java.util.Locale.ENGLISH)
     val englishName = MockRandom.name()
@@ -198,8 +195,16 @@ fun main() {
     val regexString = mock("/[a-z]{3}\\d{2}/")
     println("正则生成: $regexString")
     
+    // Bean Mock 示例（需要定义数据类）
+    data class User(val id: String, val name: String, val email: String)
+    val userBean = mock<User>()
+    println("Bean对象: $userBean")
+    
     // 自定义占位符扩展示例
-    val customTemplate = mock("@string(5)|2-3")
+    Mock.Random.entend("people") { args ->
+        "people-${args[0]}"
+    }
+    val customTemplate = mock("@people(5)")
     println("自定义模板: $customTemplate")
 }
 ```
@@ -240,14 +245,6 @@ public class JavaExample {
         String randomString = MockRandom.string(5, 15);
         System.out.println("随机整数: " + randomInt + ", 随机字符串: " + randomString);
         
-        // 国际化电话号码生成
-        String mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE.alias);
-        String landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE.alias);
-        String tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE.alias);
-        System.out.println("移动电话: " + mobilePhone);
-        System.out.println("固定电话: " + landlinePhone);
-        System.out.println("免费电话: " + tollFreePhone);
-        
         // 设置语言环境
         MockRandom.setLocale(java.util.Locale.ENGLISH);
         String englishName = MockRandom.name();
@@ -257,8 +254,17 @@ public class JavaExample {
         String regexString = mock("/[a-z]{3}\\d{2}/");
         System.out.println("正则生成: " + regexString);
         
+        // UUID 生成
+        String uuid = mock("@uuid");
+        System.out.println("UUID: " + uuid);
+        
+        // Bean Mock 示例（需要定义数据类）
+        // User userBean = mock(User.class);
+        // System.out.println("Bean对象: " + userBean);
+        
         // 自定义占位符扩展示例
-        String customTemplate = mock("@string(5)|2-3");
+        Mock.Random.entend("people", args -> "people-%s".formatted(args[0]));
+        String customTemplate = mock("@people(5)");
         System.out.println("自定义模板: " + customTemplate);
     }
 }
@@ -279,6 +285,7 @@ public class JavaExample {
 | `@string(length)`       | 指定长度的随机字符串         | `@string(5)` → `"abcde"`                           |
 | `@string(min, max)`     | 长度在最小值和最大值之间的随机字符串 | `@string(5,10)` → `"abcdef"`                       |
 | `@guid`                 | 随机GUID             | `@guid` → `"550e8400-e29b-41d4-a716-446655440000"` |
+| `@uuid`                 | 随机UUID             | `@uuid` → `"550e8400-e29b-41d4-a716-446655440000"` |
 | `@id`                   | 随机ID               | `@id` → `"abc123def456"`                           |
 
 ### 常用数据
@@ -591,6 +598,134 @@ val result = mock(template)
 // 生成的数据将全部是中文本地化内容
 ```
 
+### 🏗️ Bean Mock 功能
+
+Bean Mock 支持自动生成复杂的 Java Bean 和 Kotlin 数据类对象。
+
+#### 基本使用
+
+```kotlin
+// 定义数据类
+data class User(
+    val id: Long,
+    val name: String,
+    val email: String,
+    val age: Int,
+    val active: Boolean
+)
+
+// 自动生成 User 对象
+val user = mock<User>()
+println(user)
+// 输出: User(id=123456, name="张三", email="user@example.com", age=25, active=true)
+```
+
+#### 使用注解控制生成
+
+```kotlin
+import io.github.spcookie.Mock
+
+data class Product(
+    @Mock("@integer(1,1000)")
+    val id: Long,
+    
+    @Mock("@string(5,20)")
+    val name: String,
+    
+    @Mock("@float(10,1000)")
+    val price: Double,
+    
+    @Mock("@boolean(0.8)")
+    val inStock: Boolean
+)
+
+val product = mock<Product>()
+```
+
+#### 复杂嵌套对象
+
+```kotlin
+data class Address(
+    val street: String,
+    val city: String,
+    val zipCode: String
+)
+
+data class Company(
+    val name: String,
+    val address: Address
+)
+
+data class Employee(
+    val id: Long,
+    val name: String,
+    val company: Company,
+    val skills: List<String>
+)
+
+// 自动处理嵌套对象和集合
+val employee = mock<Employee>()
+```
+
+#### 配置选项
+
+```kotlin
+// 使用配置控制生成行为
+val config = BeanMockConfig(
+    maxDepth = 5,  // 最大递归深度
+    fillStrategy = Mock.FillStrategy.ALL  // 填充策略
+)
+
+val user = mock<User>(config)
+```
+
+#### Java 中使用
+
+```java
+// Java 中的使用方式
+User user = Mocks.mock(User.class);
+System.out.println(user);
+
+// 使用配置
+BeanMockConfig config = new BeanMockConfig(5, Mock.FillStrategy.ALL);
+User configuredUser = Mocks.mock(User.class, config);
+```
+
+#### 支持的类型
+
+Bean Mock 支持以下类型的自动生成：
+
+- **基本类型**: `int`, `long`, `double`, `boolean` 等
+- **包装类型**: `Integer`, `Long`, `Double`, `Boolean` 等
+- **字符串类型**: `String`
+- **日期时间**: `Date`, `LocalDate`, `LocalDateTime` 等
+- **集合类型**: `List`, `Set`, `Map` 等
+- **数组类型**: 各种类型的数组
+- **枚举类型**: 自动从枚举值中随机选择
+- **嵌套对象**: 递归生成复杂对象结构
+
+#### 递归深度控制
+
+为避免无限递归，Bean Mock 提供了递归深度限制：
+
+```kotlin
+// 设置最大递归深度为 3
+val config = BeanMockConfig(maxDepth = 3)
+val deepObject = mock<ComplexNestedObject>(config)
+```
+
+#### 容器填充策略
+
+支持不同的属性填充策略：
+
+```kotlin
+// 重复填充
+Mock.FillStrategy.REPECT
+
+// 随机填充
+Mock.FillStrategy.RANDOM
+```
+
 
 #### LocaleManager 高级功能
 
@@ -621,23 +756,29 @@ src/
 │   ├── kotlin/io/github/spcookie/
 │   │   ├── ExecutionContext.kt    # 执行上下文管理
 │   │   ├── LocaleManager.kt       # 国际化管理器
-│   │   ├── Mock.kt                # 主要Mock对象
+│   │   ├── Mock.kt                # 主要Mock对象和注解
 │   │   ├── MockEngine.kt          # Mock引擎实现
 │   │   ├── MockRandom.kt          # 随机数据生成器
+│   │   ├── Mocks.kt               # Mock对象
 │   │   ├── ParsedRule.kt          # 规则解析数据结构
 │   │   ├── PlaceholderResolver.kt # 占位符解析逻辑
 │   │   ├── RegexResolver.kt       # 正则表达式解析器
 │   │   ├── Rule.kt                # 规则定义
 │   │   ├── RuleExecutor.kt        # 规则执行引擎
 │   │   ├── RuleParser.kt          # 规则解析逻辑
+│   │   ├── BeanMockBridge.kt      # Bean Mock 桥接实现
+│   │   ├── BeanMockConfig.kt      # Bean Mock 配置
+│   │   ├── BeanIntrospect.kt      # Bean 内省功能
+│   │   ├── ContainerAdapter.kt    # 容器类型适配器
 │   │   └── package.kt             # 包信息文档
 ```
 
 核心组件说明：
 
-- **Mock.kt**: 主要的模拟数据生成入口，提供简单易用的API
+- **Mock.kt**: 提供简单易用的API和注解定义
 - **MockEngine.kt**: 模拟引擎的核心实现，负责解析和执行模板
 - **MockRandom.kt**: 随机数据生成器，提供各种类型的随机数据生成方法
+- **Mocks.kt**: 主要的模拟数据生成入口
 - **RuleParser.kt**: 规则解析器，负责解析占位符规则
 - **RuleExecutor.kt**: 规则执行器，负责执行解析后的规则
 - **PlaceholderResolver.kt**: 占位符解析器，处理模板中的占位符，支持属性引用
@@ -647,6 +788,10 @@ src/
 - **ParsedRule.kt**: 规则解析结果的数据结构
 - **Rule.kt**: 规则定义和相关枚举，支持正则表达式和自定义占位符
 - **package.kt**: 包信息文档，包含包级别的文档和元数据
+- **BeanMockBridge.kt**: Bean Mock 桥接实现，提供强大的对象创建能力
+- **BeanMockConfig.kt**: Bean Mock 配置管理，包含填充策略和递归深度限制
+- **BeanIntrospect.kt**: Bean 内省功能，自动分析和处理复杂对象结构
+- **ContainerAdapter.kt**: 容器类型适配器，优化数组、列表、集合等容器类型的处理
 
 ### 开发环境设置
 
