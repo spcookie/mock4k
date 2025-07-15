@@ -66,8 +66,19 @@ publishing {
 
 // Configure Signature for vanniktech plugin
 signing {
-    sign(publishing.publications)
+    val signingKey: String? = project.findProperty("signing.key") as String?
+        ?: System.getenv("SIGNING_KEY")
+    val signingPassword: String? = project.findProperty("signing.password") as String?
+        ?: System.getenv("SIGNING_PASSWORD")
+
+    if (!signingKey.isNullOrBlank() && !signingPassword.isNullOrBlank()) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications)
+    } else {
+        logger.warn("GPG signing is skipped because signing.key or signing.password is not set")
+    }
 }
+
 
 // Configure Maven Central publishing via new Central Portal
 mavenPublishing {
