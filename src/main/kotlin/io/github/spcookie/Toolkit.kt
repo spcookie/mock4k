@@ -67,11 +67,11 @@ fun isPrimitiveType(kClass: KClass<*>): Boolean {
 fun isDateTimeType(type: KClass<*>): Boolean {
     return when (type) {
         // Legacy date/time types (before Java 8)
-        java.util.Date::class -> true
+        Date::class -> true
         java.sql.Date::class -> true
         java.sql.Time::class -> true
         java.sql.Timestamp::class -> true
-        java.util.Calendar::class -> true
+        Calendar::class -> true
         // Java 8+ date/time types
         java.time.LocalDate::class -> true
         java.time.LocalTime::class -> true

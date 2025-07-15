@@ -72,10 +72,10 @@ class ContainerAdapter {
         when {
             Optional::class.java.isAssignableFrom(kClass.java) ||
                     CompletableFuture::class.java.isAssignableFrom(kClass.java) ||
-                    java.util.concurrent.Future::class.java.isAssignableFrom(kClass.java) ||
-                    java.util.concurrent.Callable::class.java.isAssignableFrom(kClass.java) ||
-                    java.util.function.Supplier::class.java.isAssignableFrom(kClass.java) ||
-                    kotlin.Lazy::class.java.isAssignableFrom(kClass.java) -> return ContainerBehavior.SINGLE_VALUE
+                    Future::class.java.isAssignableFrom(kClass.java) ||
+                    Callable::class.java.isAssignableFrom(kClass.java) ||
+                    Supplier::class.java.isAssignableFrom(kClass.java) ||
+                    Lazy::class.java.isAssignableFrom(kClass.java) -> return ContainerBehavior.SINGLE_VALUE
         }
 
         // Then check registered third-party types

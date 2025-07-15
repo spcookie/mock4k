@@ -46,7 +46,7 @@ internal class MockEngine() {
             is String -> resolveString(template, executionContext)
             else -> template
         }
-        
+
         return result
     }
 
@@ -65,7 +65,7 @@ internal class MockEngine() {
                 context.storeResolvedValue(parsedRule.name, null)
                 return@forEach
             }
-            
+
             // Use context-aware parsing for better rule determination
             val valueType = determineValueType(value)
             val parsedRule = if (key.contains("|")) {

@@ -49,11 +49,11 @@ object LocaleManager {
         }
 
         val properties = Properties()
-        
+
         // Try to load specific locale file first
         val resourceName = "/messages_$localeKey.properties"
         var loaded = false
-        
+
         try {
             val inputStream = this::class.java.getResourceAsStream(resourceName)
             if (inputStream != null) {
@@ -68,7 +68,7 @@ object LocaleManager {
         } catch (e: Exception) {
             logger.warn("Failed to load locale resource {}: {}", resourceName, e.message)
         }
-        
+
         // If specific locale not found, try fallback order
         if (!loaded) {
             val fallbackOrder = when (localeKey) {
@@ -79,7 +79,7 @@ object LocaleManager {
                 // For other languages, try English as fallback
                 else -> listOf("en")
             }
-            
+
             for (fallbackLang in fallbackOrder) {
                 try {
                     val fallbackResource = "/messages_$fallbackLang.properties"
@@ -89,7 +89,11 @@ object LocaleManager {
                             properties.load(reader)
                         }
                         loaded = true
-                        logger.info("Loaded fallback locale data from: {} for requested locale: {}", fallbackResource, localeKey)
+                        logger.info(
+                            "Loaded fallback locale data from: {} for requested locale: {}",
+                            fallbackResource,
+                            localeKey
+                        )
                         break
                     }
                 } catch (e: Exception) {
@@ -97,7 +101,7 @@ object LocaleManager {
                 }
             }
         }
-        
+
         // Final fallback to default properties
         if (!loaded) {
             try {
