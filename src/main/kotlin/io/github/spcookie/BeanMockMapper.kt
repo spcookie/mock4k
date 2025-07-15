@@ -12,7 +12,7 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
 
 /**
- * Maps generated mock data back to Bean instances
+ * 将生成的模拟数据映射回 Bean 实例
  *
  * @author spcookie
  * @since 1.2.0
@@ -25,7 +25,7 @@ internal class BeanMockMapper(
     private val logger = LoggerFactory.getLogger(BeanMockMapper::class.java)
 
     /**
-     * Map generated data to Bean instance
+     * 将生成的数据映射到 Bean 实例
      */
     fun <T : Any> mapToBean(clazz: KClass<T>, data: Map<String, Any?>, config: BeanMockConfig): T {
         val instance = createInstanceWithConstructor(clazz, data, config)
@@ -34,7 +34,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Create instance using primary constructor
+     * 使用主构造函数创建实例
      */
     private fun <T : Any> createInstanceWithConstructor(
         clazz: KClass<T>,
@@ -54,7 +54,7 @@ internal class BeanMockMapper(
                 if (rawValue != null) {
                     convertValue(rawValue, param.type, config)
                 } else {
-                    // Use default value if available
+                    // 如果有默认值，则使用默认值
                     if (param.isOptional) {
                         null
                     } else {
@@ -67,7 +67,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Map remaining properties that were not handled by constructor
+     * 映射构造函数未处理的剩余属性
      */
     private fun <T : Any> mapRemainingProperties(
         instance: T,
@@ -78,10 +78,10 @@ internal class BeanMockMapper(
         val constructor = clazz.primaryConstructor
         val constructorParamNames = constructor?.parameters?.mapNotNull { it.name }?.toSet() ?: emptySet()
 
-        // Get properties that were not mapped by constructor
+        // 获取构造函数未映射的属性
         val eligibleProperties = getEligibleProperties(clazz, config)
         val unmappedProperties = eligibleProperties.filter { property ->
-            // Only include properties that are not handled by constructor
+            // 仅包括构造函数未处理的属性
             property.name !in constructorParamNames
         }
 
@@ -89,7 +89,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Map specific properties to instance
+     * 将特定属性映射到实例
      */
     private fun mapPropertiesToInstance(
         instance: Any,
@@ -111,13 +111,13 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Find value for property in generated data, handling rule-based keys
+     * 在生成的数据中查找属性值，处理基于规则的键
      */
     private fun findValueForProperty(propertyName: String, data: Map<String, Any?>): Any? {
-        // First try exact match
+        // 首先尝试精确匹配
         data[propertyName]?.let { return it }
 
-        // Then try to find keys that start with property name followed by |
+        // 然后尝试查找以属性名开头后跟 | 的键
         val ruleBasedKey = data.keys.find { it.startsWith("$propertyName|") }
         if (ruleBasedKey != null) {
             return data[ruleBasedKey]
@@ -127,7 +127,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Convert value to target type using TypeAdapter
+     * 使用 TypeAdapter 将值转换为目标类型
      */
     private fun convertValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
         if (value == null) return null
@@ -135,22 +135,22 @@ internal class BeanMockMapper(
         val targetClass = targetType.classifier as? KClass<*> ?: return value
 
         return when {
-            // Handle basic types with TypeAdapter
+            // 使用 TypeAdapter 处理基本类型
             isBasicType(targetClass) -> {
                 val adapter = typeAdapter.get(targetClass)
                 adapter?.invoke(value) ?: value
             }
 
-            // Handle collections
+            // 处理集合
             isCollectionType(targetClass) -> convertCollectionValue(value, targetType, config)
 
-            // Handle container types
+            // 处理容器类型
             isContainerType(targetClass, containerAdapter) -> convertContainerValue(value, targetType, config)
 
-            // Handle custom objects
+            // 处理自定义对象
             isCustomClass(targetClass, containerAdapter) -> convertCustomObjectValue(value, targetClass, config)
 
-            // Handle enums
+            // 处理枚举
             isEnumClass(targetClass) -> convertEnumValue(value, targetClass)
 
             else -> value
@@ -171,7 +171,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Convert collection values
+     * 转换集合值
      */
     private fun convertCollectionValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
         if (value == null) return null
@@ -247,7 +247,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Convert container values using ContainerAdapter
+     * 使用 ContainerAdapter 转换容器值
      */
     private fun convertContainerValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
         return containerAdapter.convertContainerValue(
@@ -261,7 +261,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Convert wrapped value with fallback to original value
+     * 转换包装值，回退到原始值
      */
     private fun convertWrappedValue(value: Any?, wrappedType: KType?, config: BeanMockConfig): Any? {
         return if (wrappedType != null) {
@@ -272,7 +272,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Convert custom object values
+     * 转换自定义对象值
      */
     private fun convertCustomObjectValue(value: Any?, targetClass: KClass<*>, config: BeanMockConfig): Any? {
         if (value == null) return null
@@ -290,7 +290,7 @@ internal class BeanMockMapper(
             }
 
             else -> {
-                // Try to use TypeAdapter if available
+                // 如果可用，尝试使用 TypeAdapter
                 val adapter = typeAdapter.get(targetClass)
                 adapter?.invoke(value) ?: value
             }
@@ -298,7 +298,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Set property value on instance
+     * 在实例上设置属性值
      */
     private fun setPropertyValue(instance: Any, property: KProperty<*>, value: Any?) {
         property.isAccessible = true
@@ -307,18 +307,18 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Generate appropriate value for type, including recursive object creation
+     * 为类型生成适当的值，包括递归对象创建
      */
     private fun generateValueForType(type: KType, config: BeanMockConfig): Any? {
         val kClass = type.classifier as? KClass<*> ?: return null
 
         return when {
-            // Handle basic types and collections
+            // 处理基本类型和集合
             isBasicType(kClass) || isCollectionType(kClass) -> getDefaultValueForType(type)
 
-            // Handle container types
+            // 处理容器类型
             isContainerType(kClass, containerAdapter) -> {
-                // For container types, try to create with default wrapped value
+                // 对于容器类型，尝试使用默认包装值创建
                 val wrappedType = type.arguments.firstOrNull()?.type
                 if (wrappedType != null && config.depth > 0) {
                     val reducedConfig = config.copy(depth = config.depth - 1)
@@ -329,15 +329,15 @@ internal class BeanMockMapper(
                 }
             }
 
-            // Handle custom objects - recursively create them
+            // 处理自定义对象 - 递归创建它们
             isCustomClass(kClass, containerAdapter) -> {
-                // Check depth to prevent infinite recursion
+                // 检查深度以防止无限递归
                 if (config.depth <= 0) {
                     return null
                 }
 
                 try {
-                    // Recursively create the custom object with empty data and reduced depth
+                    // 使用空数据和减少的深度递归创建自定义对象
                     val reducedConfig = config.copy(depth = config.depth - 1)
                     mapToBean(kClass, emptyMap(), reducedConfig)
                 } catch (e: Exception) {
@@ -351,7 +351,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Get default value for basic types
+     * 获取基本类型的默认值
      */
     private fun getDefaultValueForType(type: KType): Any? {
         val kClass = type.classifier as? KClass<*> ?: return null

@@ -7,8 +7,8 @@ import java.util.*
 import kotlin.reflect.KClass
 
 /**
- * Type adapter manager for custom type conversion
- * Provides default adapters for common types and allows custom registration
+ * 用于自定义类型转换的类型适配器管理器
+ * 为常见类型提供默认适配器并允许自定义注册
  *
  * @author spcookie
  * @since 1.2.0
@@ -22,10 +22,10 @@ class TypeAdapter {
     }
 
     /**
-     * Register default type adapters for common types
+     * 为常见类型注册默认类型适配器
      */
     private fun registerDefaultAdapters() {
-        // Basic types
+        // 基本类型
         register(String::class) { value -> value?.toString() }
         register(Int::class) { value ->
             when (value) {
@@ -85,7 +85,7 @@ class TypeAdapter {
             }
         }
 
-        // BigDecimal and BigInteger
+        // BigDecimal 和 BigInteger
         register(BigDecimal::class) { value ->
             when (value) {
                 is Number -> BigDecimal.valueOf(value.toDouble())
@@ -111,7 +111,7 @@ class TypeAdapter {
             }
         }
 
-        // Legacy date/time types
+        // 旧式日期/时间类型
         register(Date::class) { value ->
             when (value) {
                 is Date -> value
@@ -167,7 +167,7 @@ class TypeAdapter {
             }
         }
 
-        // Java 8+ date/time types
+        // Java 8+ 日期/时间类型
         register(LocalDate::class) { value ->
             when (value) {
                 is LocalDate -> value
@@ -242,7 +242,7 @@ class TypeAdapter {
             }
         }
 
-        // Kotlin Pair type
+        // Kotlin Pair 类型
         register(Pair::class) { value ->
             when (value) {
                 is Pair<*, *> -> value
@@ -261,21 +261,21 @@ class TypeAdapter {
     }
 
     /**
-     * Register a custom type adapter
+     * 注册自定义类型适配器
      */
     fun <T : Any> register(type: KClass<T>, adapter: (Any?) -> T?) {
         adapters[type] = adapter as (Any?) -> Any?
     }
 
     /**
-     * Get type adapter for a specific type
+     * 获取特定类型的适配器
      */
     internal fun get(type: KClass<*>): ((Any?) -> Any?)? {
         return adapters[type]
     }
 
     /**
-     * Get all registered adapters (for internal use)
+     * 获取所有已注册的适配器（供内部使用）
      */
     internal fun getAll(): Map<KClass<*>, (Any?) -> Any?> {
         return adapters.toMap()

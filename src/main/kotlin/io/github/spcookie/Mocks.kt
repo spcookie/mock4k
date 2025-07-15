@@ -5,11 +5,10 @@ import kotlin.reflect.full.createInstance
 
 
 /**
- * Mock4K - A Kotlin library for generating mock data
+ * Mock4K - 用于生成模拟数据的Kotlin库
  *
- * This is the main entry point for the Mock4K library, providing utilities
- * for generating mock data including random values, locale-specific data,
- * and complex bean objects with customizable configurations.
+ * 这是Mock4K库的主要入口点，提供用于生成模拟数据的工具，
+ * 包括随机值、特定区域设置的数据和具有可自定义配置的复杂Bean对象。
  *
  * @author spcookie
  * @since 1.0.0
@@ -17,66 +16,66 @@ import kotlin.reflect.full.createInstance
 object Mocks {
 
     /**
-     * The Random utility instance for generating random values
+     * 用于生成随机值的Random工具实例
      *
-     * Provides access to various random data generation methods including
-     * numbers, strings, dates, and other primitive types.
+     * 提供对各种随机数据生成方法的访问，包括
+     * 数字、字符串、日期和其他基本类型。
      */
     @JvmField
     val Random = MockRandom
 
     /**
-     * The Locale utility instance for locale-specific data generation
+     * 用于特定区域设置数据生成的Locale工具实例
      *
-     * Manages locale settings and provides locale-aware data generation
-     * such as names, addresses, and other region-specific information.
+     * 管理区域设置并提供区域感知的数据生成，
+     * 如姓名、地址和其他特定区域的信息。
      */
     @JvmField
     val Locale = LocaleManager
 
     /**
-     * Type adapter manager for custom type conversion
+     * 用于自定义类型转换的类型适配器管理器
      *
-     * Allows registration of custom type adapters to handle specific
-     * data types during mock data generation process.
+     * 允许注册自定义类型适配器来处理
+     * 模拟数据生成过程中的特定数据类型。
      */
     @JvmField
     val TypeAdapter = TypeAdapter()
 
     /**
-     * Container adapter manager for custom container type handling
+     * 用于自定义容器类型处理的容器适配器管理器
      *
-     * Manages adapters for container types like List, Set, Map, etc.
-     * to customize how collections are populated with mock data.
+     * 管理List、Set、Map等容器类型的适配器，
+     * 以自定义集合如何填充模拟数据。
      */
     @JvmField
     val ContainerAdapter = ContainerAdapter()
 
     /**
-     * Singleton MockEngine instance to maintain state across calls
+     * 单例MockEngine实例以在调用间维护状态
      *
-     * The core engine responsible for processing templates and generating
-     * mock data based on various input formats and configurations.
+     * 负责处理模板并基于各种输入格式和配置
+     * 生成模拟数据的核心引擎。
      */
     private val mockEngine = MockEngine()
 
     /**
-     * BeanMockBridge instance for handling bean object generation
+     * 用于处理Bean对象生成的BeanMockBridge实例
      *
-     * Bridges the gap between the core mock engine and bean-specific
-     * generation logic, integrating type and container adapters.
+     * 在核心模拟引擎和Bean特定生成逻辑之间架起桥梁，
+     * 集成类型和容器适配器。
      */
     private val beanMockEngine = BeanMockBridge(mockEngine, TypeAdapter, ContainerAdapter)
 
     /**
-     * Generate mock data based on template (internal shorthand method)
+     * 基于模板生成模拟数据（内部简写方法）
      *
-     * This is an internal utility method that delegates to the mock engine
-     * for generating data based on the provided template.
+     * 这是一个内部工具方法，委托给模拟引擎
+     * 基于提供的模板生成数据。
      *
-     * @param template The data template (can be Map, List, or other supported types)
-     * @return Generated mock data matching the template structure
-     * @throws IllegalArgumentException if template format is not supported
+     * @param template 数据模板（可以是Map、List或其他支持的类型）
+     * @return 匹配模板结构的生成模拟数据
+     * @throws IllegalArgumentException 如果模板格式不受支持
      */
     @JvmSynthetic
     internal fun g(template: Any): Any {
@@ -84,18 +83,18 @@ object Mocks {
     }
 
     /**
-     * Generate mock bean object (internal shorthand method)
+     * 生成模拟Bean对象（内部简写方法）
      *
-     * This is an internal utility method that delegates to the bean mock engine
-     * for generating complex object instances with configurable property inclusion.
+     * 这是一个内部工具方法，委托给Bean模拟引擎
+     * 生成具有可配置属性包含的复杂对象实例。
      *
-     * @param clazz The Kotlin class to mock
-     * @param includePrivate Whether to mock private properties (null uses annotation/default)
-     * @param includeStatic Whether to mock static properties (null uses annotation/default)
-     * @param includeTransient Whether to mock transient properties (null uses annotation/default)
-     * @param depth Maximum depth for recursive bean generation (null uses annotation/default of 3)
-     * @return Generated mock bean object with populated properties
-     * @throws IllegalArgumentException if class cannot be instantiated
+     * @param clazz 要模拟的Kotlin类
+     * @param includePrivate 是否模拟私有属性（null使用注解/默认值）
+     * @param includeStatic 是否模拟静态属性（null使用注解/默认值）
+     * @param includeTransient 是否模拟瞬态属性（null使用注解/默认值）
+     * @param depth 递归Bean生成的最大深度（null使用注解/默认值3）
+     * @return 生成的具有填充属性的模拟Bean对象
+     * @throws IllegalArgumentException 如果类无法实例化
      */
     @JvmSynthetic
     internal fun <T : Any> bg(
@@ -110,14 +109,14 @@ object Mocks {
 
 
     /**
-     * Create a mock stub object using ByteBuddy instrumentation (Kotlin version)
+     * 使用ByteBuddy工具创建模拟存根对象（Kotlin版本）
      *
-     * This method creates a dynamic subclass of the given class and intercepts
-     * all public non-void/non-Unit methods to return mock values.
+     * 此方法创建给定类的动态子类并拦截
+     * 所有公共非void/非Unit方法以返回模拟值。
      *
-     * @param clazz The Kotlin class to create a stub for
-     * @return A stubbed instance where public methods return mock values
-     * @throws IllegalArgumentException if the class cannot be subclassed
+     * @param clazz 要为其创建存根的Kotlin类
+     * @return 公共方法返回模拟值的存根实例
+     * @throws IllegalArgumentException 如果类无法被子类化
      */
     internal fun <T : Any> s(clazz: KClass<T>): T {
         return MethodMockStub.make(clazz).createInstance()
@@ -126,14 +125,14 @@ object Mocks {
 }
 
 /**
- * Generate mock data based on template map
+ * 基于模板映射生成模拟数据
  *
- * Creates mock data by processing a map template where keys represent
- * field names and values represent the data generation rules or patterns.
+ * 通过处理映射模板创建模拟数据，其中键表示
+ * 字段名称，值表示数据生成规则或模式。
  *
- * @param template The data template as map with string keys and value patterns
- * @return Generated mock data as a map with the same structure
- * @throws IllegalArgumentException if template contains unsupported value types
+ * @param template 作为映射的数据模板，包含字符串键和值模式
+ * @return 生成的具有相同结构的映射模拟数据
+ * @throws IllegalArgumentException 如果模板包含不支持的值类型
  */
 @Suppress("UNCHECKED_CAST")
 fun mock(template: Map<String, *>): Map<String, *> {
@@ -141,14 +140,14 @@ fun mock(template: Map<String, *>): Map<String, *> {
 }
 
 /**
- * Generate mock data based on template list
+ * 基于模板列表生成模拟数据
  *
- * Creates mock data by processing a list template where each element
- * represents a data generation rule or pattern to be applied.
+ * 通过处理列表模板创建模拟数据，其中每个元素
+ * 表示要应用的数据生成规则或模式。
  *
- * @param template The data template as list containing generation patterns
- * @return Generated mock data as a list with corresponding mock values
- * @throws IllegalArgumentException if template contains unsupported element types
+ * @param template 作为列表的数据模板，包含生成模式
+ * @return 生成的具有相应模拟值的列表模拟数据
+ * @throws IllegalArgumentException 如果模板包含不支持的元素类型
  */
 @Suppress("UNCHECKED_CAST")
 fun mock(template: List<*>): List<*> {
@@ -156,14 +155,14 @@ fun mock(template: List<*>): List<*> {
 }
 
 /**
- * Generate mock data based on JSON template string
+ * 基于JSON模板字符串生成模拟数据
  *
- * Parses a JSON template string and generates mock data according to the
- * template structure, then returns the result as a JSON string.
+ * 解析JSON模板字符串并根据模板结构生成模拟数据，
+ * 然后将结果作为JSON字符串返回。
  *
- * @param template The JSON template string containing generation patterns
- * @return Generated mock data as a JSON string
- * @throws IllegalArgumentException if the template is not valid JSON
+ * @param template 包含生成模式的JSON模板字符串
+ * @return 生成的JSON字符串格式的模拟数据
+ * @throws IllegalArgumentException 如果模板不是有效的JSON
  */
 fun mock(template: String): String {
     val parse = Mson.parse(template)
@@ -172,14 +171,14 @@ fun mock(template: String): String {
 }
 
 /**
- * Generate mock bean object
+ * 生成模拟Bean对象
  *
- * @param clazz The class to mock
- * @param includePrivate Whether to mock private properties (default: null, uses annotation value)
- * @param includeStatic Whether to mock static properties (default: null, uses annotation value)
- * @param includeTransient Whether to mock transient properties (default: null, uses annotation value)
- * @param depth Maximum depth for recursive bean generation (default: null, uses annotation value or 3)
- * @return Generated mock bean object
+ * @param clazz 要模拟的类
+ * @param includePrivate 是否模拟私有属性（默认：null，使用注解值）
+ * @param includeStatic 是否模拟静态属性（默认：null，使用注解值）
+ * @param includeTransient 是否模拟瞬态属性（默认：null，使用注解值）
+ * @param depth 递归Bean生成的最大深度（默认：null，使用注解值或3）
+ * @return 生成的模拟Bean对象
  */
 @JvmSynthetic
 fun <T : Any> mock(
@@ -193,18 +192,18 @@ fun <T : Any> mock(
 }
 
 /**
- * Generate mock bean object with reified type
+ * 使用具体化类型生成模拟Bean对象
  *
- * Convenience method that uses Kotlin's reified generics to automatically
- * determine the target class type, eliminating the need to pass the class explicitly.
+ * 便利方法，使用Kotlin的具体化泛型自动
+ * 确定目标类类型，无需显式传递类。
  *
- * @param T The type to generate (automatically inferred)
- * @param includePrivate Whether to mock private properties (default: null, uses annotation value)
- * @param includeStatic Whether to mock static properties (default: null, uses annotation value)
- * @param includeTransient Whether to mock transient properties (default: null, uses annotation value)
- * @param depth Maximum depth for recursive bean generation (default: null, uses annotation value or 3)
- * @return Generated mock bean object of type T
- * @throws IllegalArgumentException if type T cannot be instantiated
+ * @param T 要生成的类型（自动推断）
+ * @param includePrivate 是否模拟私有属性（默认：null，使用注解值）
+ * @param includeStatic 是否模拟静态属性（默认：null，使用注解值）
+ * @param includeTransient 是否模拟瞬态属性（默认：null，使用注解值）
+ * @param depth 递归Bean生成的最大深度（默认：null，使用注解值或3）
+ * @return 生成的T类型模拟Bean对象
+ * @throws IllegalArgumentException 如果类型T无法实例化
  */
 @JvmSynthetic
 inline fun <reified T : Any> mock(
@@ -217,15 +216,15 @@ inline fun <reified T : Any> mock(
 }
 
 /**
- * Generate mock bean object using configuration object
+ * 使用配置对象生成模拟Bean对象
  *
- * Alternative method that accepts a configuration object instead of individual
- * parameters, providing a more structured approach to bean generation settings.
+ * 接受配置对象而不是单个参数的替代方法，
+ * 为Bean生成设置提供更结构化的方法。
  *
- * @param clazz The Kotlin class to mock
- * @param config Configuration object containing all generation settings (nullable)
- * @return Generated mock bean object
- * @throws IllegalArgumentException if class cannot be instantiated
+ * @param clazz 要模拟的Kotlin类
+ * @param config 包含所有生成设置的配置对象（可为空）
+ * @return 生成的模拟Bean对象
+ * @throws IllegalArgumentException 如果类无法实例化
  */
 @JvmSynthetic
 fun <T : Any> mock(
@@ -240,15 +239,15 @@ fun <T : Any> mock(
 }
 
 /**
- * Generate mock bean object with reified type using configuration object
+ * 使用配置对象和具体化类型生成模拟Bean对象
  *
- * Combines the convenience of reified generics with configuration object approach,
- * providing the most flexible and type-safe way to generate mock beans.
+ * 结合具体化泛型的便利性和配置对象方法，
+ * 提供生成模拟Bean最灵活和类型安全的方式。
  *
- * @param T The type to generate (automatically inferred)
- * @param config Configuration object containing all generation settings (nullable)
- * @return Generated mock bean object of type T
- * @throws IllegalArgumentException if type T cannot be instantiated
+ * @param T 要生成的类型（自动推断）
+ * @param config 包含所有生成设置的配置对象（可为空）
+ * @return 生成的T类型模拟Bean对象
+ * @throws IllegalArgumentException 如果类型T无法实例化
  */
 @JvmSynthetic
 inline fun <reified T : Any> mock(
@@ -262,14 +261,14 @@ inline fun <reified T : Any> mock(
 }
 
 /**
- * Generate mock bean object (Java-friendly version)
+ * 生成模拟Bean对象（Java友好版本）
  *
- * @param clazz The Java class to mock
- * @param includePrivate Whether to mock private properties (default: null, uses annotation value)
- * @param includeStatic Whether to mock static properties (default: null, uses annotation value)
- * @param includeTransient Whether to mock transient properties (default: null, uses annotation value)
- * @param depth Maximum depth for recursive bean generation (default: null, uses annotation value or 3)
- * @return Generated mock bean object
+ * @param clazz 要模拟的Java类
+ * @param includePrivate 是否模拟私有属性（默认：null，使用注解值）
+ * @param includeStatic 是否模拟静态属性（默认：null，使用注解值）
+ * @param includeTransient 是否模拟瞬态属性（默认：null，使用注解值）
+ * @param depth 递归Bean生成的最大深度（默认：null，使用注解值或3）
+ * @return 生成的模拟Bean对象
  */
 @JvmOverloads
 fun <T : Any> mock(
@@ -283,15 +282,15 @@ fun <T : Any> mock(
 }
 
 /**
- * Generate mock bean object using Java Class and configuration object
+ * 使用Java类和配置对象生成模拟Bean对象
  *
- * Java-friendly version that accepts a configuration object, providing
- * a structured approach for Java developers to configure bean generation.
+ * 接受配置对象的Java友好版本，为Java开发者
+ * 提供配置Bean生成的结构化方法。
  *
- * @param clazz The Java class to mock
- * @param config Configuration object containing all generation settings (nullable)
- * @return Generated mock bean object
- * @throws IllegalArgumentException if class cannot be instantiated
+ * @param clazz 要模拟的Java类
+ * @param config 包含所有生成设置的配置对象（可为空）
+ * @return 生成的模拟Bean对象
+ * @throws IllegalArgumentException 如果类无法实例化
  */
 fun <T : Any> mock(
     clazz: Class<T>,
@@ -305,15 +304,15 @@ fun <T : Any> mock(
 }
 
 /**
- * Create a mock stub object using ByteBuddy instrumentation
+ * 使用ByteBuddy工具创建模拟存根对象
  *
- * Creates a dynamic subclass of the given class and intercepts all public
- * non-void/non-Unit methods to return mock values. This is useful for creating
- * test doubles where you need actual method calls to return mock data.
+ * 创建给定类的动态子类并拦截所有公共
+ * 非void/非Unit方法以返回模拟值。这对于创建
+ * 需要实际方法调用返回模拟数据的测试替身很有用。
  *
- * @param clazz The Kotlin class to create a stub for
- * @return A stubbed instance where public methods return mock values
- * @throws IllegalArgumentException if the class cannot be subclassed
+ * @param clazz 要为其创建存根的Kotlin类
+ * @return 公共方法返回模拟值的存根实例
+ * @throws IllegalArgumentException 如果类无法被子类化
  */
 @JvmSynthetic
 fun <T : Any> load(clazz: KClass<T>): T {
@@ -321,14 +320,14 @@ fun <T : Any> load(clazz: KClass<T>): T {
 }
 
 /**
- * Create a mock stub object using ByteBuddy instrumentation with reified type
+ * 使用具体化类型和ByteBuddy工具创建模拟存根对象
  *
- * Convenience method that uses Kotlin's reified generics to automatically
- * determine the target class type for stub creation.
+ * 便利方法，使用Kotlin的具体化泛型自动
+ * 确定存根创建的目标类类型。
  *
- * @param T The type to create a stub for (automatically inferred)
- * @return A stubbed instance where public methods return mock values
- * @throws IllegalArgumentException if the class cannot be subclassed
+ * @param T 要为其创建存根的类型（自动推断）
+ * @return 公共方法返回模拟值的存根实例
+ * @throws IllegalArgumentException 如果类无法被子类化
  */
 @JvmSynthetic
 inline fun <reified T : Any> load(): T {
@@ -336,14 +335,14 @@ inline fun <reified T : Any> load(): T {
 }
 
 /**
- * Create a mock stub object using ByteBuddy instrumentation (Java-friendly version)
+ * 使用ByteBuddy工具创建模拟存根对象（Java友好版本）
  *
- * Java-compatible version that accepts a Java Class object and creates
- * a stubbed instance with intercepted public methods.
+ * 接受Java类对象并创建具有拦截公共方法的
+ * 存根实例的Java兼容版本。
  *
- * @param clazz The Java class to create a stub for
- * @return A stubbed instance where public methods return mock values
- * @throws IllegalArgumentException if the class cannot be subclassed
+ * @param clazz 要为其创建存根的Java类
+ * @return 公共方法返回模拟值的存根实例
+ * @throws IllegalArgumentException 如果类无法被子类化
  */
 fun <T : Any> load(clazz: Class<T>): T {
     return load(clazz.kotlin)

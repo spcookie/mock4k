@@ -3,7 +3,7 @@ package io.github.spcookie
 import kotlin.reflect.full.memberFunctions
 
 /**
- * Resolver for @placeholder syntax
+ * @placeholder语法解析器
  *
  * @author spcookie
  * @since 1.0.0
@@ -12,14 +12,14 @@ internal class PlaceholderResolver {
 
     companion object {
         /**
-         * Pattern for matching placeholder syntax: @methodName or @methodName(params)
-         * Groups: 1 = method name, 2 = parameters (optional)
+         * 匹配占位符语法的模式: @methodName 或 @methodName(params)
+         * 分组: 1 = 方法名, 2 = 参数 (可选)
          */
         private val PLACEHOLDER_PATTERN = Regex("@([a-zA-Z][a-zA-Z0-9]*(?:\\.[a-zA-Z0-9]+)*)(?:\\(([^)]*)\\))?")
 
         /**
-         * Pattern for matching a single placeholder that spans the entire string
-         * Used to determine if we should preserve the original type or convert to string
+         * 匹配跨越整个字符串的单个占位符的模式
+         * 用于确定是否应保留原始类型或转换为字符串
          */
         private val SINGLE_PLACEHOLDER_PATTERN =
             Regex("^@([a-zA-Z][a-zA-Z0-9]*(?:\\.[a-zA-Z0-9]+)*)(?:\\(([^)]*)\\))?$")
@@ -28,10 +28,10 @@ internal class PlaceholderResolver {
     private val random = MockRandom
 
     /**
-     * Resolve placeholders in a string
+     * 解析字符串中的占位符
      */
     fun resolve(template: String, context: ExecutionContext? = null): String {
-        // Handle @placeholder syntax
+        // 处理@placeholder语法
         return PLACEHOLDER_PATTERN.findAll(template).fold(template) { acc, match ->
             val fullMatch = match.value
             val methodName = match.groupValues[1]
@@ -43,24 +43,24 @@ internal class PlaceholderResolver {
     }
 
     /**
-     * Resolve string template with smart type detection
-     * Determines whether to return original type (for single placeholder) or string (for multiple parts)
+     * 使用智能类型检测解析字符串模板
+     * 确定是返回原始类型(单个占位符)还是字符串(多个部分)
      */
     fun resolveStringTemplate(template: String, context: ExecutionContext? = null): Any {
-        // Check if the template is a single placeholder
+        // 检查模板是否为单个占位符
         val match = SINGLE_PLACEHOLDER_PATTERN.matchEntire(template.trim())
 
         return if (match != null) {
-            // Single placeholder - preserve original type
+            // 单个占位符 - 保留原始类型
             resolveSinglePlaceholder(template, context)
         } else {
-            // Template with multiple parts - return as string
+            // 包含多个部分的模板 - 返回字符串
             resolve(template, context)
         }
     }
 
     /**
-     * Resolve a single placeholder while preserving its original type
+     * 解析单个占位符同时保留其原始类型
      */
     fun resolveSinglePlaceholder(template: String, context: ExecutionContext? = null): Any {
         val match = PLACEHOLDER_PATTERN.find(template)
@@ -80,7 +80,7 @@ internal class PlaceholderResolver {
         context: ExecutionContext?
     ): Any {
         return try {
-            // First, try to resolve as property reference
+            // 首先，尝试解析为属性引用
             if (context != null) {
                 val propertyValue = resolvePropertyReference(methodName, context)
                 if (propertyValue != null) {
@@ -88,14 +88,14 @@ internal class PlaceholderResolver {
                 }
             }
 
-            // Second, try custom placeholders
+            // 其次，尝试自定义占位符
             val lowercaseMethodName = methodName.lowercase()
             val customResult = resolveExtendedPlaceholder(lowercaseMethodName, params, placeholder)
             if (customResult != placeholder) {
                 return customResult
             }
 
-            // Finally, try built-in placeholders
+            // 最后，尝试内置占位符
             val result = if (params.isNotEmpty()) {
                 val paramList = parseParams(params)
                 callMethodWithParams(lowercaseMethodName, paramList, placeholder)
@@ -109,34 +109,34 @@ internal class PlaceholderResolver {
     }
 
     /**
-     * Resolve property reference (relative or absolute path)
+     * 解析属性引用(相对或绝对路径)
      */
     private fun resolvePropertyReference(propertyPath: String, context: ExecutionContext): Any? {
-        // Check if it's an absolute path (contains dots)
+        // 检查是否为绝对路径(包含点)
         return if (propertyPath.contains(".")) {
-            // Absolute path reference
+            // 绝对路径引用
             context.getResolvedValueByAbsolutePath(propertyPath)
         } else {
-            // Relative path reference (within current context)
+            // 相对路径引用(在当前上下文内)
             context.getResolvedValue(propertyPath)
         }
     }
 
     /**
-     * Resolve custom placeholder
+     * 解析自定义占位符
      */
     private fun resolveExtendedPlaceholder(methodName: String, params: String, placeholder: String): Any {
         return try {
             val lowerMethodName = methodName.lowercase()
             if (params.isNotEmpty()) {
-                // Try custom placeholder with parameters
+                // 尝试带参数的自定义占位符
                 val customGenerator = random.getExtendedWithParams(lowerMethodName)
                 if (customGenerator != null) {
                     val paramList = parseParams(params)
                     return customGenerator(paramList)
                 }
             } else {
-                // Try custom placeholder without parameters
+                // 尝试不带参数的自定义占位符
                 val customGenerator = random.getExtended(lowerMethodName)
                 if (customGenerator != null) {
                     return customGenerator()

@@ -6,8 +6,8 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 
 /**
- * Bean mock engine for generating mock objects
- * Redesigned to leverage MockEngine's full capabilities
+ * 用于生成模拟对象的Bean模拟引擎
+ * 重新设计以充分利用MockEngine的功能
  *
  * @author spcookie
  * @since 1.2.0
@@ -23,7 +23,7 @@ internal class BeanMockBridge(
     private val beanMockMapper = BeanMockMapper(typeAdapter, containerAdapter)
 
     /**
-     * Mock a bean object with optional configuration
+     * 使用可选配置模拟Bean对象
      */
     fun <T : Any> mockBean(
         clazz: KClass<T>,
@@ -37,8 +37,8 @@ internal class BeanMockBridge(
             else -> {
                 val mockBeanAnnotation = clazz.findAnnotation<Mock.Bean>()
                 val config = BeanMockConfig(
-                    // Method parameters take precedence over annotation values
-                    // If method parameter is null, use annotation value; otherwise use method parameter
+                    // 方法参数优先于注解值
+                    // 如果方法参数为null，则使用注解值；否则使用方法参数
                     includePrivate = includePrivate ?: (mockBeanAnnotation?.includePrivate ?: false),
                     includeStatic = includeStatic ?: (mockBeanAnnotation?.includeStatic ?: false),
                     includeTransient = includeTransient ?: (mockBeanAnnotation?.includeTransient ?: false),
@@ -51,21 +51,21 @@ internal class BeanMockBridge(
     }
 
     /**
-     * Internal bean mocking implementation using new architecture:
-     * 1. Analyze Bean properties and convert to Map structure
-     * 2. Use MockEngine to generate data
-     * 3. Map generated data back to Bean object
+     * 使用新架构的内部Bean模拟实现：
+     * 1. 分析Bean属性并转换为Map结构
+     * 2. 使用MockEngine生成数据
+     * 3. 将生成的数据映射回Bean对象
      */
     private fun <T : Any> mockBeanInternal(clazz: KClass<T>, config: BeanMockConfig): T {
         try {
-            // Step 1: Analyze Bean properties and convert to Map structure
+            // 步骤1：分析Bean属性并转换为Map结构
             val propertyMap = beanIntrospect.analyzeBean(clazz, config)
 
-            // Step 2: Use MockEngine to generate data
+            // 步骤2：使用MockEngine生成数据
             @Suppress("UNCHECKED_CAST")
             val generatedData = mockEngine.generate(propertyMap) as Map<String, Any?>
 
-            // Step 3: Map generated data back to Bean object
+            // 步骤3：将生成的数据映射回Bean对象
             val result = beanMockMapper.mapToBean(clazz, generatedData, config)
 
             return result

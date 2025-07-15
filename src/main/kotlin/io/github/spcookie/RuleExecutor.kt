@@ -4,7 +4,7 @@ import kotlin.math.pow
 
 
 /**
- * Executor for generation rules
+ * 生成规则执行器
  *
  * @author spcookie
  * @since 1.0.0
@@ -14,7 +14,7 @@ internal class RuleExecutor {
     private val random = MockRandom
 
     /**
-     * Execute a rule with given value
+     * 使用给定值执行规则
      */
     fun execute(
         parsedRule: ParsedRule,
@@ -26,11 +26,11 @@ internal class RuleExecutor {
 
         return if (rule.validate()) {
             when (rule) {
-                // String rules
+                // 字符串规则
                 is Rule.StringRange -> executeStringRange(rule, value, engine, context)
                 is Rule.StringCount -> executeStringCount(rule, value, engine, context)
 
-                // Number rules
+                // 数字规则
                 is Rule.NumberIncrement -> executeNumberIncrement(rule, value, parsedRule.name, context)
                 is Rule.NumberRange -> executeNumberRange(rule, value, engine)
                 is Rule.FloatRange -> executeFloatRange(rule, value)
@@ -38,15 +38,15 @@ internal class RuleExecutor {
                 is Rule.FloatRangeFixed -> executeFloatRangeFixed(rule, value)
                 is Rule.FloatFixed -> executeFloatFixed(rule, value)
 
-                // Boolean rules
+                // 布尔规则
                 is Rule.BooleanRandom -> executeBooleanRandom(rule, value)
                 is Rule.BooleanWeighted -> executeBooleanWeighted(rule, value)
 
-                // Object rules
+                // 对象规则
                 is Rule.ObjectCount -> executeObjectCount(rule, value, engine, context)
                 is Rule.ObjectRange -> executeObjectRange(rule, value, engine, context)
 
-                // Array rules
+                // 数组规则
                 is Rule.ArrayPickOne -> executeArrayPickOne(rule, value, engine, context)
                 is Rule.ArrayPickSequential -> executeArrayPickSequential(rule, value, engine, parsedRule.name, context)
                 is Rule.ArrayRepeatRange -> executeArrayRepeatRange(rule, value, engine, context)
@@ -57,7 +57,7 @@ internal class RuleExecutor {
         }
     }
 
-    // ==================== String Rules ====================
+    // ==================== 字符串规则 ====================
 
     private fun executeStringRange(
         rule: Rule.StringRange,
@@ -81,7 +81,7 @@ internal class RuleExecutor {
         }
     }
 
-    // ==================== Number Rules ====================
+    // ==================== 数字规则 ====================
 
     private fun executeNumberRange(rule: Rule.NumberRange, value: Any, engine: MockEngine): Any? {
         return random.integer(rule.min, rule.max)
@@ -113,7 +113,7 @@ internal class RuleExecutor {
         }
     }
 
-    // ==================== Boolean Rules ====================
+    // ==================== 布尔规则 ====================
 
     private fun executeBooleanRandom(rule: Rule.BooleanRandom, value: Any): Any? {
         // 随机生成布尔值，概率为 1/(2 * probability)
@@ -127,7 +127,7 @@ internal class RuleExecutor {
         return random.float() < threshold
     }
 
-    // ==================== Object Rules ====================
+    // ==================== 对象规则 ====================
 
     private fun executeObjectCount(
         rule: Rule.ObjectCount,
@@ -168,7 +168,7 @@ internal class RuleExecutor {
         return executeObjectCount(Rule.ObjectCount(count), value, engine, context)
     }
 
-    // ==================== Array Rules ====================
+    // ==================== 数组规则 ====================
 
     private fun executeArrayPickOne(
         rule: Rule.ArrayPickOne,

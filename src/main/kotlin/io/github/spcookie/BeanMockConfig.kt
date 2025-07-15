@@ -1,7 +1,7 @@
 package io.github.spcookie
 
 /**
- * Configuration for bean mocking
+ * Bean模拟配置
  */
 data class BeanMockConfig(
     val includePrivate: Boolean = false,

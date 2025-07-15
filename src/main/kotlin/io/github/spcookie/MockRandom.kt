@@ -6,8 +6,8 @@ import java.util.*
 import kotlin.random.Random
 
 /**
- * Random data generator utility
- * Provides methods for generating various types of random data
+ * 随机数据生成器实用程序
+ * 提供生成各种类型随机数据的方法
  *
  * @author spcookie
  * @since 1.0.0
@@ -18,50 +18,50 @@ object MockRandom {
     private val random = Random.Default
 
     /**
-     * Registry for extended placeholder generators
+     * 扩展占位符生成器的注册表
      */
     private val extended = mutableMapOf<String, () -> Any>()
 
     /**
-     * Registry for extended placeholder generators with parameters
+     * 带参数的扩展占位符生成器的注册表
      */
     private val extendedWithParams = mutableMapOf<String, (List<Any>) -> Any>()
 
-    // Basic types
+    // 基本类型
 
     /**
-     * Generate random boolean
+     * 生成随机布尔值
      */
     fun boolean(): Boolean = random.nextBoolean()
 
     /**
-     * Generate random boolean with probability
+     * 按概率生成随机布尔值
      */
     fun boolean(probability: Double): Boolean = random.nextDouble() < probability
 
     /**
-     * Generate random natural number (positive integer)
+     * 生成随机自然数（正整数）
      */
     fun natural(): Int {
         return random.nextInt(0, Int.MAX_VALUE)
     }
 
     /**
-     * Generate random natural number (positive integer) with range
+     * 生成指定范围内的随机自然数（正整数）
      */
     fun natural(min: Int, max: Int): Int {
         return random.nextInt(min, max + 1)
     }
 
     /**
-     * Generate random integer
+     * 生成随机整数
      */
     fun integer(): Int {
         return random.nextInt()
     }
 
     /**
-     * Generate random integer with range
+     * 生成指定范围内的随机整数
      */
     fun integer(min: Int, max: Int): Int {
         return if (min == max) {
@@ -72,14 +72,14 @@ object MockRandom {
     }
 
     /**
-     * Generate random long
+     * 生成随机长整数
      */
     fun long(): Long {
         return random.nextLong()
     }
 
     /**
-     * Generate random long with range
+     * 生成指定范围内的随机长整数
      */
     fun long(min: Long, max: Long): Long {
         return if (min == max) {
@@ -90,21 +90,21 @@ object MockRandom {
     }
 
     /**
-     * Generate random float
+     * 生成随机浮点数
      */
     fun float(): Double {
         return random.nextDouble()
     }
 
     /**
-     * Generate random float with range
+     * 生成指定范围内的随机浮点数
      */
     fun float(min: Double, max: Double): Double {
         return min + random.nextDouble() * (max - min)
     }
 
     /**
-     * Generate random character
+     * 生成随机字符
      */
     fun character(): Char {
         val pool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -112,21 +112,21 @@ object MockRandom {
     }
 
     /**
-     * Generate random character from pool
+     * 从池中生成随机字符
      */
     fun character(pool: String): Char {
         return pool[random.nextInt(pool.length)]
     }
 
     /**
-     * Generate random string
+     * 生成随机字符串
      */
     fun string(): String {
         return string(10)
     }
 
     /**
-     * Generate random string with length
+     * 生成指定长度的随机字符串
      */
     fun string(length: Int): String {
         val pool = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -134,14 +134,14 @@ object MockRandom {
     }
 
     /**
-     * Generate random string with length and pool
+     * 生成指定长度和池的随机字符串
      */
     fun string(length: Int, pool: String): String {
         return (1..length).map { character(pool) }.joinToString("")
     }
 
     /**
-     * Generate range of integers
+     * 生成整数范围
      */
     fun range(): List<Int> {
         return range(0, 10)
@@ -161,10 +161,10 @@ object MockRandom {
         return (start..stop step step).toList()
     }
 
-    // Date and time
+    // 日期和时间
 
     /**
-     * Generate random date
+     * 生成随机日期
      */
     fun date(): String {
         return date("yyyy-MM-dd")
@@ -178,7 +178,7 @@ object MockRandom {
     }
 
     /**
-     * Generate random time
+     * 生成随机时间
      */
     fun time(): String {
         return time("HH:mm:ss")
@@ -203,7 +203,7 @@ object MockRandom {
     }
 
     /**
-     * Generate random datetime
+     * 生成随机日期时间
      */
     fun datetime(): String {
         return datetime("yyyy-MM-dd HH:mm:ss")
@@ -224,7 +224,7 @@ object MockRandom {
     }
 
     /**
-     * Generate current datetime
+     * 生成当前日期时间
      */
     fun now(): String {
         return now("yyyy-MM-dd HH:mm:ss")
@@ -238,27 +238,27 @@ object MockRandom {
         return formatter.format(Date())
     }
 
-    // Text
+    // 文本
 
     /**
-     * Generate random word with specified length
+     * 生成指定长度的随机单词
      */
     fun word(min: Int = 3, max: Int = 10): String {
-        // For length-specific words, use the internationalized word() method
-        // and adjust length if needed
+        // 对于特定长度的单词，请使用国际化的 word() 方法
+        // 并根据需要调整长度
         val baseWord = word()
         val targetLength = random.nextInt(min, max + 1)
 
         return if (baseWord.length >= targetLength) {
             baseWord.take(targetLength)
         } else {
-            // Pad with random characters if word is too short
+            // 如果单词太短，则用随机字符填充
             baseWord + string(targetLength - baseWord.length, "abcdefghijklmnopqrstuvwxyz")
         }
     }
 
     /**
-     * Generate random sentence
+     * 生成随机句子
      */
     fun sentence(): String {
         return sentence(12, 18)
@@ -274,7 +274,7 @@ object MockRandom {
     }
 
     /**
-     * Generate random paragraph
+     * 生成随机段落
      */
     fun paragraph(): String {
         return paragraph(3, 7)
@@ -289,7 +289,7 @@ object MockRandom {
     }
 
     /**
-     * Generate random title
+     * 生成随机标题
      */
     fun title(): String {
         return title(3, 7)
@@ -304,9 +304,9 @@ object MockRandom {
     }
 
 
-    // Names
+    // 姓名
 
-    // Names are now loaded from configuration files
+    // 姓名现在从配置文件加载
     private fun getFirstNames(): List<String> {
         val names = getDataList("firstNames")
         return names.ifEmpty { listOf("John", "Jane", "Michael", "Sarah", "David", "Lisa") }
@@ -320,7 +320,7 @@ object MockRandom {
     // Names are now loaded from configuration files
 
     /**
-     * Generate random first name
+     * 生成随机名字
      */
     fun first(): String {
         val names = getFirstNames()
@@ -328,7 +328,7 @@ object MockRandom {
     }
 
     /**
-     * Generate random last name
+     * 生成随机姓氏
      */
     fun last(): String {
         val names = getLastNames()
@@ -336,18 +336,18 @@ object MockRandom {
     }
 
     /**
-     * Generate random full name
+     * 生成随机全名
      */
     fun name(): String = "${first()} ${last()}"
 
 
-    // Web
+    // 网络
 
     private val domains = listOf("example.com", "test.org", "sample.net", "demo.io", "mock.dev")
     private val tlds = listOf("com", "org", "net", "edu", "gov", "io", "co", "me")
 
     /**
-     * Generate random URL
+     * 生成随机 URL
      */
     fun url(): String {
         val protocol = if (random.nextBoolean()) "http" else "https"
@@ -356,12 +356,12 @@ object MockRandom {
     }
 
     /**
-     * Generate random domain
+     * 生成随机域名
      */
     fun domain(): String = domains[random.nextInt(domains.size)]
 
     /**
-     * Generate random email
+     * 生成随机电子邮件
      */
     fun email(): String {
         val username = string(random.nextInt(5, 12), "abcdefghijklmnopqrstuvwxyz")
@@ -370,60 +370,60 @@ object MockRandom {
     }
 
     /**
-     * Generate random IP address
+     * 生成随机 IP 地址
      */
     fun ip(): String {
         return (1..4).map { random.nextInt(0, 256) }.joinToString(".")
     }
 
     /**
-     * Generate random TLD
+     * 生成随机顶级域名
      */
     fun tld(): String = tlds[random.nextInt(tlds.size)]
 
-    // Helper methods
+    // 辅助方法
 
     /**
-     * Capitalize string
+     * 大写字符串
      */
     fun capitalize(str: String): String = str.replaceFirstChar { it.uppercase() }
 
     /**
-     * Convert to uppercase
+     * 转换为大写
      */
     fun upper(str: String): String = str.uppercase()
 
     /**
-     * Convert to lowercase
+     * 转换为小写
      */
     fun lower(str: String): String = str.lowercase()
 
     /**
-     * Pick random element from list
+     * 从列表中选择随机元素
      */
     fun <T> pick(list: List<T>): T = list[random.nextInt(list.size)]
 
     /**
-     * Shuffle list
+     * 打乱列表
      */
     fun <T> shuffle(list: List<T>): List<T> = list.shuffled(random)
 
-    // Miscellaneous
+    // 杂项
 
     /**
-     * Generate random GUID
+     * 生成随机 GUID
      */
     fun guid(): String = UUID.randomUUID().toString()
 
     /**
-     * Generate random ID
+     * 生成随机 ID
      */
     fun id(): String = string(24, "abcdefghijklmnopqrstuvwxyz0123456789")
 
-    // Color
+    // 颜色
 
     /**
-     * Generate random color
+     * 生成随机颜色
      */
     fun color(): String {
         val r = random.nextInt(256)
@@ -432,10 +432,10 @@ object MockRandom {
         return String.format("#%02x%02x%02x", r, g, b)
     }
 
-    // Image
+    // 图片
 
     /**
-     * Generate random image URL
+     * 生成随机图片 URL
      */
     fun image(): String {
         return image("200x200", "cccccc", "ffffff", null)
@@ -455,14 +455,14 @@ object MockRandom {
             if (imageTexts.isNotEmpty()) {
                 imageTexts[random.nextInt(imageTexts.size)]
             } else {
-                "Mock" // fallback
+                "Mock" // 回退
             }
         }
         return "https://via.placeholder.com/$size/$background/$foreground?text=$imageText"
     }
 
     /**
-     * Generate data image URL
+     * 生成数据图片 URL
      */
     fun dataImage(): String {
         return dataImage("200x200")
@@ -475,16 +475,16 @@ object MockRandom {
         return "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2NjY2NjYyIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LXNpemU9IjE4IiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+TW9jazwvdGV4dD48L3N2Zz4="
     }
 
-    // Financial
+    // 金融
 
-    // Bank codes are now loaded from configuration files
+    // 银行代码现在从配置文件加载
     private fun getBankCodes(): Map<String, String> {
         val bankNames = getDataList("bankNames")
         val bankCodes = getDataList("bankCodes")
         return if (bankNames.size == bankCodes.size) {
             bankNames.zip(bankCodes).toMap()
         } else {
-            // Fallback bank codes
+            // 回退银行代码
             mapOf(
                 "Bank of America" to "4147",
                 "JPMorgan Chase" to "4000",
@@ -495,7 +495,7 @@ object MockRandom {
     }
 
     /**
-     * Generate random bank card number
+     * 生成随机银行卡号
      */
     fun bankCard(
         bankName: String? = null,

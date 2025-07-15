@@ -11,45 +11,45 @@ import java.lang.invoke.MethodType
 import kotlin.reflect.KClass
 
 /**
- * Internal utility object for creating mock stub objects using ByteBuddy
+ * 使用 ByteBuddy 创建模拟存根对象的内部实用工具对象
  *
- * This object provides functionality to create dynamic subclasses that intercept
- * method calls and return mock values. It uses caching to improve performance
- * by reusing previously generated stub classes.
+ * 此对象提供创建动态子类的功能，这些子类可以拦截
+ * 方法调用并返回模拟值。它使用缓存通过重用
+ * 先前生成的存根类来提高性能。
  */
 internal object MethodMockStub {
 
     /**
-     * Cache for storing generated stub classes to avoid regeneration
+     * 用于存储生成的存根类的缓存，以避免重新生成
      *
-     * Maps original class types to their corresponding generated stub class types.
-     * This cache improves performance by reusing previously created dynamic classes.
+     * 将原始类类型映射到其对应的生成的存根类类型。
+     * 此缓存通过重用先前创建的动态类来提高性能。
      */
     private val stubCache: MutableMap<KClass<*>, KClass<out Any>> = mutableMapOf()
 
     /**
-     * Create or retrieve a cached stub class for the given type
+     * 为给定类型创建或检索缓存的存根类
      *
-     * This method uses ByteBuddy to create a dynamic subclass that intercepts
-     * all public non-void/non-Unit methods. The generated class is cached for
-     * future use to improve performance.
+     * 此方法使用 ByteBuddy 创建一个动态子类，该子类拦截
+     * 所有公共的非 void/非 Unit 方法。生成的类将被缓存以供
+     * 将来使用，以提高性能。
      *
-     * @param clazz The class to create a stub for
-     * @return The generated stub class that can be instantiated
-     * @throws IllegalArgumentException if the class cannot be subclassed
+     * @param clazz 要为其创建存根的类
+     * @return 可实例化的生成的存根类
+     * @throws IllegalArgumentException 如果该类无法被子类化
      */
     @JvmStatic
     fun <T : Any> make(clazz: KClass<T>): KClass<out T> {
-        // Double-checked locking pattern for thread-safe cache access
+        // 用于线程安全缓存访问的双重检查锁定模式
         if (!stubCache.containsKey(clazz)) {
             synchronized(MethodMockStub) {
                 if (!stubCache.containsKey(clazz)) {
                     try {
-                        // Create dynamic subclass using ByteBuddy
+                        // 使用 ByteBuddy 创建动态子类
                         val dynamicType = ByteBuddy()
                             .subclass(clazz.java)
                             .method(
-                                // Intercept public methods that return non-void/non-Unit values
+                                // 拦截返回非 void/非 Unit 值的公共方法
                                 isPublic<MethodDescription>()
                                     .and(not(returns(Void::class.java)))
                                     .and(not(returns(Unit::class.java)))
@@ -75,23 +75,23 @@ internal object MethodMockStub {
     }
 
     /**
-     * Interceptor class for ByteBuddy method delegation
+     * 用于 ByteBuddy 方法委托的拦截器类
      *
-     * This class handles the interception of method calls and generates
-     * appropriate mock return values based on the method's return type.
+     * 此类处理方法调用的拦截，并根据
+     * 方法的返回类型生成适当的模拟返回值。
      */
     class MockInterceptor {
 
         companion object {
             /**
-             * Intercepts method calls and returns mock values
+             * 拦截方法调用并返回模拟值
              *
-             * This method is called by ByteBuddy whenever an intercepted method is invoked.
-             * It analyzes the method's return type and generates appropriate mock data.
+             * 每当调用被拦截的方法时，ByteBuddy 都会调用此方法。
+             * 它会分析方法的返回类型并生成适当的模拟数据。
              *
-             * @param methodType The method type information including return type
-             * @param args The method arguments (currently unused but required by ByteBuddy)
-             * @return Mock value appropriate for the method's return type, or null for void/Unit
+             * @param methodType 包括返回类型在内的方法类型信息
+             * @param args 方法参数（当前未使用，但 ByteBuddy 需要）
+             * @return 适合方法返回类型的模拟值，对于 void/Unit 则为 null
              */
             @JvmStatic
             @RuntimeType
@@ -101,16 +101,16 @@ internal object MethodMockStub {
             ): Any? {
                 val returnType = methodType.returnType()
 
-                // Handle void and Unit returns
+                // 处理 void 和 Unit 返回
                 if (returnType == Void.TYPE || returnType == Unit::class.java) {
                     return null
                 }
 
                 return try {
-                    // Convert Java Class to Kotlin KClass and generate mock
+                    // 将 Java 类转换为 Kotlin KClass 并生成模拟
                     val kotlinClass = returnType.kotlin
                     when (kotlinClass) {
-                        // Handle primitive and wrapper types with appropriate mock values
+                        // 使用适当的模拟值处理原始类型和包装类型
                         String::class -> Mocks.Random.string()
                         Int::class, Integer::class -> Mocks.Random.integer()
                         Long::class, java.lang.Long::class -> Mocks.Random.long()
@@ -122,10 +122,10 @@ internal object MethodMockStub {
                         Short::class, java.lang.Short::class -> Mocks.Random.integer(0, 65535).toShort()
                         else -> {
                             try {
-                                // Try to generate a mock bean for complex types
+                                // 尝试为复杂类型生成模拟 bean
                                 mock(kotlinClass)
                             } catch (_: Exception) {
-                                // If bean generation fails, try to create a simple instance
+                                // 如果 bean 生成失败，请尝试创建一个简单实例
                                 try {
                                     returnType.getDeclaredConstructor().newInstance()
                                 } catch (_: Exception) {
@@ -135,7 +135,7 @@ internal object MethodMockStub {
                         }
                     }
                 } catch (_: Exception) {
-                    // Return null if all else fails
+                    // 如果所有其他方法都失败，则返回 null
                     null
                 }
             }

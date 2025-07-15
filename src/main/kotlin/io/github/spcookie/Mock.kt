@@ -1,7 +1,7 @@
 package io.github.spcookie
 
 /**
- * Mock annotation container for bean and property configurations
+ * Bean和属性配置的Mock注解容器
  *
  * @author spcookie
  * @since 1.2.0
@@ -11,30 +11,30 @@ package io.github.spcookie
 annotation class Mock {
 
     /**
-     * Fill strategy enumeration for collection generation
+     * 集合生成的填充策略枚举
      *
      * @author spcookie
      * @since 1.2.0
      */
     enum class Fill {
         /**
-         * Repeat the same element for all positions
+         * 为所有位置重复相同的元素
          */
         REPEAT,
 
         /**
-         * Generate different random elements for each position
+         * 为每个位置生成不同的随机元素
          */
         RANDOM
     }
 
     /**
-     * Configuration for bean mock generation
+     * Bean模拟生成的配置
      *
-     * @param includePrivate Whether to include private properties in mock generation
-     * @param includeStatic Whether to include static properties in mock generation
-     * @param includeTransient Whether to include transient properties in mock generation
-     * @param depth Maximum depth for recursive bean generation to avoid infinite recursion (default: 3)
+     * @param includePrivate 是否在模拟生成中包含私有属性
+     * @param includeStatic 是否在模拟生成中包含静态属性
+     * @param includeTransient 是否在模拟生成中包含瞬态属性
+     * @param depth 递归Bean生成的最大深度以避免无限递归 (默认: 3)
      *
      * @author spcookie
      * @since 1.2.0
@@ -49,11 +49,11 @@ annotation class Mock {
     )
 
     /**
-     * Mock annotation for bean properties
+     * Bean属性的Mock注解
      *
-     * @param rule The rule to apply for mock generation
-     * @param placeholder The placeholder to use for mock generation
-     * @param enabled Whether to enable mock for this property (default: true)
+     * @param rule 用于模拟生成的规则
+     * @param placeholder 用于模拟生成的占位符
+     * @param enabled 是否为此属性启用模拟 (默认: true)
      *
      * @author spcookie
      * @since 1.2.0
@@ -68,9 +68,9 @@ annotation class Mock {
     )
 
     /**
-     * Placeholder annotation for specifying placeholders
+     * 用于指定占位符的占位符注解
      *
-     * @param value The placeholder expression to use
+     * @param value 要使用的占位符表达式
      *
      * @author spcookie
      * @since 1.2.0
@@ -83,15 +83,15 @@ annotation class Mock {
     )
 
     /**
-     * Rule annotation for specifying generation rules
+     * 用于指定生成规则的规则注解
      *
-     * @param count Fixed count for generation
-     * @param min Minimum value for range generation
-     * @param max Maximum value for range generation
-     * @param step Step value for increment generation
-     * @param dmin Minimum decimal places
-     * @param dmax Maximum decimal places
-     * @param dcount Fixed decimal places
+     * @param count 生成的固定计数
+     * @param min 范围生成的最小值
+     * @param max 范围生成的最大值
+     * @param step 递增生成的步长值
+     * @param dmin 最小小数位数
+     * @param dmax 最大小数位数
+     * @param dcount 固定小数位数
      *
      * @author spcookie
      * @since 1.2.0
@@ -109,10 +109,10 @@ annotation class Mock {
     )
 
     /**
-     * Length annotation for specifying collection size and fill strategy
+     * 用于指定集合大小和填充策略的长度注解
      *
-     * @param value The size of the collection (List or Map)
-     * @param fill The fill strategy: Fill.REPEAT to repeat the first element, Fill.RANDOM to generate random elements
+     * @param value 集合的大小 (List或Map)
+     * @param fill 填充策略: Fill.REPEAT重复第一个元素，Fill.RANDOM生成随机元素
      *
      * @author spcookie
      * @since 1.2.0

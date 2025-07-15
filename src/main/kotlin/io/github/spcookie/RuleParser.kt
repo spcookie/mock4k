@@ -1,7 +1,7 @@
 package io.github.spcookie
 
 /**
- * Parser for template rules
+ * 模板规则解析器
  *
  * @author spcookie
  * @since 1.0.0
@@ -11,7 +11,7 @@ internal class RuleParser {
     private val rulePattern = Regex("^(.+?)\\|(.+)$")
 
     /**
-     * Parse rule string with context information for more accurate rule determination
+     * 使用上下文信息解析规则字符串以进行更准确的规则确定
      */
     fun parse(key: String, valueType: ValueType): ParsedRule {
         val match = rulePattern.find(key)
@@ -26,26 +26,26 @@ internal class RuleParser {
     }
 
     /**
-     * Parse rule string with value type context for accurate rule determination
+     * 使用值类型上下文解析规则字符串以进行准确的规则确定
      */
     private fun parseRuleString(ruleString: String, valueType: ValueType): Rule? {
         return when {
-            // Increment pattern: +step
+            // 递增模式: +step
             ruleString.startsWith("+") -> {
                 val step = ruleString.substring(1).toIntOrNull() ?: 1
                 when (valueType) {
                     ValueType.NUMBER -> Rule.NumberIncrement(step)
                     ValueType.ARRAY -> Rule.ArrayPickSequential(step)
-                    else -> Rule.NumberIncrement(step) // fallback
+                    else -> Rule.NumberIncrement(step) // 回退
                 }
             }
 
-            // Float patterns with decimal places
+            // 带小数位的浮点数模式
             ruleString.contains(".") -> {
                 parseFloatRule(ruleString)
             }
 
-            // Range pattern: min-max
+            // 范围模式: min-max
             ruleString.contains("-") -> {
                 val parts = ruleString.split("-")
                 if (parts.size == 2) {
@@ -63,13 +63,13 @@ internal class RuleParser {
                 } else null
             }
 
-            // Count pattern: count
+            // 计数模式: count
             else -> {
                 val count = ruleString.toIntOrNull()
                 if (count != null) {
                     when (valueType) {
                         ValueType.STRING -> Rule.StringCount(count)
-                        ValueType.NUMBER -> Rule.NumberRange(count, count) // single value
+                        ValueType.NUMBER -> Rule.NumberRange(count, count) // 单个值
                         ValueType.BOOLEAN -> Rule.BooleanRandom(count)
                         ValueType.OBJECT -> Rule.ObjectCount(count)
                         ValueType.ARRAY -> {
@@ -83,7 +83,7 @@ internal class RuleParser {
     }
 
     /**
-     * Value types for context-aware parsing
+     * 用于上下文感知解析的值类型
      */
     enum class ValueType {
         STRING, NUMBER, BOOLEAN, OBJECT, ARRAY
@@ -97,7 +97,7 @@ internal class RuleParser {
         val decimalPart = parts[1]
 
         return when {
-            // Range with decimal range: 1-10.1-3
+            // 带小数范围的范围: 1-10.1-3
             integerPart.contains("-") && decimalPart.contains("-") -> {
                 val intParts = integerPart.split("-")
                 val decParts = decimalPart.split("-")
@@ -112,7 +112,7 @@ internal class RuleParser {
                 } else null
             }
 
-            // Count with decimal range: 5.1-3
+            // 带小数范围的计数: 5.1-3
             decimalPart.contains("-") -> {
                 val count = integerPart.toIntOrNull()
                 val decParts = decimalPart.split("-")
@@ -125,7 +125,7 @@ internal class RuleParser {
                 } else null
             }
 
-            // Range with fixed decimal places: 1-10.2
+            // 带固定小数位的范围: 1-10.2
             integerPart.contains("-") -> {
                 val intParts = integerPart.split("-")
                 val dcount = decimalPart.toIntOrNull()
@@ -138,7 +138,7 @@ internal class RuleParser {
                 } else null
             }
 
-            // Count with fixed decimal places: 5.2
+            // 带固定小数位的计数: 5.2
             else -> {
                 val count = integerPart.toIntOrNull()
                 val dcount = decimalPart.toIntOrNull()

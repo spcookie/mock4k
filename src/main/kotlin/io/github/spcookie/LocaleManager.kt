@@ -5,8 +5,8 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Locale management utility for MockRandom
- * Handles locale settings and resource loading
+ * MockRandom的区域设置管理工具
+ * 处理区域设置和资源加载
  *
  * @author spcookie
  * @since 1.0.0
@@ -18,8 +18,8 @@ object LocaleManager {
     private val localeDataCache = ConcurrentHashMap<String, Properties>()
 
     /**
-     * Set current locale
-     * @param locale locale to set
+     * 设置当前区域设置
+     * @param locale 要设置的区域设置
      */
     fun setLocale(locale: Locale) {
         logger.info("Setting locale from {} to {}", currentLocale, locale)
@@ -27,17 +27,17 @@ object LocaleManager {
     }
 
     /**
-     * Get current locale
-     * @return current locale
+     * 获取当前区域设置
+     * @return 当前区域设置
      */
     fun getCurrentLocale(): Locale {
         return currentLocale
     }
 
     /**
-     * Load locale data from properties file
-     * @param locale locale to load
-     * @return properties object
+     * 从属性文件加载区域设置数据
+     * @param locale 要加载的区域设置
+     * @return 属性对象
      */
     fun loadLocaleData(locale: Locale = currentLocale): Properties {
         val localeKey = locale.language
@@ -50,7 +50,7 @@ object LocaleManager {
 
         val properties = Properties()
 
-        // Try to load specific locale file first
+        // 首先尝试加载特定的区域设置文件
         val resourceName = "/messages_$localeKey.properties"
         var loaded = false
 
@@ -69,14 +69,14 @@ object LocaleManager {
             logger.warn("Failed to load locale resource {}: {}", resourceName, e.message)
         }
 
-        // If specific locale not found, try fallback order
+        // 如果未找到特定区域设置，尝试回退顺序
         if (!loaded) {
             val fallbackOrder = when (localeKey) {
-                // For Chinese variants, try Chinese first
+                // 对于中文变体，首先尝试中文
                 "zh-cn", "zh-tw", "zh-hk", "zh-sg" -> listOf("zh", "en")
-                // For English variants, try English first
+                // 对于英文变体，首先尝试英文
                 "en-us", "en-gb", "en-ca", "en-au" -> listOf("en")
-                // For other languages, try English as fallback
+                // 对于其他语言，使用英文作为回退
                 else -> listOf("en")
             }
 
@@ -102,7 +102,7 @@ object LocaleManager {
             }
         }
 
-        // Final fallback to default properties
+        // 最终回退到默认属性
         if (!loaded) {
             try {
                 val defaultStream = this::class.java.getResourceAsStream("/messages.properties")
@@ -121,10 +121,10 @@ object LocaleManager {
     }
 
     /**
-     * Get data list from properties
-     * @param key property key
-     * @param locale optional locale, defaults to current locale
-     * @return list of data
+     * 从属性中获取数据列表
+     * @param key 属性键
+     * @param locale 可选的区域设置，默认为当前区域设置
+     * @return 数据列表
      */
     fun getDataList(key: String, locale: Locale = currentLocale): List<String> {
         val properties = loadLocaleData(locale)
@@ -137,8 +137,8 @@ object LocaleManager {
     }
 
     /**
-     * Clear locale data cache
-     * Useful for testing or when locale resources are updated
+     * 清除区域设置数据缓存
+     * 在测试或区域设置资源更新时很有用
      */
     fun clearCache() {
         logger.info("Clearing locale data cache, {} entries removed", localeDataCache.size)
@@ -146,9 +146,9 @@ object LocaleManager {
     }
 
     /**
-     * Check if a locale is supported
-     * @param locale locale to check
-     * @return true if supported, false otherwise
+     * 检查是否支持某个区域设置
+     * @param locale 要检查的区域设置
+     * @return 如果支持返回true，否则返回false
      */
     fun isLocaleSupported(locale: Locale): Boolean {
         val localeKey = locale.language
@@ -156,8 +156,8 @@ object LocaleManager {
     }
 
     /**
-     * Get all supported language codes (ISO 639-1)
-     * @return set of supported language codes
+     * 获取所有支持的语言代码 (ISO 639-1)
+     * @return 支持的语言代码集合
      */
     fun getSupportedLanguageCodes(): Set<String> {
         return setOf(
@@ -181,8 +181,8 @@ object LocaleManager {
     }
 
     /**
-     * Get all supported locales
-     * @return list of supported locales
+     * 获取所有支持的区域设置
+     * @return 支持的区域设置列表
      */
     fun getSupportedLocales(): List<Locale> {
         return getSupportedLanguageCodes().map { Locale(it) }

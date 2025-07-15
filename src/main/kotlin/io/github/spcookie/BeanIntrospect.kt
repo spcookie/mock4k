@@ -11,7 +11,7 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.primaryConstructor
 
 /**
- * Analyzes Bean properties and converts them to Map structure for MockEngine
+ * 分析Bean属性并将其转换为MockEngine的Map结构
  *
  * @author spcookie
  * @since 1.2.0
@@ -21,34 +21,34 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     private val logger = LoggerFactory.getLogger(BeanIntrospect::class.java)
 
     /**
-     * Analyze Bean class and convert to MapList structure for MockEngine
+     * 分析Bean类并转换为MockEngine的MapList结构
      */
     fun <T : Any> analyzeBean(clazz: KClass<T>, config: BeanMockConfig): Map<String, Any?> {
         return analyzeBean(clazz, config, 0)
     }
 
     /**
-     * Analyze Bean class and convert to MapList structure for MockEngine with depth tracking
+     * 分析Bean类并转换为MockEngine的MapList结构，带深度跟踪
      */
     private fun <T : Any> analyzeBean(clazz: KClass<T>, config: BeanMockConfig, currentDepth: Int): Map<String, Any?> {
 
-        // Check depth limit to avoid infinite recursion
+        // 检查深度限制以避免无限递归
         if (currentDepth > config.depth) {
             return emptyMap()
         }
 
         val result = mutableMapOf<String, Any?>()
 
-        // Get all properties based on configuration
+        // 根据配置获取所有属性
         val properties = getEligibleProperties(clazz, config)
 
         for (property in properties) {
             try {
-                // Try to get annotation from constructor parameter first, then from property
+                // 首先尝试从构造函数参数获取注解，然后从属性获取
                 val propertyAnnotation = getPropertyAnnotation(clazz, property)
                 val propertyBeanAnnotation = getPropertyBeanAnnotation(clazz, property)
 
-                // Skip if property is disabled
+                // 如果属性被禁用则跳过
                 if (propertyAnnotation?.enabled == false) {
                     continue
                 }
@@ -72,10 +72,10 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     }
 
     /**
-     * Get property annotation from constructor parameter or property itself
+     * 从构造函数参数或属性本身获取属性注解
      */
     private fun <T : Any> getPropertyAnnotation(clazz: KClass<T>, property: KProperty<*>): Mock.Property? {
-        // First try to get annotation from constructor parameter
+        // 首先尝试从构造函数参数获取注解
         val constructor = clazz.primaryConstructor
         if (constructor != null) {
             val parameter = constructor.parameters.find { it.name == property.name }
@@ -87,16 +87,16 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
             }
         }
 
-        // Fallback to property annotation
+        // 回退到属性注解
         return property.findAnnotation<Mock.Property>()
     }
 
     /**
-     * Get property-level @Mock.Bean annotation from constructor parameter or property itself
-     * Property-level annotation has higher priority than class-level annotation
+     * 从构造函数参数或属性本身获取属性级别的@Mock.Bean注解
+     * 属性级别的注解优先级高于类级别的注解
      */
     private fun <T : Any> getPropertyBeanAnnotation(clazz: KClass<T>, property: KProperty<*>): Mock.Bean? {
-        // First try to get annotation from constructor parameter
+        // 首先尝试从构造函数参数获取注解
         val constructor = clazz.primaryConstructor
         if (constructor != null) {
             val parameter = constructor.parameters.find { it.name == property.name }
@@ -108,13 +108,13 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
             }
         }
 
-        // Fallback to property annotation
+        // 回退到属性注解
         return property.findAnnotation<Mock.Bean>()
     }
 
     /**
-     * Build property key with rules from annotation
-     * Rule priority: step > count > range and decimal > range > decimal
+     * 使用注解中的规则构建属性键
+     * 规则优先级：step > count > range and decimal > range > decimal
      */
     private fun buildPropertyKey(property: KProperty<*>, annotation: Mock.Property?): String {
         val baseName = property.name
@@ -124,12 +124,12 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
             return baseName
         }
 
-        // Priority 1: step rule (highest priority)
+        // 优先级1：step规则（最高优先级）
         if (rule.step >= 0) {
             return "$baseName|+${rule.step}"
         }
 
-        // Priority 2: count rule
+        // 优先级2：count规则
         if (rule.count >= 0) {
             val countPart = rule.count.toString()
             val decimalPart = getDecimalPart(rule)
@@ -140,7 +140,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
             }
         }
 
-        // Priority 3: range and decimal
+        // 优先级3：range和decimal
         if (rule.min >= 0 && rule.max >= 0) {
             val rangePart = "${rule.min}-${rule.max}"
             val decimalPart = getDecimalPart(rule)
@@ -151,7 +151,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
             }
         }
 
-        // Priority 4: only decimal
+        // 优先级4：仅decimal
         val decimalPart = getDecimalPart(rule)
         if (decimalPart != null) {
             return "$baseName|1.$decimalPart"
@@ -161,7 +161,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     }
 
     /**
-     * Extract decimal part from rule
+     * 从规则中提取小数部分
      */
     private fun getDecimalPart(rule: Mock.Rule): String? {
         return when {
@@ -172,7 +172,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     }
 
     /**
-     * Analyze property type and convert to appropriate placeholder or structure
+     * 分析属性类型并转换为适当的占位符或结构
      */
     internal fun analyzePropertyType(
         type: KType,
@@ -183,17 +183,17 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     ): Any? {
         val kClass = type.classifier as? KClass<*> ?: return "@string"
 
-        // Check for custom placeholder first
+        // 首先检查自定义占位符
         val placeholder = annotation?.placeholder
         if (placeholder != null && placeholder.value.isNotEmpty() && isBasicType(kClass)) {
             return placeholder.value
         }
 
         return when {
-            // Basic types
+            // 基本类型
             isBasicType(kClass) -> getBasicTypePlaceholder(kClass)
 
-            // Collections
+            // 集合类型
             isCollectionType(kClass) -> analyzeCollectionType(
                 type,
                 annotation,
@@ -202,7 +202,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 currentDepth
             )
 
-            // Container objects
+            // 容器对象
             isContainerType(kClass, containerAdapter) -> analyzeContainerType(
                 type,
                 annotation,
@@ -211,7 +211,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 currentDepth
             )
 
-            //  Custom objects
+            // 自定义对象
             isCustomClass(kClass, containerAdapter) -> analyzeCustomObject(
                 kClass,
                 propertyBeanAnnotation,
@@ -219,7 +219,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 currentDepth
             )
 
-            // Enums
+            // 枚举类型
             isEnumClass(kClass) -> analyzeEnumClass(kClass)
 
             else -> "@string"
@@ -232,7 +232,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     }
 
     /**
-     * Get placeholder for basic types
+     * 获取基本类型的占位符
      */
     private fun getBasicTypePlaceholder(kClass: KClass<*>): String {
         return when (kClass) {
@@ -264,7 +264,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
 
 
     /**
-     * Analyze collection type and return appropriate structure
+     * 分析集合类型并返回适当的结构
      */
     private fun analyzeCollectionType(
         type: KType,
@@ -285,7 +285,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
 
                 when (fill) {
                     Mock.Fill.REPEAT -> {
-                        // REPEAT: use the same element for all positions
+                        // REPEAT: 对所有位置使用相同的元素
                         val elementValue = if (elementType != null) {
                             analyzePropertyType(elementType, null, propertyBeanAnnotation, config, currentDepth)
                         } else {
@@ -295,7 +295,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                     }
 
                     Mock.Fill.RANDOM -> {
-                        // RANDOM: generate different elements for each position
+                        // RANDOM: 为每个位置生成不同的元素
                         List(length) {
                             if (elementType != null) {
                                 analyzePropertyType(elementType, null, propertyBeanAnnotation, config, currentDepth)
@@ -311,7 +311,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 val keyType = type.arguments.getOrNull(0)?.type
                 val valueType = type.arguments.getOrNull(1)?.type
 
-                // Generate random key-value pairs based on length
+                // 根据长度生成随机键值对
                 (1..length).associate {
                     val keyValue = if (keyType != null) {
                         val keyClass = keyType.classifier as? KClass<*>
@@ -339,7 +339,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     }
 
     /**
-     * Analyze custom object recursively
+     * 递归分析自定义对象
      */
     private fun analyzeCustomObject(
         kClass: KClass<*>,
@@ -348,10 +348,10 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
         currentDepth: Int = 0
     ): Map<String, Any?> {
         return try {
-            // Property-level @Mock.Bean annotation has higher priority than class-level annotation
+            // 属性级别的@Mock.Bean注解优先级高于类级别的注解
             val effectiveBeanAnnotation = propertyBeanAnnotation ?: kClass.findAnnotation<Mock.Bean>()
             val config = if (effectiveBeanAnnotation != null) {
-                // Use annotation configuration if present (property-level takes precedence)
+                // 如果存在注解配置则使用（属性级别优先）
                 BeanMockConfig(
                     includePrivate = effectiveBeanAnnotation.includePrivate,
                     includeStatic = effectiveBeanAnnotation.includeStatic,
@@ -359,7 +359,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                     depth = effectiveBeanAnnotation.depth
                 )
             } else {
-                // Use parent configuration if no annotation
+                // 如果没有注解则使用父配置
                 parentConfig
             }
             analyzeBean(kClass, config, currentDepth + 1)
@@ -370,7 +370,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     }
 
     /**
-     * Analyze container types using ContainerAdapter
+     * 使用ContainerAdapter分析容器类型
      */
     private fun analyzeContainerType(
         type: KType,
@@ -391,7 +391,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
     }
 
     /**
-     * Analyze wrapped type with fallback to default value
+     * 分析包装类型，如果失败则回退到默认值
      */
     private fun analyzeWrappedType(
         wrappedType: KType?,

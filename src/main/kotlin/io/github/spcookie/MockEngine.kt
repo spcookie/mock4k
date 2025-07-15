@@ -3,7 +3,7 @@ package io.github.spcookie
 import org.slf4j.LoggerFactory
 
 /**
- * Core engine for mock data generation
+ * 模拟数据生成的核心引擎
  *
  * @author spcookie
  * @since 1.0.0
@@ -20,24 +20,24 @@ internal class MockEngine() {
     }
 
     /**
-     * Resolve string template by first handling regex patterns, then placeholders
+     * 首先处理正则表达式模式，然后处理占位符来解析字符串模板
      */
     private fun resolveString(template: String, context: ExecutionContext): Any {
-        // First, handle regex patterns
+        // 首先，处理正则表达式模式
         val regexResult = regexResolver.resolveRegexPatterns(template)
 
-        // Use PlaceholderResolver to handle both single and multiple placeholder resolution
+        // 使用 PlaceholderResolver 处理单个和多个占位符解析
         val result = placeholderResolver.resolveStringTemplate(regexResult, context)
         return result
     }
 
     /**
-     * Generate mock data based on template
+     * 根据模板生成模拟数据
      */
     @Suppress("UNCHECKED_CAST")
     fun generate(template: Any, context: ExecutionContext? = null): Any? {
-        // For top-level calls, create a new execution context with unique instance ID
-        // For nested calls, use the provided context
+        // 对于顶级调用，使用唯一的实例 ID 创建新的执行上下文
+        // 对于嵌套调用，使用提供的上下文
         val executionContext = context ?: ExecutionContext()
 
         val result = when (template) {
@@ -54,7 +54,7 @@ internal class MockEngine() {
         val result = mutableMapOf<String, Any?>()
 
         template.forEach { (key, value) ->
-            // Handle null values directly without processing
+            // 直接处理 null 值，不进行处理
             if (value == null) {
                 val parsedRule = if (key.contains("|")) {
                     ruleParser.parse(key, RuleParser.ValueType.STRING)
@@ -66,7 +66,7 @@ internal class MockEngine() {
                 return@forEach
             }
 
-            // Use context-aware parsing for better rule determination
+            // 使用上下文感知解析以更好地确定规则
             val valueType = determineValueType(value)
             val parsedRule = if (key.contains("|")) {
                 ruleParser.parse(key, valueType)
@@ -77,7 +77,7 @@ internal class MockEngine() {
             val generatedValue = ruleExecutor.execute(parsedRule, value, this, childContext)
             result[parsedRule.name] = generatedValue
 
-            // Store the resolved value in context for future reference
+            // 将解析后的值存储在上下文中以供将来参考
             context.storeResolvedValue(parsedRule.name, generatedValue)
         }
 
@@ -85,7 +85,7 @@ internal class MockEngine() {
     }
 
     /**
-     * Determine the value type for context-aware rule parsing
+     * 确定上下文感知规则解析的值类型
      */
     private fun determineValueType(value: Any): RuleParser.ValueType {
         return when (value) {
@@ -94,7 +94,7 @@ internal class MockEngine() {
             is Boolean -> RuleParser.ValueType.BOOLEAN
             is Map<*, *> -> RuleParser.ValueType.OBJECT
             is List<*> -> RuleParser.ValueType.ARRAY
-            else -> RuleParser.ValueType.STRING // fallback
+            else -> RuleParser.ValueType.STRING // 回退
         }
     }
 

@@ -5,7 +5,7 @@ import org.json.JSONObject
 
 object Mson {
 
-    /** JSON → Kotlin Object（Map/List/Primitive） */
+    /** JSON 到 Kotlin 对象（Map/List/Primitive） */
     fun parse(json: String): Any? {
         return when {
             json.trim().startsWith("{") -> toMap(JSONObject(json))
@@ -14,7 +14,7 @@ object Mson {
         }
     }
 
-    /** Kotlin Object（Map/List）→ JSON */
+    /** Kotlin 对象（Map/List）到 JSON */
     fun stringify(value: Any?): String {
         return when (value) {
             is Map<*, *> -> JSONObject(value).toString()

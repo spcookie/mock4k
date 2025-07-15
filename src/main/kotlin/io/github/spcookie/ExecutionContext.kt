@@ -1,7 +1,7 @@
 package io.github.spcookie
 
 /**
- * Execution context for tracking instance, path information, increment counters and resolved data
+ * 用于跟踪实例、路径信息、递增计数器和已解析数据的执行上下文
  *
  * @author spcookie
  * @since 1.0.0
@@ -18,7 +18,7 @@ internal data class ExecutionContext(
     }
 
     fun createCounterKey(propertyName: String): String {
-        // Include path to ensure independent counters at different levels
+        // 包含路径以确保不同级别的独立计数器
         return if (path.isEmpty()) propertyName else "$path.$propertyName"
     }
 
@@ -27,7 +27,7 @@ internal data class ExecutionContext(
     }
 
     /**
-     * Store resolved value in both local and root context
+     * 在本地和根上下文中存储已解析的值
      */
     fun storeResolvedValue(key: String, value: Any?) {
         val fullPath = if (path.isEmpty()) key else "$path.$key"
@@ -36,21 +36,21 @@ internal data class ExecutionContext(
     }
 
     /**
-     * Get resolved value by relative path (within current context)
+     * 通过相对路径获取已解析的值(在当前上下文内)
      */
     fun getResolvedValue(key: String): Any? {
         return dataContext[key]
     }
 
     /**
-     * Get resolved value by absolute path (from root)
+     * 通过绝对路径获取已解析的值(从根开始)
      */
     fun getResolvedValueByAbsolutePath(absolutePath: String): Any? {
         return rootDataContext[absolutePath]
     }
 
     /**
-     * Get all available keys for debugging
+     * 获取所有可用的键用于调试
      */
     fun getAllKeys(): Set<String> {
         return rootDataContext.keys

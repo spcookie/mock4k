@@ -10,8 +10,8 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
 /**
- * Container adapter manager for handling third-party container types
- * Provides default adapters for common container types and allows custom registration
+ * 用于处理第三方容器类型的容器适配器管理器
+ * 为常见的容器类型提供默认适配器，并允许自定义注册
  *
  * @author spcookie
  * @since 1.2.0
@@ -19,15 +19,15 @@ import kotlin.reflect.KType
 class ContainerAdapter {
 
     /**
-     * Container type behavior enumeration
+     * 容器类型行为枚举
      */
     enum class ContainerBehavior {
-        SINGLE_VALUE,    // Container returns a single value
-        STREAM_VALUES    // Container returns multiple values
+        SINGLE_VALUE,    // 容器返回单个值
+        STREAM_VALUES    // 容器返回多个值
     }
 
     /**
-     * Container handler definition
+     * 容器处理器定义
      */
     data class ContainerHandler(
         val behavior: ContainerBehavior,
@@ -38,14 +38,14 @@ class ContainerAdapter {
     private val handlers = mutableMapOf<String, ContainerHandler>()
 
     /**
-     * Register a container handler by qualified name prefix
+     * 按限定名称前缀注册容器处理器
      */
     fun register(qualifiedNamePrefix: String, behavior: ContainerBehavior) {
         handlers[qualifiedNamePrefix] = ContainerHandler(behavior)
     }
 
     /**
-     * Register a container handler with custom analyzer and mapper
+     * 注册具有自定义分析器和映射器的容器处理器
      */
     fun register(
         qualifiedNamePrefix: String,
@@ -57,7 +57,7 @@ class ContainerAdapter {
     }
 
     /**
-     * Get all registered container type prefixes
+     * 获取所有已注册的容器类型前缀
      */
     fun getRegisteredPrefixes(): Set<String> {
         return handlers.keys.toSet()
@@ -65,10 +65,10 @@ class ContainerAdapter {
 
 
     /**
-     * Get container behavior for a class
+     * 获取类的容器行为
      */
     fun getContainerBehavior(kClass: KClass<*>): ContainerBehavior {
-        // First check Java standard types
+        // 首先检查Java标准类型
         when {
             Optional::class.java.isAssignableFrom(kClass.java) ||
                     CompletableFuture::class.java.isAssignableFrom(kClass.java) ||
@@ -78,14 +78,14 @@ class ContainerAdapter {
                     Lazy::class.java.isAssignableFrom(kClass.java) -> return ContainerBehavior.SINGLE_VALUE
         }
 
-        // Then check registered third-party types
+        // 然后检查已注册的第三方类型
         val qualifiedName = kClass.qualifiedName ?: return ContainerBehavior.SINGLE_VALUE
         val handler = handlers.entries.find { qualifiedName.startsWith(it.key) }?.value
         return handler?.behavior ?: ContainerBehavior.SINGLE_VALUE
     }
 
     /**
-     * Get container handler for a class
+     * 获取类的容器处理器
      */
     fun getContainerHandler(kClass: KClass<*>): ContainerHandler? {
         val qualifiedName = kClass.qualifiedName ?: return null
@@ -93,7 +93,7 @@ class ContainerAdapter {
     }
 
     /**
-     * Analyze container type for BeanIntrospect
+     * 为BeanIntrospect分析容器类型
      */
     fun analyzeContainerType(
         type: KType,
@@ -107,7 +107,7 @@ class ContainerAdapter {
         val handler = getContainerHandler(kClass)
         val typeArguments = type.arguments.mapNotNull { it.type }
 
-        // Use custom analyzer if available
+        // 如果有自定义分析器，则使用它
         if (handler?.analyzer != null) {
             return handler.analyzer.invoke(typeArguments, null, config, currentDepth)
         }
@@ -129,7 +129,7 @@ class ContainerAdapter {
     }
 
     /**
-     * Convert container value for BeanMockMapper
+     * 为BeanMockMapper转换容器值
      */
     fun convertContainerValue(
         value: Any?,
@@ -144,18 +144,18 @@ class ContainerAdapter {
         val handler = getContainerHandler(targetClass)
         val typeArguments = targetType.arguments.mapNotNull { it.type }
 
-        // Use custom mapper if available
+        // 如果有自定义映射器，则使用它
         if (handler?.mapper != null) {
             return handler.mapper.invoke(value, typeArguments, config)
         }
 
-        // Try to use TypeAdapter first for third-party types
+        // 首先尝试为第三方类型使用TypeAdapter
         val adapter = typeAdapter.get(targetClass)
         if (adapter != null) {
             return adapter.invoke(value)
         }
 
-        // Fallback to standard container handling
+        // 回退到标准容器处理
         val wrappedType = targetType.arguments.firstOrNull()?.type
         val behavior = getContainerBehavior(targetClass)
 

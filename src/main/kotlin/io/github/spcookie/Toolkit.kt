@@ -15,14 +15,14 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
 
 /**
- * Utility functions for common operations
+ * 常用操作的实用函数
  *
  * @author spcookie
  * @since 1.2.0
  */
 
 /**
- * Check if type is a basic type
+ * 检查类型是否为基本类型
  */
 fun isBasicType(kClass: KClass<*>): Boolean {
     return when (kClass) {
@@ -43,11 +43,11 @@ fun isBasicType(kClass: KClass<*>): Boolean {
 }
 
 /**
- * Check if type is a Kotlin or Java primitive type (including wrapper types)
+ * 检查类型是否为 Kotlin 或 Java 基本类型（包括包装类型）
  */
 fun isPrimitiveType(kClass: KClass<*>): Boolean {
     return when (kClass) {
-        // Kotlin primitive types and their Java wrapper equivalents
+        // Kotlin 基本类型及其 Java 包装类型等效项
         String::class -> true
         Int::class, Integer::class -> true
         Long::class, java.lang.Long::class -> true
@@ -62,17 +62,17 @@ fun isPrimitiveType(kClass: KClass<*>): Boolean {
 }
 
 /**
- * Check if a class is a date/time type (both legacy and Java 8+ types)
+ * 检查类是否为日期/时间类型（包括旧式和 Java 8+ 类型）
  */
 fun isDateTimeType(type: KClass<*>): Boolean {
     return when (type) {
-        // Legacy date/time types (before Java 8)
+        // 旧式日期/时间类型（Java 8 之前）
         Date::class -> true
         java.sql.Date::class -> true
         java.sql.Time::class -> true
         java.sql.Timestamp::class -> true
         Calendar::class -> true
-        // Java 8+ date/time types
+        // Java 8+ 日期/时间类型
         java.time.LocalDate::class -> true
         java.time.LocalTime::class -> true
         java.time.LocalDateTime::class -> true
@@ -90,10 +90,10 @@ fun isDateTimeType(type: KClass<*>): Boolean {
 }
 
 /**
- * Check if type is a container type
+ * 检查类型是否为容器类型
  */
 fun isContainerType(kClass: KClass<*>, containerAdapter: ContainerAdapter): Boolean {
-    // First check Java standard types
+    // 首先检查 Java 标准类型
     when {
         Optional::class.java.isAssignableFrom(kClass.java) -> return true
         Stream::class.java.isAssignableFrom(kClass.java) -> return true
@@ -103,13 +103,13 @@ fun isContainerType(kClass: KClass<*>, containerAdapter: ContainerAdapter): Bool
         Lazy::class.java.isAssignableFrom(kClass.java) -> return true
     }
 
-    // Then check registered third-party types
+    // 然后检查已注册的第三方类型
     val qualifiedName = kClass.qualifiedName ?: return false
     return containerAdapter.getRegisteredPrefixes().any { qualifiedName.startsWith(it) }
 }
 
 /**
- * Check if type is a collection type
+ * 检查类型是否为集合类型
  */
 fun isCollectionType(kClass: KClass<*>): Boolean {
     return when {
@@ -122,7 +122,7 @@ fun isCollectionType(kClass: KClass<*>): Boolean {
 }
 
 /**
- * Check if a class is a custom class (not a basic type)
+ * 检查类是否为自定义类（非基本类型）
  */
 fun isCustomClass(type: KClass<*>, containerAdapter: ContainerAdapter): Boolean {
     return when {
@@ -141,14 +141,14 @@ fun isCustomClass(type: KClass<*>, containerAdapter: ContainerAdapter): Boolean 
 }
 
 /**
- * Check if type is an enum class
+ * 检查类型是否为枚举类
  */
 fun isEnumClass(type: KClass<*>): Boolean {
     return type.java.isEnum
 }
 
 /**
- * Get eligible properties for mocking based on configuration
+ * 根据配置获取符合条件的模拟属性
  */
 fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KProperty<*>> {
     val constructor = clazz.primaryConstructor
@@ -158,36 +158,36 @@ fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KPrope
     val properties = clazz.memberProperties.filter { property ->
         val javaField = property.javaField
 
-        // For Kotlin data class, all val properties from primary constructor should be included
+        // 对于 Kotlin 数据类，应包括主构造函数中的所有 val 属性
         val isDataClassProperty = isDataClass && constructor?.parameters?.any { it.name == property.name } == true
 
-        // For Java record, all properties should be included (they don't have javaField)
+        // 对于 Java 记录，应包括所有属性（它们没有 javaField）
         val isRecordProperty = isJavaRecord && javaField == null
 
-        // For Kotlin properties, check if they are mutable (var) rather than field visibility
+        // 对于 Kotlin 属性，检查它们是否是可变的 (var) 而不是字段可见性
         val isMutableProperty = property is KMutableProperty<*>
 
-        // For Kotlin properties, check if it's actually a private property
+        // 对于 Kotlin 属性，检查它是否实际上是私有属性
         val isKotlinPrivateProperty = property.visibility == KVisibility.PRIVATE
 
-        // Check if property should be included based on configuration
+        // 根据配置检查是否应包括属性
         when {
-            // Special handling for data class and record properties
+            // 数据类和记录属性的特殊处理
             isDataClassProperty || isRecordProperty -> {
-                // For data class and record, check privacy settings
+                // 对于数据类和记录，检查隐私设置
                 if (!config.includePrivate && isKotlinPrivateProperty) {
                     false
                 } else {
-                    // Check if Mock annotation is present and enabled
+                    // 检查是否存在并启用 Mock 注解
                     val mockParam = property.findAnnotation<Mock.Property>()
                     val javaFieldAnnotation = javaField?.getAnnotation(Mock.Property::class.java)
 
-                    // Try to get annotation from constructor parameter
+                    // 尝试从构造函数参数中获取注解
                     getConstructorAnnotation(constructor, property, mockParam, javaFieldAnnotation)
                 }
             }
 
-            // Regular property handling
+            // 常规属性处理
             javaField == null -> {
                 false
             }
@@ -209,11 +209,11 @@ fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KPrope
             }
 
             else -> {
-                // Check if Mock annotation is present and enabled
+                // 检查是否存在并启用 Mock 注解
                 val mockParam = property.findAnnotation<Mock.Property>()
                 val javaFieldAnnotation = javaField.getAnnotation(Mock.Property::class.java)
 
-                // Try to get annotation from constructor parameter
+                // 尝试从构造函数参数中获取注解
                 getConstructorAnnotation(constructor, property, mockParam, javaFieldAnnotation)
             }
         }
