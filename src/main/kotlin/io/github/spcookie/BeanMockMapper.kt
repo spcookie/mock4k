@@ -7,11 +7,9 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
-import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
-import kotlin.reflect.jvm.javaField
 
 /**
  * Maps generated mock data back to Bean instances
@@ -69,19 +67,6 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Create instance using default constructor and set properties
-     */
-    private fun <T : Any> createInstanceWithProperties(
-        clazz: KClass<T>,
-        data: Map<String, Any?>,
-        config: BeanMockConfig
-    ): T {
-        val instance = clazz.createInstance()
-        mapPropertiesToInstance(instance, clazz, data, config)
-        return instance
-    }
-
-    /**
      * Map remaining properties that were not handled by constructor
      */
     private fun <T : Any> mapRemainingProperties(
@@ -101,19 +86,6 @@ internal class BeanMockMapper(
         }
 
         mapPropertiesToInstance(instance, unmappedProperties, data, config)
-    }
-
-    /**
-     * Map properties to instance
-     */
-    private fun mapPropertiesToInstance(
-        instance: Any,
-        clazz: KClass<*>,
-        data: Map<String, Any?>,
-        config: BeanMockConfig
-    ) {
-        val eligibleProperties = getEligibleProperties(clazz, config)
-        mapPropertiesToInstance(instance, eligibleProperties, data, config)
     }
 
     /**
@@ -155,30 +127,6 @@ internal class BeanMockMapper(
     }
 
     /**
-     * Check if property should be included based on configuration
-     */
-    private fun shouldIncludeProperty(property: KProperty<*>, config: BeanMockConfig): Boolean {
-        val javaField = property.javaField
-
-        // Check private access
-        if (!config.includePrivate && javaField != null && !java.lang.reflect.Modifier.isPublic(javaField.modifiers)) {
-            return false
-        }
-
-        // Check static access
-        if (!config.includeStatic && javaField != null && java.lang.reflect.Modifier.isStatic(javaField.modifiers)) {
-            return false
-        }
-
-        // Check transient access
-        if (!config.includeTransient && javaField != null && java.lang.reflect.Modifier.isTransient(javaField.modifiers)) {
-            return false
-        }
-
-        return true
-    }
-
-    /**
      * Convert value to target type using TypeAdapter
      */
     private fun convertValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
@@ -202,7 +150,23 @@ internal class BeanMockMapper(
             // Handle custom objects
             isCustomClass(targetClass, containerAdapter) -> convertCustomObjectValue(value, targetClass, config)
 
+            // Handle enums
+            isEnumClass(targetClass) -> convertEnumValue(value, targetClass)
+
             else -> value
+        }
+    }
+
+    private fun convertEnumValue(value: Any, targetClass: KClass<*>): Any? {
+        return when (value) {
+            is String -> try {
+                targetClass.java.enumConstants.getOrNull(value.toInt())
+            } catch (_: NumberFormatException) {
+                null
+            }
+
+            is Int -> targetClass.java.enumConstants.getOrNull(value)
+            else -> null
         }
     }
 

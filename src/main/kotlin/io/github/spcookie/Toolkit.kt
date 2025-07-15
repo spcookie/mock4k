@@ -141,6 +141,13 @@ fun isCustomClass(type: KClass<*>, containerAdapter: ContainerAdapter): Boolean 
 }
 
 /**
+ * Check if type is an enum class
+ */
+fun isEnumClass(type: KClass<*>): Boolean {
+    return type.java.isEnum
+}
+
+/**
  * Get eligible properties for mocking based on configuration
  */
 fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KProperty<*>> {

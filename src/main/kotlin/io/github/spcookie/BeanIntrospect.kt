@@ -190,10 +190,10 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
         }
 
         return when {
-            // Category 1: Basic types
+            // Basic types
             isBasicType(kClass) -> getBasicTypePlaceholder(kClass)
 
-            // Category 2: Collections
+            // Collections
             isCollectionType(kClass) -> analyzeCollectionType(
                 type,
                 annotation,
@@ -202,7 +202,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 currentDepth
             )
 
-            // Advanced: Container objects
+            // Container objects
             isContainerType(kClass, containerAdapter) -> analyzeContainerType(
                 type,
                 annotation,
@@ -211,7 +211,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 currentDepth
             )
 
-            // Category 3: Custom objects
+            //  Custom objects
             isCustomClass(kClass, containerAdapter) -> analyzeCustomObject(
                 kClass,
                 propertyBeanAnnotation,
@@ -219,8 +219,16 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 currentDepth
             )
 
+            // Enums
+            isEnumClass(kClass) -> analyzeEnumClass(kClass)
+
             else -> "@string"
         }
+    }
+
+    private fun <T : Any> analyzeEnumClass(kClass: KClass<T>): Any? {
+        val size = kClass.java.enumConstants.size
+        return "@integer(0, $size)"
     }
 
     /**
