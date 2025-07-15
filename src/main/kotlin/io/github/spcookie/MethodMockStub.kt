@@ -105,39 +105,10 @@ internal object MethodMockStub {
                 if (returnType == Void.TYPE || returnType == Unit::class.java) {
                     return null
                 }
-
-                return try {
-                    // 将 Java 类转换为 Kotlin KClass 并生成模拟
-                    val kotlinClass = returnType.kotlin
-                    when (kotlinClass) {
-                        // 使用适当的模拟值处理原始类型和包装类型
-                        String::class -> Mocks.Random.string()
-                        Int::class, Integer::class -> Mocks.Random.integer()
-                        Long::class, java.lang.Long::class -> Mocks.Random.long()
-                        Float::class, java.lang.Float::class -> Mocks.Random.float()
-                        Double::class, java.lang.Double::class -> Mocks.Random.float()
-                        Boolean::class, java.lang.Boolean::class -> Mocks.Random.boolean()
-                        Char::class, Character::class -> Mocks.Random.string(1).first()
-                        Byte::class, java.lang.Byte::class -> Mocks.Random.integer(0, 255).toByte()
-                        Short::class, java.lang.Short::class -> Mocks.Random.integer(0, 65535).toShort()
-                        else -> {
-                            try {
-                                // 尝试为复杂类型生成模拟 bean
-                                mock(kotlinClass)
-                            } catch (_: Exception) {
-                                // 如果 bean 生成失败，请尝试创建一个简单实例
-                                try {
-                                    returnType.getDeclaredConstructor().newInstance()
-                                } catch (_: Exception) {
-                                    null
-                                }
-                            }
-                        }
-                    }
-                } catch (_: Exception) {
-                    // 如果所有其他方法都失败，则返回 null
-                    null
-                }
+                // 将 Java 类转换为 Kotlin KClass 并生成模拟
+                val kotlinClass = returnType.kotlin
+                // 尝试为复杂类型生成模拟 bean
+                return mock(kotlinClass)
             }
 
         }

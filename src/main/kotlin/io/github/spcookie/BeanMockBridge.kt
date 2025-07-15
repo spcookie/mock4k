@@ -1,8 +1,7 @@
 package io.github.spcookie
 
-import org.slf4j.LoggerFactory
 import kotlin.reflect.KClass
-import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 
 /**
@@ -18,7 +17,6 @@ internal class BeanMockBridge(
     containerAdapter: ContainerAdapter
 ) {
 
-    private val logger = LoggerFactory.getLogger(BeanMockBridge::class.java)
     private val beanIntrospect = BeanIntrospect(containerAdapter)
     private val beanMockMapper = BeanMockMapper(typeAdapter, containerAdapter)
 
@@ -33,7 +31,20 @@ internal class BeanMockBridge(
         depth: Int? = null
     ): T {
         return when {
-            isPrimitiveType(clazz) -> clazz.createInstance()
+            isSingleType(clazz) -> {
+                @Suppress("UNCHECKED_CAST")
+                beanMockMapper.convertValue(
+                    beanIntrospect.analyzePropertyType(
+                        clazz.createType(),
+                        null
+                    )?.let {
+                        mockEngine.generate(it)
+                    },
+                    clazz.createType(),
+                    BeanMockConfig()
+                ) as T
+            }
+
             else -> {
                 val mockBeanAnnotation = clazz.findAnnotation<Mock.Bean>()
                 val config = BeanMockConfig(

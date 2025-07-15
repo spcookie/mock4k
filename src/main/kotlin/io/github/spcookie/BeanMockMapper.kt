@@ -129,7 +129,7 @@ internal class BeanMockMapper(
     /**
      * 使用 TypeAdapter 将值转换为目标类型
      */
-    private fun convertValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
+    internal fun convertValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
         if (value == null) return null
 
         val targetClass = targetType.classifier as? KClass<*> ?: return value

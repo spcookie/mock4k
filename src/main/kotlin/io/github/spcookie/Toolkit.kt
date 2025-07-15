@@ -148,6 +148,13 @@ fun isEnumClass(type: KClass<*>): Boolean {
 }
 
 /**
+ * 检查类型是否为单类型（基本类型、集合类型、枚举类）
+ */
+fun isSingleType(kClass: KClass<*>): Boolean {
+    return isPrimitiveType(kClass) || isCollectionType(kClass) || isEnumClass(kClass)
+}
+
+/**
  * 根据配置获取符合条件的模拟属性
  */
 fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KProperty<*>> {
