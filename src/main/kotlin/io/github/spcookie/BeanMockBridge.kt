@@ -1,6 +1,7 @@
 package io.github.spcookie
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 
@@ -14,7 +15,7 @@ import kotlin.reflect.full.findAnnotation
 internal class BeanMockBridge(
     private val mockEngine: MockEngine,
     typeAdapter: TypeAdapter,
-    containerAdapter: ContainerAdapter
+    private val containerAdapter: ContainerAdapter
 ) {
 
     private val beanIntrospect = BeanIntrospect(containerAdapter)
@@ -31,22 +32,16 @@ internal class BeanMockBridge(
         depth: Int? = null
     ): T {
         return when {
-            isSingleType(clazz) -> {
-                when {
-
-                }
-                val params = clazz.typeParameters.size.downTo(0).map { Any::class.createType() }
+            isSingleType(clazz, containerAdapter) -> {
+                // 处理单个类型
+                val params = clazz.typeParameters.size.downTo(1)
+                    .map { Any::class.createType() }
+                    .map { KTypeProjection.invariant(it) }
+                val type = clazz.createType(params)
+                val gen = beanIntrospect.analyzePropertyType(type, null)
+                    ?.let { mockEngine.generate(it) }
                 @Suppress("UNCHECKED_CAST")
-                beanMockMapper.convertValue(
-                    beanIntrospect.analyzePropertyType(
-                        clazz.createType(params),
-                        null
-                    )?.let {
-                        mockEngine.generate(it)
-                    },
-                    clazz.createType(),
-                    BeanMockConfig()
-                ) as T
+                beanMockMapper.convertValue(gen, type, BeanMockConfig()) as T
             }
 
             else -> {

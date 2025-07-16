@@ -147,11 +147,11 @@ internal class BeanMockMapper(
             // 处理容器类型
             isContainerType(targetClass, containerAdapter) -> convertContainerValue(value, targetType, config)
 
-            // 处理自定义对象
-            isCustomClass(targetClass, containerAdapter) -> convertCustomObjectValue(value, targetClass, config)
-
             // 处理枚举
             isEnumClass(targetClass) -> convertEnumValue(value, targetClass)
+
+            // 处理自定义对象
+            isCustomClass(targetClass, containerAdapter) -> convertCustomObjectValue(value, targetClass, config)
 
             else -> value
         }
