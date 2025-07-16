@@ -1,3 +1,5 @@
+@file:JvmName("MockUtils")
+
 package io.github.spcookie
 
 import kotlin.reflect.KClass
@@ -65,10 +67,10 @@ object Mocks {
      * 在核心模拟引擎和Bean特定生成逻辑之间架起桥梁，
      * 集成类型和容器适配器。
      */
-    private val beanMockEngine = BeanMockBridge(mockEngine, TypeAdapter, ContainerAdapter)
+    private val beanMockBridge = BeanMockBridge(mockEngine, TypeAdapter, ContainerAdapter)
 
     /**
-     * 基于模板生成模拟数据（内部简写方法）
+     * 基于模板生成模拟数据
      *
      * 这是一个内部工具方法，委托给模拟引擎
      * 基于提供的模板生成数据。
@@ -83,7 +85,7 @@ object Mocks {
     }
 
     /**
-     * 生成模拟Bean对象（内部简写方法）
+     * 生成模拟Bean对象
      *
      * 这是一个内部工具方法，委托给Bean模拟引擎
      * 生成具有可配置属性包含的复杂对象实例。
@@ -104,20 +106,21 @@ object Mocks {
         includeTransient: Boolean? = null,
         depth: Int? = null
     ): T {
-        return beanMockEngine.mockBean(clazz, includePrivate, includeStatic, includeTransient, depth)
+        return beanMockBridge.mockBean(clazz, includePrivate, includeStatic, includeTransient, depth)
     }
 
 
     /**
-     * 使用ByteBuddy工具创建模拟存根对象（Kotlin版本）
+     * 创建MockStub对象
      *
      * 此方法创建给定类的动态子类并拦截
      * 所有公共非void/非Unit方法以返回模拟值。
      *
-     * @param clazz 要为其创建存根的Kotlin类
-     * @return 公共方法返回模拟值的存根实例
+     * @param clazz 要为其创建Stub的Kotlin类
+     * @return 公共方法返回模拟值的Stub实例
      * @throws IllegalArgumentException 如果类无法被子类化
      */
+    @JvmSynthetic
     internal fun <T : Any> s(clazz: KClass<T>): T {
         return MethodMockStub.make(clazz).createInstance()
     }
@@ -284,8 +287,7 @@ fun <T : Any> mock(
 /**
  * 使用Java类和配置对象生成模拟Bean对象
  *
- * 接受配置对象的Java友好版本，为Java开发者
- * 提供配置Bean生成的结构化方法。
+ * 接受配置对象的Java版本，提供配置Bean生成的结构化方法。
  *
  * @param clazz 要模拟的Java类
  * @param config 包含所有生成设置的配置对象（可为空）
@@ -304,14 +306,13 @@ fun <T : Any> mock(
 }
 
 /**
- * 使用ByteBuddy工具创建模拟存根对象
+ * 创建MockStub对象
  *
  * 创建给定类的动态子类并拦截所有公共
- * 非void/非Unit方法以返回模拟值。这对于创建
- * 需要实际方法调用返回模拟数据的测试替身很有用。
+ * 非void/Unit方法以返回模拟值。
  *
- * @param clazz 要为其创建存根的Kotlin类
- * @return 公共方法返回模拟值的存根实例
+ * @param clazz 要为其创建Stub的Kotlin类
+ * @return 公共方法返回模拟值的Stub实例
  * @throws IllegalArgumentException 如果类无法被子类化
  */
 @JvmSynthetic
@@ -320,13 +321,13 @@ fun <T : Any> load(clazz: KClass<T>): T {
 }
 
 /**
- * 使用具体化类型和ByteBuddy工具创建模拟存根对象
+ * 使用具体化类型和创建创建MockStub对象
  *
  * 便利方法，使用Kotlin的具体化泛型自动
- * 确定存根创建的目标类类型。
+ * 确定Stub创建的目标类类型。
  *
- * @param T 要为其创建存根的类型（自动推断）
- * @return 公共方法返回模拟值的存根实例
+ * @param T 要为其创建Stub的类型（自动推断）
+ * @return 公共方法返回模拟值的Stub实例
  * @throws IllegalArgumentException 如果类无法被子类化
  */
 @JvmSynthetic
@@ -335,13 +336,13 @@ inline fun <reified T : Any> load(): T {
 }
 
 /**
- * 使用ByteBuddy工具创建模拟存根对象（Java友好版本）
+ * 创建MockStub对象（Java版本）
  *
  * 接受Java类对象并创建具有拦截公共方法的
- * 存根实例的Java兼容版本。
+ * Stub实例的Java兼容版本。
  *
- * @param clazz 要为其创建存根的Java类
- * @return 公共方法返回模拟值的存根实例
+ * @param clazz 要为其创建Stub的Java类
+ * @return 公共方法返回模拟值的Stub实例
  * @throws IllegalArgumentException 如果类无法被子类化
  */
 fun <T : Any> load(clazz: Class<T>): T {
