@@ -54,51 +54,54 @@ internal class MockEngine() {
         val result = mutableMapOf<Any, Any?>()
 
         template.forEach { (key, value) ->
-
-            // 直接处理 null 值，不进行处理
-            if (value == null) {
-                if (key is Map<*, *> || key is List<*>) {
-                    val keyRef = generate(key)
-                    if (keyRef != null) {
-                        result[keyRef] = null
-                    }
-                } else if (key is String) {
-                    val parsedRule = if (key.contains("|")) {
-                        ruleParser.parse(key, RuleParser.ValueType.STRING)
-                    } else {
-                        ParsedRule(key, null)
-                    }
+            val keyObject = generate(key)
+            if (key == keyObject) {
+                val key = key.toString()
+                // 使用上下文感知解析以更好地确定规则
+                val valueType = if (value == null) RuleParser.ValueType.STRING else determineValueType(value)
+                val parsedRule = if (key.contains("|")) {
+                    ruleParser.parse(key, valueType)
+                } else {
+                    ParsedRule(key, null)
+                }
+                val generatedValue = if (value == null) {
                     result[parsedRule.name] = null
-                    context.storeResolvedValue(parsedRule.name, null)
+                    null
+                } else {
+                    resolve(key, value, parsedRule, context, result)
                 }
-                return@forEach
-            }
 
-            val keyObj =
-
-                if (key is Map<*, *> || key is List<*>) {
-                    val keyObj = generate(key)
-                    if (keyObj != null) {
-                        result[keyObj] = null
-                    }
-                } else if (key is String) {
-                    // 使用上下文感知解析以更好地确定规则
-                    val valueType = determineValueType(value)
-                    val parsedRule = if (key.contains("|")) {
-                        ruleParser.parse(key, valueType)
+                // 将解析后的值存储在上下文中以供将来参考
+                context.storeResolvedValue(parsedRule.name, generatedValue)
+            } else {
+                if (keyObject != null) {
+                    if (value == null) {
+                        result[keyObject] = null
                     } else {
-                        ParsedRule(key, null)
+                        val parsedRule = ParsedRule(key.toString(), null)
+                        resolve(keyObject, value, parsedRule, context, result)
                     }
-                    val childContext = context.createChildContext(parsedRule.name)
-                    val generatedValue = ruleExecutor.execute(parsedRule, value, this, childContext)
-                    result[parsedRule.name] = generatedValue
-                    // 将解析后的值存储在上下文中以供将来参考
-                    context.storeResolvedValue(parsedRule.name, generatedValue)
                 }
-
+            }
         }
 
         return result
+    }
+
+    /**
+     * 解析规则并执行规则执行器
+     */
+    private fun resolve(
+        key: Any,
+        value: Any,
+        parsedRule: ParsedRule,
+        context: ExecutionContext,
+        result: MutableMap<Any, Any?>
+    ): Any? {
+        val childContext = context.createChildContext(parsedRule.name)
+        val generatedValue = ruleExecutor.execute(parsedRule, value, this, childContext)
+        result[key] = generatedValue
+        return generatedValue
     }
 
     /**
@@ -111,7 +114,7 @@ internal class MockEngine() {
             is Boolean -> RuleParser.ValueType.BOOLEAN
             is Map<*, *> -> RuleParser.ValueType.OBJECT
             is List<*> -> RuleParser.ValueType.ARRAY
-            else -> RuleParser.ValueType.STRING // 回退
+            else -> RuleParser.ValueType.STRING
         }
     }
 

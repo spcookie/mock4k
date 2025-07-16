@@ -14,9 +14,12 @@ public class SingleTypeTest {
 
         Map<String, Object> map = mock.getMap();
         BeanMethodMock.TestEnum testEnum = mock.getEnum();
+        Map<BeanMethodMock.TestBean, String> beanMap = mock.getBeanMap();
 
         assertNotNull(map);
         assertFalse(map.isEmpty());
+        assertNotNull(beanMap);
+        assertFalse(beanMap.isEmpty());
         assertNotNull(testEnum);
 
         assertDoesNotThrow(() -> {
@@ -33,6 +36,22 @@ public class SingleTypeTest {
 
         public TestEnum getEnum() {
             return null;
+        }
+
+        public Map<TestBean, String> getBeanMap() {
+            return Map.of();
+        }
+
+        public static class TestBean {
+            String name;
+            private int age;
+            private boolean isAlive;
+            private double height;
+            private float weight;
+            private long money;
+            private short number;
+            private byte number2;
+            private char character;
         }
 
         public enum TestEnum {

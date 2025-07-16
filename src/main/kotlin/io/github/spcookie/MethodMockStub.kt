@@ -82,7 +82,7 @@ internal object MethodMockStub {
      * 此类处理方法调用的拦截，并根据
      * 方法的返回类型生成适当的模拟返回值。
      */
-    private class MockInterceptor {
+    class MockInterceptor {
 
         companion object {
             /**
