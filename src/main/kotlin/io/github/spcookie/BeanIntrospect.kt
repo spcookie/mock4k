@@ -211,6 +211,9 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 currentDepth
             )
 
+            // 枚举类型
+            isEnumClass(kClass) -> analyzeEnumClass(kClass)
+
             // 自定义对象
             isCustomClass(kClass, containerAdapter) -> analyzeCustomObject(
                 kClass,
@@ -218,9 +221,6 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                 config,
                 currentDepth
             )
-
-            // 枚举类型
-            isEnumClass(kClass) -> analyzeEnumClass(kClass)
 
             else -> "@string"
         }
