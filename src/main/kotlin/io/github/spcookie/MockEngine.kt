@@ -41,7 +41,7 @@ internal class MockEngine() {
         val executionContext = context ?: ExecutionContext()
 
         val result = when (template) {
-            is Map<*, *> -> generateFromMap(template as Map<String, Any?>, executionContext)
+            is Map<*, *> -> generateFromMap(template as Map<Any, Any?>, executionContext)
             is List<*> -> generateFromList(template, executionContext)
             is String -> resolveString(template, executionContext)
             else -> template
@@ -50,35 +50,52 @@ internal class MockEngine() {
         return result
     }
 
-    private fun generateFromMap(template: Map<String, Any?>, context: ExecutionContext): Map<String, Any?> {
-        val result = mutableMapOf<String, Any?>()
+    private fun generateFromMap(template: Map<Any, Any?>, context: ExecutionContext): Map<Any, Any?> {
+        val result = mutableMapOf<Any, Any?>()
 
         template.forEach { (key, value) ->
+
             // 直接处理 null 值，不进行处理
             if (value == null) {
-                val parsedRule = if (key.contains("|")) {
-                    ruleParser.parse(key, RuleParser.ValueType.STRING)
-                } else {
-                    ParsedRule(key, null)
+                if (key is Map<*, *> || key is List<*>) {
+                    val keyRef = generate(key)
+                    if (keyRef != null) {
+                        result[keyRef] = null
+                    }
+                } else if (key is String) {
+                    val parsedRule = if (key.contains("|")) {
+                        ruleParser.parse(key, RuleParser.ValueType.STRING)
+                    } else {
+                        ParsedRule(key, null)
+                    }
+                    result[parsedRule.name] = null
+                    context.storeResolvedValue(parsedRule.name, null)
                 }
-                result[parsedRule.name] = null
-                context.storeResolvedValue(parsedRule.name, null)
                 return@forEach
             }
 
-            // 使用上下文感知解析以更好地确定规则
-            val valueType = determineValueType(value)
-            val parsedRule = if (key.contains("|")) {
-                ruleParser.parse(key, valueType)
-            } else {
-                ParsedRule(key, null)
-            }
-            val childContext = context.createChildContext(parsedRule.name)
-            val generatedValue = ruleExecutor.execute(parsedRule, value, this, childContext)
-            result[parsedRule.name] = generatedValue
+            val keyObj =
 
-            // 将解析后的值存储在上下文中以供将来参考
-            context.storeResolvedValue(parsedRule.name, generatedValue)
+                if (key is Map<*, *> || key is List<*>) {
+                    val keyObj = generate(key)
+                    if (keyObj != null) {
+                        result[keyObj] = null
+                    }
+                } else if (key is String) {
+                    // 使用上下文感知解析以更好地确定规则
+                    val valueType = determineValueType(value)
+                    val parsedRule = if (key.contains("|")) {
+                        ruleParser.parse(key, valueType)
+                    } else {
+                        ParsedRule(key, null)
+                    }
+                    val childContext = context.createChildContext(parsedRule.name)
+                    val generatedValue = ruleExecutor.execute(parsedRule, value, this, childContext)
+                    result[parsedRule.name] = generatedValue
+                    // 将解析后的值存储在上下文中以供将来参考
+                    context.storeResolvedValue(parsedRule.name, generatedValue)
+                }
+
         }
 
         return result

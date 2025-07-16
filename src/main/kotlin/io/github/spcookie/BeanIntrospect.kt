@@ -318,7 +318,14 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                         if (keyClass == String::class) {
                             "@string"
                         } else {
-                            analyzePropertyType(keyType, null, propertyBeanAnnotation, config, currentDepth).toString()
+                            val propertyType = analyzePropertyType(
+                                keyType,
+                                null,
+                                propertyBeanAnnotation,
+                                config,
+                                currentDepth
+                            )
+                            Mson.stringify(propertyType)
                         }
                     } else {
                         "@string"
