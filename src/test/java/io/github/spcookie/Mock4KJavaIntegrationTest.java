@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static io.github.spcookie.MocksKt.mock;
+import static io.github.spcookie.MockUtils.mock;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
