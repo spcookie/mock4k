@@ -150,8 +150,11 @@ fun isEnumClass(type: KClass<*>): Boolean {
 /**
  * 检查类型是否为单类型（基本类型、集合类型、枚举类）
  */
-fun isSingleType(kClass: KClass<*>): Boolean {
-    return isPrimitiveType(kClass) || isCollectionType(kClass) || isEnumClass(kClass)
+fun isSingleType(kClass: KClass<*>, containerAdapter: ContainerAdapter): Boolean {
+    return isPrimitiveType(kClass) || isCollectionType(kClass) || isContainerType(
+        kClass,
+        containerAdapter
+    ) || isEnumClass(kClass)
 }
 
 /**
