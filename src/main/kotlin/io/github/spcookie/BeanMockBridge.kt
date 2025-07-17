@@ -1,9 +1,11 @@
 package io.github.spcookie
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.starProjectedType
 
 /**
  * 用于生成模拟对象的Bean模拟引擎
@@ -34,10 +36,7 @@ internal class BeanMockBridge(
         return when {
             isSingleType(clazz, containerAdapter) -> {
                 // 处理单个类型
-                val params = clazz.typeParameters.size.downTo(1)
-                    .map { Any::class.createType() }
-                    .map { KTypeProjection.invariant(it) }
-                val type = clazz.createType(params)
+                val type = recursiveToKType(clazz)
                 val gen = beanIntrospect.analyzePropertyType(type, null)
                     ?.let { mockEngine.generate(it) }
                 @Suppress("UNCHECKED_CAST")
@@ -82,5 +81,18 @@ internal class BeanMockBridge(
         } catch (e: Exception) {
             throw IllegalArgumentException("Cannot generate mock bean for ${clazz.simpleName}", e)
         }
+    }
+
+    fun recursiveToKType(clazz: KClass<*>): KType {
+        if (clazz.typeParameters.isEmpty()) {
+            return clazz.createType()
+        }
+        val typeArgs = clazz.typeParameters.map { param ->
+            val upper = param.upperBounds.firstOrNull() ?: Any::class.starProjectedType
+            val upperClassifier = upper.classifier as? KClass<*> ?: Any::class
+            val recursiveType = recursiveToKType(upperClassifier)
+            KTypeProjection.invariant(recursiveType)
+        }
+        return clazz.createType(typeArgs)
     }
 }

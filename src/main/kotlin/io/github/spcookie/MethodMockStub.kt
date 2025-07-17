@@ -8,7 +8,8 @@ import net.bytebuddy.implementation.bind.annotation.AllArguments
 import net.bytebuddy.implementation.bind.annotation.Origin
 import net.bytebuddy.implementation.bind.annotation.RuntimeType
 import net.bytebuddy.matcher.ElementMatchers.*
-import java.lang.invoke.MethodType
+import java.lang.invoke.MethodType.methodType
+import java.lang.reflect.Method
 import kotlin.reflect.KClass
 
 /**
@@ -98,10 +99,12 @@ internal object MethodMockStub {
             @JvmStatic
             @RuntimeType
             fun intercept(
-                @Origin methodType: MethodType,
+                @Origin method: Method,
                 @AllArguments args: Array<Any?>
             ): Any? {
-                val returnType = methodType.returnType()
+                method.genericReturnType
+
+                val returnType = method.returnType
                 // 处理 void 和 Unit 返回
                 if (returnType == Void.TYPE || returnType == Unit::class.java) {
                     return null
