@@ -44,7 +44,7 @@ public class SingleTypeTest {
 
         public static class TestBean {
             String name;
-            private int age;
+            int age;
             private boolean isAlive;
             private double height;
             private float weight;
