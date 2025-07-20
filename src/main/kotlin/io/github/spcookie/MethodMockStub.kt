@@ -102,17 +102,19 @@ internal object MethodMockStub {
                 @Origin method: Method,
                 @AllArguments args: Array<Any?>
             ): Any? {
-                method.genericReturnType
-
                 val returnType = method.returnType
                 // 处理 void 和 Unit 返回
                 if (returnType == Void.TYPE || returnType == Unit::class.java) {
                     return null
                 }
-                // 将 Java 类转换为 Kotlin KClass 并生成模拟
-                val kotlinClass = returnType.kotlin
-                // 尝试为复杂类型生成模拟 bean
-                return mock(kotlinClass)
+                val genericReturnType = method.genericReturnType
+                return if (isSingleType(returnType.kotlin, Mocks.ContainerAdapter)) {
+                    // 处理单类型
+                    mock(genericReturnType.toKType())
+                } else {
+                    // 处理复杂类型
+                    mock(returnType)
+                }
             }
 
         }

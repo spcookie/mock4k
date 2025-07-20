@@ -2,7 +2,9 @@
 
 package io.github.spcookie
 
+import java.lang.reflect.Type
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
 import kotlin.reflect.full.createInstance
 
 
@@ -109,6 +111,18 @@ object Mocks {
         return beanMockBridge.mockBean(clazz, includePrivate, includeStatic, includeTransient, depth)
     }
 
+    /**
+     * 基于KType生成模拟对象
+     *
+     * 使用Kotlin类型信息生成模拟对象，支持复杂的泛型类型。
+     *
+     * @param type Kotlin类型信息
+     * @return 生成的指定类型的模拟对象
+     * @throws IllegalArgumentException 如果类型无法实例化
+     */
+    fun <T : Any> stg(type: KType): T {
+        return beanMockBridge.mockSingleType(type)
+    }
 
     /**
      * 创建MockStub对象
@@ -264,7 +278,7 @@ inline fun <reified T : Any> mock(
 }
 
 /**
- * 生成模拟Bean对象（Java友好版本）
+ * 生成模拟Bean对象（Java版本）
  *
  * @param clazz 要模拟的Java类
  * @param includePrivate 是否模拟私有属性（默认：null，使用注解值）
@@ -282,6 +296,32 @@ fun <T : Any> mock(
     depth: Int? = null
 ): T {
     return mock(clazz.kotlin, includePrivate, includeStatic, includeTransient, depth)
+}
+
+/**
+ * 基于KType生成模拟对象
+ *
+ * 使用Kotlin类型信息生成模拟对象，支持复杂的泛型类型。
+ *
+ * @param type Kotlin类型信息
+ * @return 生成的指定类型的模拟对象
+ * @throws IllegalArgumentException 如果类型无法实例化
+ */
+fun <T : Any> mock(type: KType): T {
+    return Mocks.stg(type)
+}
+
+/**
+ * 基于Java Type生成模拟对象
+ *
+ * 使用Java反射类型信息生成模拟对象，会自动转换为Kotlin类型。
+ *
+ * @param type Java反射类型信息
+ * @return 生成的指定类型的模拟对象
+ * @throws IllegalArgumentException 如果类型无法实例化
+ */
+fun <T : Any> mock(type: Type): T {
+    return mock(type.toKType())
 }
 
 /**

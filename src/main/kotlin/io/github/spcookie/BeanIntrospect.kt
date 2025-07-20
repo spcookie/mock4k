@@ -325,7 +325,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
                                 config,
                                 currentDepth
                             )
-                            Mson.stringify(propertyType)
+                            propertyType
                         }
                     } else {
                         "@string"

@@ -1,6 +1,6 @@
 package io.github.spcookie
 
-import java.lang.reflect.Modifier
+import java.lang.reflect.*
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.util.*
@@ -9,10 +9,12 @@ import java.util.concurrent.Future
 import java.util.function.Supplier
 import java.util.stream.Stream
 import kotlin.reflect.*
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.javaField
+
 
 /**
  * 常用操作的实用函数
@@ -243,4 +245,55 @@ private fun getConstructorAnnotation(
     val finalAnnotation = mockParam ?: javaFieldAnnotation ?: constructorAnnotation
     val enabled = finalAnnotation?.enabled != false
     return enabled
+}
+
+/**
+ * 将 Java Type 转换为 Kotlin KType
+ */
+fun Type.toKType(): KType {
+    return when (this) {
+        is Class<*> -> {
+            // 处理普通类
+            this.kotlin.createType()
+        }
+
+        is ParameterizedType -> {
+            // 处理泛型类型，如 List<String>
+            val rawType = this.rawType as Class<*>
+            val typeArguments = this.actualTypeArguments.map { argType ->
+                when (argType) {
+                    is WildcardType -> {
+                        // 处理通配符类型，如 ? extends String
+                        val upperBounds = argType.upperBounds
+                        val lowerBounds = argType.lowerBounds
+                        when {
+                            upperBounds.isNotEmpty() && upperBounds[0] != Any::class.java -> {
+                                KTypeProjection.covariant(upperBounds[0].toKType())
+                            }
+
+                            lowerBounds.isNotEmpty() -> {
+                                KTypeProjection.contravariant(lowerBounds[0].toKType())
+                            }
+
+                            else -> KTypeProjection.STAR
+                        }
+                    }
+
+                    else -> KTypeProjection.invariant(argType.toKType())
+                }
+            }
+            rawType.kotlin.createType(typeArguments)
+        }
+
+        is GenericArrayType -> {
+            // 处理泛型数组类型
+            val componentType = this.genericComponentType.toKType()
+            Array<Any>::class.createType(listOf(KTypeProjection.invariant(componentType)))
+        }
+
+        else -> {
+            // 默认情况，尝试转换为 Any
+            Any::class.createType()
+        }
+    }
 }

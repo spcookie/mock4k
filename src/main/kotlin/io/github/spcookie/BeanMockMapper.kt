@@ -7,6 +7,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
+import kotlin.reflect.full.createType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.isAccessible
@@ -34,7 +35,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * 使用主构造函数创建实例
+     * 使用主构造函数或Java构造函数创建实例
      */
     private fun <T : Any> createInstanceWithConstructor(
         clazz: KClass<T>,
@@ -42,28 +43,75 @@ internal class BeanMockMapper(
         config: BeanMockConfig
     ): T {
         val constructor = clazz.primaryConstructor
-            ?: throw IllegalArgumentException("No primary constructor found for ${clazz.simpleName}")
 
-        val args = constructor.parameters
-            .filter { it.findAnnotation<Mock.Property>()?.enabled != false }
-            .map { param ->
-                val propertyName = param.name ?: throw IllegalArgumentException("Parameter name not available")
+        // 如果有主构造函数，使用主构造函数创建实例
+        if (constructor != null) {
+            val args = constructor.parameters
+                .filter { it.findAnnotation<Mock.Property>()?.enabled != false }
+                .map { param ->
+                    val propertyName = param.name ?: throw IllegalArgumentException("Parameter name not available")
 
-                val rawValue = findValueForProperty(propertyName, data)
+                    val rawValue = findValueForProperty(propertyName, data)
+
+                    if (rawValue != null) {
+                        convertValue(rawValue, param.type, config)
+                    } else {
+                        // 如果有默认值，则使用默认值
+                        if (param.isOptional) {
+                            null
+                        } else {
+                            generateValueForType(param.type, config)
+                        }
+                    }
+                }.toTypedArray()
+
+            return constructor.call(*args)
+        } else {
+            // 如果没有主构造函数，直接使用Java类的第一个构造函数
+            return createInstanceWithJavaConstructor(clazz, data, config)
+        }
+    }
+
+    /**
+     * 使用Java类的第一个构造函数创建实例
+     */
+    private fun <T : Any> createInstanceWithJavaConstructor(
+        clazz: KClass<T>,
+        data: Map<String, Any?>,
+        config: BeanMockConfig
+    ): T {
+        val javaClass = clazz.java
+        val constructors = javaClass.constructors.sortedByDescending { it.parameterCount }
+
+        // 直接使用第一个构造函数
+        val firstConstructor = constructors.firstOrNull()
+            ?: throw IllegalArgumentException("No constructor found for ${clazz.simpleName}")
+
+        try {
+            val args = firstConstructor.parameters.mapIndexed { index, param ->
+                // 尝试通过参数名或索引查找值
+                val parameterName = param.name ?: "arg$index"
+                val rawValue = findValueForProperty(parameterName, data)
 
                 if (rawValue != null) {
-                    convertValue(rawValue, param.type, config)
+                    // 如果在data中找到值，进行类型转换
+                    val paramType = param.type.kotlin.createType()
+                    convertValue(rawValue, paramType, config)
                 } else {
-                    // 如果有默认值，则使用默认值
-                    if (param.isOptional) {
-                        null
-                    } else {
-                        generateValueForType(param.type, config)
-                    }
+                    // 如果没有找到值，生成默认值
+                    val paramType = param.type.kotlin.createType()
+                    generateValueForType(paramType, config)
                 }
             }.toTypedArray()
 
-        return constructor.call(*args)
+            @Suppress("UNCHECKED_CAST")
+            return firstConstructor.newInstance(*args) as T
+        } catch (e: Exception) {
+            throw IllegalArgumentException(
+                "Failed to create instance using first constructor for ${clazz.simpleName}: ${e.message}",
+                e
+            )
+        }
     }
 
     /**

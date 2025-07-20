@@ -21,6 +21,7 @@ internal class BeanMockBridge(
 ) {
 
     private val beanIntrospect = BeanIntrospect(containerAdapter)
+
     private val beanMockMapper = BeanMockMapper(typeAdapter, containerAdapter)
 
     /**
@@ -35,12 +36,7 @@ internal class BeanMockBridge(
     ): T {
         return when {
             isSingleType(clazz, containerAdapter) -> {
-                // 处理单个类型
-                val type = recursiveToKType(clazz)
-                val gen = beanIntrospect.analyzePropertyType(type, null)
-                    ?.let { mockEngine.generate(it) }
-                @Suppress("UNCHECKED_CAST")
-                beanMockMapper.convertValue(gen, type, BeanMockConfig()) as T
+                mockSingleType(recursiveToKType(clazz))
             }
 
             else -> {
@@ -56,6 +52,22 @@ internal class BeanMockBridge(
 
                 mockBeanInternal(clazz, config)
             }
+        }
+    }
+
+    /**
+     * 使用模拟单个类型
+     */
+    fun <T : Any> mockSingleType(kType: KType): T {
+        val clazz = kType.classifier as? KClass<*> ?: throw IllegalArgumentException("Type classifier is not KClass")
+        return if (isSingleType(clazz, containerAdapter)) {
+            // 处理单个类型
+            val gen = beanIntrospect.analyzePropertyType(kType, null)
+                ?.let { mockEngine.generate(it) }
+            @Suppress("UNCHECKED_CAST")
+            beanMockMapper.convertValue(gen, kType, BeanMockConfig()) as T
+        } else {
+            throw IllegalArgumentException("Cannot generate single type for ${kType.classifier}")
         }
     }
 
