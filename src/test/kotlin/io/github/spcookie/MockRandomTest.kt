@@ -192,56 +192,56 @@ class MockRandomTest {
     @Test
     fun testRandomMethods() {
         // 测试随机方法
-        println("Random boolean: ${MockRandom.boolean()}")
-        println("Random integer: ${MockRandom.integer(1, 100)}")
-        println("Random string: ${MockRandom.string(10)}")
-        println("Random name: ${MockRandom.name()}")
-        println("Random email: ${MockRandom.email()}")
-        println("Random date: ${MockRandom.date()}")
-        println("Random color: ${MockRandom.color()}")
-        println("Random GUID: ${MockRandom.guid()}")
+        println("random boolean: ${GlobalMockConf.Random.boolean()}")
+        println("random integer: ${GlobalMockConf.Random.integer(1, 100)}")
+        println("random string: ${GlobalMockConf.Random.string(10)}")
+        println("random name: ${GlobalMockConf.Random.name()}")
+        println("random email: ${GlobalMockConf.Random.email()}")
+        println("random date: ${GlobalMockConf.Random.date()}")
+        println("random color: ${GlobalMockConf.Random.color()}")
+        println("random GUID: ${GlobalMockConf.Random.guid()}")
     }
 
     @Test
     fun testMockRandomMethods() {
-        // 测试MockRandom的所有方法
-        val result1 = MockRandom.boolean()
-        val result2 = MockRandom.natural()
-        val result3 = MockRandom.integer()
-        val result4 = MockRandom.float()
-        val result5 = MockRandom.character()
-        val result6 = MockRandom.string()
-        val result7 = MockRandom.range(1, 10)
-        val result8 = MockRandom.date()
-        val result9 = MockRandom.time()
-        val result10 = MockRandom.datetime()
-        val result11 = MockRandom.now()
-        val result12 = MockRandom.word()
-        val result13 = MockRandom.sentence()
-        val result14 = MockRandom.paragraph()
-        val result15 = MockRandom.title()
-        val result16 = MockRandom.first()
-        val result17 = MockRandom.last()
-        val result18 = MockRandom.name()
-        val result19 = MockRandom.url()
-        val result20 = MockRandom.domain()
-        val result21 = MockRandom.email()
-        val result22 = MockRandom.ip()
-        val result23 = MockRandom.tld()
-        val result24 = MockRandom.guid()
-        val result25 = MockRandom.id()
-        val result26 = MockRandom.color()
-        val result27 = MockRandom.image()
-        val result28 = MockRandom.dataImage()
-        val result29 = MockRandom.bankCard()
-        val result30 = MockRandom.areaCode()
-        val result31 = MockRandom.phoneNumber()
-        val result32 = MockRandom.city()
-        val result33 = MockRandom.company()
-        val result34 = MockRandom.province()
-        val result35 = MockRandom.profession()
-        val result36 = MockRandom.streetName()
-        val result37 = MockRandom.emailDomain()
+        // 测试GlobalMockConf.Random的所有方法
+        val result1 = GlobalMockConf.Random.boolean()
+        val result2 = GlobalMockConf.Random.natural()
+        val result3 = GlobalMockConf.Random.integer()
+        val result4 = GlobalMockConf.Random.float()
+        val result5 = GlobalMockConf.Random.character()
+        val result6 = GlobalMockConf.Random.string()
+        val result7 = GlobalMockConf.Random.range(1, 10)
+        val result8 = GlobalMockConf.Random.date()
+        val result9 = GlobalMockConf.Random.time()
+        val result10 = GlobalMockConf.Random.datetime()
+        val result11 = GlobalMockConf.Random.now()
+        val result12 = GlobalMockConf.Random.word()
+        val result13 = GlobalMockConf.Random.sentence()
+        val result14 = GlobalMockConf.Random.paragraph()
+        val result15 = GlobalMockConf.Random.title()
+        val result16 = GlobalMockConf.Random.first()
+        val result17 = GlobalMockConf.Random.last()
+        val result18 = GlobalMockConf.Random.name()
+        val result19 = GlobalMockConf.Random.url()
+        val result20 = GlobalMockConf.Random.domain()
+        val result21 = GlobalMockConf.Random.email()
+        val result22 = GlobalMockConf.Random.ip()
+        val result23 = GlobalMockConf.Random.tld()
+        val result24 = GlobalMockConf.Random.guid()
+        val result25 = GlobalMockConf.Random.id()
+        val result26 = GlobalMockConf.Random.color()
+        val result27 = GlobalMockConf.Random.image()
+        val result28 = GlobalMockConf.Random.dataImage()
+        val result29 = GlobalMockConf.Random.bankCard()
+        val result30 = GlobalMockConf.Random.areaCode()
+        val result31 = GlobalMockConf.Random.phoneNumber()
+        val result32 = GlobalMockConf.Random.city()
+        val result33 = GlobalMockConf.Random.company()
+        val result34 = GlobalMockConf.Random.province()
+        val result35 = GlobalMockConf.Random.profession()
+        val result36 = GlobalMockConf.Random.streetName()
+        val result37 = GlobalMockConf.Random.emailDomain()
 
         println("Boolean: $result1")
         println("Natural: $result2")
@@ -315,20 +315,20 @@ class MockRandomTest {
     @Test
     fun testChineseLocale() {
         // 测试中文语言环境
-        MockRandom.setLocale(Locale.CHINESE)
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
 
         // 测试单词生成
-        val word = MockRandom.word()
+        val word = GlobalMockConf.Random.word()
         assertNotNull(word)
         assertTrue(word.isNotEmpty())
 
         // 测试城市生成
-        val city = MockRandom.city()
+        val city = GlobalMockConf.Random.city()
         assertNotNull(city)
         assertTrue(city.isNotEmpty())
 
         // 测试公司生成
-        val company = MockRandom.company()
+        val company = GlobalMockConf.Random.company()
         assertNotNull(company)
         assertTrue(company.isNotEmpty())
 
@@ -338,20 +338,20 @@ class MockRandomTest {
     @Test
     fun testEnglishLocale() {
         // 测试英文语言环境
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
         // 测试单词生成
-        val word = MockRandom.word()
+        val word = GlobalMockConf.Random.word()
         assertNotNull(word)
         assertTrue(word.isNotEmpty())
 
         // 测试城市生成
-        val city = MockRandom.city()
+        val city = GlobalMockConf.Random.city()
         assertNotNull(city)
         assertTrue(city.isNotEmpty())
 
         // 测试公司生成
-        val company = MockRandom.company()
+        val company = GlobalMockConf.Random.company()
         assertNotNull(company)
         assertTrue(company.isNotEmpty())
 
@@ -361,9 +361,9 @@ class MockRandomTest {
     @Test
     fun testMultipleWords() {
         // 测试多个单词生成
-        MockRandom.setLocale(Locale.CHINESE)
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
 
-        val words = MockRandom.words(5)
+        val words = GlobalMockConf.Random.words(5)
         assertEquals(5, words.size)
         words.forEach { word ->
             assertNotNull(word)
@@ -377,14 +377,14 @@ class MockRandomTest {
     fun testLocaleSwitch() {
         // 测试语言环境切换
         // 测试中文
-        MockRandom.setLocale(Locale.CHINESE)
-        assertEquals(Locale.CHINESE, MockRandom.getCurrentLocale())
-        val chineseWord = MockRandom.word()
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
+        assertEquals(Locale.CHINESE, GlobalMockConf.Locale.getCurrentLocale())
+        val chineseWord = GlobalMockConf.Random.word()
 
         // 测试英文
-        MockRandom.setLocale(Locale.ENGLISH)
-        assertEquals(Locale.ENGLISH, MockRandom.getCurrentLocale())
-        val englishWord = MockRandom.word()
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
+        assertEquals(Locale.ENGLISH, GlobalMockConf.Locale.getCurrentLocale())
+        val englishWord = GlobalMockConf.Random.word()
 
         // 单词应该不同（很可能）
         println("Chinese word: $chineseWord, English word: $englishWord")
@@ -393,16 +393,16 @@ class MockRandomTest {
     @Test
     fun testAllDataTypes() {
         // 测试所有数据类型
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
         // 测试所有数据类型
-        val word = MockRandom.word()
-        val city = MockRandom.city()
-        val company = MockRandom.company()
-        val province = MockRandom.province()
-        val profession = MockRandom.profession()
-        val streetName = MockRandom.streetName()
-        val emailDomain = MockRandom.emailDomain()
+        val word = GlobalMockConf.Random.word()
+        val city = GlobalMockConf.Random.city()
+        val company = GlobalMockConf.Random.company()
+        val province = GlobalMockConf.Random.province()
+        val profession = GlobalMockConf.Random.profession()
+        val streetName = GlobalMockConf.Random.streetName()
+        val emailDomain = GlobalMockConf.Random.emailDomain()
 
         // 所有值都应该非空且不为空字符串
         listOf(word, city, company, province, profession, streetName, emailDomain).forEach {
@@ -416,11 +416,11 @@ class MockRandomTest {
     @Test
     fun testChineseNames() {
         // 测试中文姓名
-        MockRandom.setLocale(Locale.CHINESE)
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
 
-        val firstName = MockRandom.first()
-        val lastName = MockRandom.last()
-        val fullName = MockRandom.name()
+        val firstName = GlobalMockConf.Random.first()
+        val lastName = GlobalMockConf.Random.last()
+        val fullName = GlobalMockConf.Random.name()
 
         assertNotNull(firstName)
         assertNotNull(lastName)
@@ -435,11 +435,11 @@ class MockRandomTest {
     @Test
     fun testEnglishNames() {
         // 测试英文姓名
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
-        val firstName = MockRandom.first()
-        val lastName = MockRandom.last()
-        val fullName = MockRandom.name()
+        val firstName = GlobalMockConf.Random.first()
+        val lastName = GlobalMockConf.Random.last()
+        val fullName = GlobalMockConf.Random.name()
 
         assertNotNull(firstName)
         assertNotNull(lastName)
@@ -454,11 +454,11 @@ class MockRandomTest {
     @Test
     fun testNameGeneration() {
         // 测试多个姓名生成以确保多样性
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
         val names = mutableSetOf<String>()
         repeat(10) {
-            names.add(MockRandom.name())
+            names.add(GlobalMockConf.Random.name())
         }
 
         // 应该有一些多样性（不是全部相同）
@@ -470,9 +470,9 @@ class MockRandomTest {
     @Test
     fun testChinesePhoneFormats() {
         // 测试中文电话格式
-        MockRandom.setLocale(Locale.CHINESE)
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
 
-        val phoneNumbers = (1..10).map { MockRandom.phoneNumber() }
+        val phoneNumbers = (1..10).map { GlobalMockConf.Random.phoneNumber() }
 
         phoneNumbers.forEach { phone ->
             assertNotNull(phone)
@@ -493,9 +493,9 @@ class MockRandomTest {
     @Test
     fun testEnglishPhoneFormats() {
         // 测试英文电话格式
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
-        val phoneNumbers = (1..10).map { MockRandom.phoneNumber() }
+        val phoneNumbers = (1..10).map { GlobalMockConf.Random.phoneNumber() }
 
         phoneNumbers.forEach { phone ->
             assertNotNull(phone)
@@ -516,10 +516,10 @@ class MockRandomTest {
     @Test
     fun testCustomPhoneFormat() {
         // 测试自定义电话格式
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
         val customFormat = "(###) ###-####"
-        val phone = MockRandom.phoneNumber(format = customFormat)
+        val phone = GlobalMockConf.Random.phoneNumber(format = customFormat)
 
         assertTrue(
             phone.matches(Regex("\\(\\d{3}\\) \\d{3}-\\d{4}")),
@@ -531,8 +531,8 @@ class MockRandomTest {
     @Test
     fun testDefaultPhoneGeneration() {
         // 测试默认电话生成（应该使用国际化格式）
-        MockRandom.setLocale(Locale.ENGLISH)
-        val defaultPhone = MockRandom.phoneNumber()
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
+        val defaultPhone = GlobalMockConf.Random.phoneNumber()
         assertNotNull(defaultPhone)
         assertTrue(defaultPhone.isNotEmpty(), "默认电话不应为空")
         println("Default phone: $defaultPhone")
@@ -551,13 +551,13 @@ class MockRandomTest {
     fun testPhoneFormatSwitching() {
         // 测试电话格式切换
         // 测试中文格式
-        MockRandom.setLocale(Locale.CHINESE)
-        val chinesePhone = MockRandom.phoneNumber()
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
+        val chinesePhone = GlobalMockConf.Random.phoneNumber()
         println("Chinese locale phone: $chinesePhone")
 
         // 切换到英文格式
-        MockRandom.setLocale(Locale.ENGLISH)
-        val englishPhone = MockRandom.phoneNumber()
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
+        val englishPhone = GlobalMockConf.Random.phoneNumber()
         println("English locale phone: $englishPhone")
 
         // 电话应该是不同的格式（尽管由于随机性不能保证）
@@ -570,9 +570,9 @@ class MockRandomTest {
     @Test
     fun testPhoneNumberDigitsOnly() {
         // 测试电话号码仅数字
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
-        val phone = MockRandom.phoneNumber()
+        val phone = GlobalMockConf.Random.phoneNumber()
         val digitsOnly = phone.replace(Regex("[^\\d]"), "")
 
         // 应该有合理的数字位数（7-15是电话号码的典型位数）
@@ -586,7 +586,7 @@ class MockRandomTest {
     @Test
     fun testBasicPhoneGeneration() {
         // 测试基本电话生成
-        val phoneNumber = MockRandom.phoneNumber()
+        val phoneNumber = GlobalMockConf.Random.phoneNumber()
         println("Generated phone number: $phoneNumber")
         Assertions.assertNotNull(phoneNumber)
         Assertions.assertTrue(phoneNumber.isNotEmpty())
@@ -595,10 +595,10 @@ class MockRandomTest {
     @Test
     fun testPhoneTypeGeneration() {
         // 测试电话类型生成
-        val mobilePhone = MockRandom.phoneNumber(MockRandom.PhoneType.MOBILE.alias)
-        val landlinePhone = MockRandom.phoneNumber(MockRandom.PhoneType.LANDLINE.alias)
-        val tollFreePhone = MockRandom.phoneNumber(MockRandom.PhoneType.TOLL_FREE.alias)
-        val premiumPhone = MockRandom.phoneNumber(MockRandom.PhoneType.PREMIUM.alias)
+        val mobilePhone = GlobalMockConf.Random.phoneNumber(MockRandom.PhoneType.MOBILE.alias)
+        val landlinePhone = GlobalMockConf.Random.phoneNumber(MockRandom.PhoneType.LANDLINE.alias)
+        val tollFreePhone = GlobalMockConf.Random.phoneNumber(MockRandom.PhoneType.TOLL_FREE.alias)
+        val premiumPhone = GlobalMockConf.Random.phoneNumber(MockRandom.PhoneType.PREMIUM.alias)
 
         println("Mobile phone: $mobilePhone")
         println("Landline phone: $landlinePhone")
@@ -619,7 +619,7 @@ class MockRandomTest {
     @Test
     fun testAreaCodeGeneration() {
         // 测试区号生成
-        val areaCode = MockRandom.areaCode()
+        val areaCode = GlobalMockConf.Random.areaCode()
         println("Generated area code: $areaCode")
         Assertions.assertNotNull(areaCode)
         Assertions.assertTrue(areaCode.isNotEmpty())
@@ -628,13 +628,13 @@ class MockRandomTest {
     @Test
     fun testChineseText() {
         // 测试中文文本
-        MockRandom.setLocale(Locale.CHINESE)
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
 
-        val word = MockRandom.word()
-        val sentence = MockRandom.sentence()
-        val paragraph = MockRandom.paragraph()
-        val title = MockRandom.title()
-        val words = MockRandom.words(3)
+        val word = GlobalMockConf.Random.word()
+        val sentence = GlobalMockConf.Random.sentence()
+        val paragraph = GlobalMockConf.Random.paragraph()
+        val title = GlobalMockConf.Random.title()
+        val words = GlobalMockConf.Random.words(3)
 
         Assertions.assertNotNull(word)
         Assertions.assertNotNull(sentence)
@@ -658,13 +658,13 @@ class MockRandomTest {
     @Test
     fun testEnglishText() {
         // 测试英文文本
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
-        val word = MockRandom.word()
-        val sentence = MockRandom.sentence()
-        val paragraph = MockRandom.paragraph()
-        val title = MockRandom.title()
-        val words = MockRandom.words(3)
+        val word = GlobalMockConf.Random.word()
+        val sentence = GlobalMockConf.Random.sentence()
+        val paragraph = GlobalMockConf.Random.paragraph()
+        val title = GlobalMockConf.Random.title()
+        val words = GlobalMockConf.Random.words(3)
 
         Assertions.assertNotNull(word)
         Assertions.assertNotNull(sentence)
@@ -688,10 +688,10 @@ class MockRandomTest {
     @Test
     fun testWordWithLength() {
         // 测试指定长度的单词
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
-        val shortWord = MockRandom.word(3, 5)
-        val longWord = MockRandom.word(8, 12)
+        val shortWord = GlobalMockConf.Random.word(3, 5)
+        val longWord = GlobalMockConf.Random.word(8, 12)
 
         Assertions.assertTrue(shortWord.length >= 3 && shortWord.length <= 5)
         Assertions.assertTrue(longWord.length >= 8 && longWord.length <= 12)
@@ -703,9 +703,9 @@ class MockRandomTest {
     @Test
     fun testSentenceStructure() {
         // 测试句子结构
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
-        val sentence = MockRandom.sentence()
+        val sentence = GlobalMockConf.Random.sentence()
 
         // 应该以大写字母开头并以句号结尾
         Assertions.assertTrue(sentence.first().isUpperCase(), "句子应该以大写字母开头")
@@ -722,9 +722,9 @@ class MockRandomTest {
     @Test
     fun testTitleFormat() {
         // 测试标题格式
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
 
-        val title = MockRandom.title()
+        val title = GlobalMockConf.Random.title()
 
         // 每个单词都应该以大写字母开头
         val words = title.split(" ")
@@ -738,19 +738,19 @@ class MockRandomTest {
     @Test
     fun testImageTextI18n() {
         // 测试英文图片文本
-        MockRandom.setLocale(Locale.ENGLISH)
-        val englishImageUrl = MockRandom.image()
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
+        val englishImageUrl = GlobalMockConf.Random.image()
         Assertions.assertTrue(englishImageUrl.contains("text="), "图片URL应该包含text参数")
         println("English image URL: $englishImageUrl")
 
         // 测试中文图片文本
-        MockRandom.setLocale(Locale.CHINESE)
-        val chineseImageUrl = MockRandom.image()
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
+        val chineseImageUrl = GlobalMockConf.Random.image()
         Assertions.assertTrue(chineseImageUrl.contains("text="), "图片URL应该包含text参数")
         println("Chinese image URL: $chineseImageUrl")
 
         // 测试自定义文本（应该覆盖国际化）
-        val customImageUrl = MockRandom.image(text = "Custom")
+        val customImageUrl = GlobalMockConf.Random.image(text = "Custom")
         Assertions.assertTrue(customImageUrl.contains("text=Custom"), "应该使用自定义文本")
         println("Custom image URL: $customImageUrl")
     }

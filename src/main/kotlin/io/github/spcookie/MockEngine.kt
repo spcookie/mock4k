@@ -1,23 +1,24 @@
 package io.github.spcookie
 
-import org.slf4j.LoggerFactory
-
 /**
  * 模拟数据生成的核心引擎
  *
  * @author spcookie
  * @since 1.0.0
  */
-internal class MockEngine() {
-
-    private val logger = LoggerFactory.getLogger(MockEngine::class.java)
-    private val ruleExecutor = RuleExecutor()
+internal class MockEngine(
+    random: MockRandom
+) {
 
     companion object {
         private val ruleParser = RuleParser()
-        private val placeholderResolver = PlaceholderResolver()
-        private val regexResolver = RegexResolver()
     }
+
+    private val ruleExecutor = RuleExecutor(random)
+
+    private val regexResolver = RegexResolver(random)
+
+    private val placeholderResolver = PlaceholderResolver(random)
 
     /**
      * 首先处理正则表达式模式，然后处理占位符来解析字符串模板

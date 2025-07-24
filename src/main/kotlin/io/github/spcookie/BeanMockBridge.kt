@@ -36,7 +36,7 @@ internal class BeanMockBridge(
     ): T {
         return when {
             isSingleType(clazz, containerAdapter) -> {
-                mockSingleType(recursiveToKType(clazz))
+                mockType(recursiveToKType(clazz))
             }
 
             else -> {
@@ -58,7 +58,7 @@ internal class BeanMockBridge(
     /**
      * 使用模拟单个类型
      */
-    fun <T : Any> mockSingleType(kType: KType): T {
+    fun <T : Any> mockType(kType: KType): T {
         val clazz = kType.classifier as? KClass<*> ?: throw IllegalArgumentException("Type classifier is not KClass")
         return if (isSingleType(clazz, containerAdapter)) {
             // 处理单个类型

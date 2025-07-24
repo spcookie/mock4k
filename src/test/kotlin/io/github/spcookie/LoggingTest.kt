@@ -42,17 +42,17 @@ class LoggingTest {
     @Test
     fun `test logging with mock data generation`() {
         // 测试 MockRandom 操作的日志记录
-        val word = MockRandom.word()
+        val word = GlobalMockConf.Random.word()
         logger.info("Generated word: $word")
-        
-        val city = MockRandom.city()
+
+        val city = GlobalMockConf.Random.city()
         logger.info("Generated city: $city")
-        
-        val company = MockRandom.company()
+
+        val company = GlobalMockConf.Random.company()
         logger.info("Generated company: $company")
         
         // 测试多个数据生成
-        val words = MockRandom.words(5)
+        val words = GlobalMockConf.Random.words(5)
         logger.info("Generated words: $words")
     }
     
@@ -67,7 +67,7 @@ class LoggingTest {
             "skills|3-5" to listOf("@word")
         )
 
-        val result = Mocks.g(template)
+        val result = GlobalMockConf.g(template)
         logger.info("Generated mock data: $result")
         
         // 测试列表生成
@@ -78,7 +78,7 @@ class LoggingTest {
             )
         )
 
-        val listResult = Mocks.g(listTemplate)
+        val listResult = GlobalMockConf.g(listTemplate)
         logger.info("Generated list data: $listResult")
     }
     
@@ -94,16 +94,16 @@ class LoggingTest {
         
         locales.forEach { locale ->
             LocaleManager.setLocale(locale)
-            val word = MockRandom.word()
-            val city = MockRandom.city()
-            logger.info("Locale: ${locale.displayName}, Word: $word, City: $city")
+            val word = GlobalMockConf.Random.word()
+            val city = GlobalMockConf.Random.city()
+            logger.info("locale: ${locale.displayName}, Word: $word, City: $city")
         }
         
         // 清理缓存以测试缓存未命中的日志记录
         LocaleManager.clearCache()
         
         // 再次生成数据以测试缓存重新加载
-        val word = MockRandom.word()
+        val word = GlobalMockConf.Random.word()
         logger.info("After cache clear, generated word: $word")
     }
 }

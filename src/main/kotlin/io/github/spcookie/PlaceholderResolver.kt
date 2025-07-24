@@ -8,7 +8,9 @@ import kotlin.reflect.full.memberFunctions
  * @author spcookie
  * @since 1.0.0
  */
-internal class PlaceholderResolver {
+internal class PlaceholderResolver(
+    private val random: MockRandom
+) {
 
     companion object {
         /**
@@ -24,8 +26,6 @@ internal class PlaceholderResolver {
         private val SINGLE_PLACEHOLDER_PATTERN =
             Regex("^@([a-zA-Z][a-zA-Z0-9]*(?:\\.[a-zA-Z0-9]+)*)(?:\\(([^)]*)\\))?$")
     }
-
-    private val random = MockRandom
 
     /**
      * 解析字符串中的占位符

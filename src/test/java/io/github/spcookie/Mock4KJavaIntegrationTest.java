@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static io.github.spcookie.MockUtils.mock;
+import static io.github.spcookie.GlobalMocks.mock;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -127,8 +127,8 @@ public class Mock4KJavaIntegrationTest {
     @Test
     public void testCustomExtensions() {
         // Test custom extensions from Java
-        Mocks.Random.extend("customJavaString", () -> "Hello from Java");
-        Mocks.Random.extend("customJavaNumber", () -> 42);
+        GlobalMockConf.Random.extend("customJavaString", () -> "Hello from Java");
+        GlobalMockConf.Random.extend("customJavaNumber", () -> 42);
 
         Map<?, ?> result = mock(gson.fromJson(
                 """
@@ -190,7 +190,7 @@ public class Mock4KJavaIntegrationTest {
     @Test
     public void testSpecialCharactersAndUnicode() {
         // Test handling of special characters and Unicode
-        Mocks.Random.extend("unicodeString", () -> "测试中文字符 🚀 Special chars: @#$%^&*()");
+        GlobalMockConf.Random.extend("unicodeString", () -> "测试中文字符 🚀 Special chars: @#$%^&*()");
 
         Map<?, ?> result = mock(gson.fromJson("""
                 {

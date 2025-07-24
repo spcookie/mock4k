@@ -16,13 +16,13 @@ class InternationalizationAdvancedTest {
     @BeforeEach
     fun setUp() {
         // 保存原始语言环境
-        originalLocale = MockRandom.getCurrentLocale()
+        originalLocale = GlobalMockConf.Locale.getCurrentLocale()
     }
 
     @AfterEach
     fun tearDown() {
         // 恢复原始语言环境
-        originalLocale?.let { MockRandom.setLocale(it) }
+        originalLocale?.let { GlobalMockConf.Locale.setLocale(it) }
     }
 
     // ==================== 基础语言环境测试 ====================
@@ -45,12 +45,12 @@ class InternationalizationAdvancedTest {
         )
 
         supportedLocales.forEach { (locale, localeName) ->
-            MockRandom.setLocale(locale)
-            assertEquals(locale, MockRandom.getCurrentLocale(), "语言环境应该设置为 $localeName")
+            GlobalMockConf.Locale.setLocale(locale)
+            assertEquals(locale, GlobalMockConf.Locale.getCurrentLocale(), "语言环境应该设置为 $localeName")
 
             // 测试基本功能在每个语言环境下都能工作
-            val name = MockRandom.name()
-            val word = MockRandom.word()
+            val name = GlobalMockConf.Random.name()
+            val word = GlobalMockConf.Random.word()
 
             assertNotNull(name, "$localeName 的姓名不应为 null")
             assertNotNull(word, "$localeName 的单词不应为 null")
@@ -65,7 +65,7 @@ class InternationalizationAdvancedTest {
 
     @Test
     fun testChineseLocaleComprehensive() {
-        MockRandom.setLocale(Locale.CHINESE)
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
 
         val template = mapOf(
             "姓名" to "@NAME",
@@ -121,16 +121,16 @@ class InternationalizationAdvancedTest {
     @Test
     fun testSimplifiedVsTraditionalChinese() {
         // 测试简体中文
-        MockRandom.setLocale(Locale.SIMPLIFIED_CHINESE)
-        val simplifiedName = MockRandom.name()
-        val simplifiedCity = MockRandom.city()
-        val simplifiedCompany = MockRandom.company()
+        GlobalMockConf.Locale.setLocale(Locale.SIMPLIFIED_CHINESE)
+        val simplifiedName = GlobalMockConf.Random.name()
+        val simplifiedCity = GlobalMockConf.Random.city()
+        val simplifiedCompany = GlobalMockConf.Random.company()
 
         // 测试繁体中文
-        MockRandom.setLocale(Locale.TRADITIONAL_CHINESE)
-        val traditionalName = MockRandom.name()
-        val traditionalCity = MockRandom.city()
-        val traditionalCompany = MockRandom.company()
+        GlobalMockConf.Locale.setLocale(Locale.TRADITIONAL_CHINESE)
+        val traditionalName = GlobalMockConf.Random.name()
+        val traditionalCity = GlobalMockConf.Random.city()
+        val traditionalCompany = GlobalMockConf.Random.company()
 
         // 验证都能生成有效数据
         assertNotNull(simplifiedName)
@@ -148,7 +148,7 @@ class InternationalizationAdvancedTest {
 
     @Test
     fun testJapaneseLocaleComprehensive() {
-        MockRandom.setLocale(Locale.JAPANESE)
+        GlobalMockConf.Locale.setLocale(Locale.JAPANESE)
 
         val template = mapOf(
             "名前" to "@NAME",
@@ -190,7 +190,7 @@ class InternationalizationAdvancedTest {
 
     @Test
     fun testKoreanLocaleComprehensive() {
-        MockRandom.setLocale(Locale.KOREAN)
+        GlobalMockConf.Locale.setLocale(Locale.KOREAN)
 
         val template = mapOf(
             "이름" to "@NAME",
@@ -241,7 +241,7 @@ class InternationalizationAdvancedTest {
         )
 
         europeanLocales.forEach { (locale, localeName) ->
-            MockRandom.setLocale(locale)
+            GlobalMockConf.Locale.setLocale(locale)
 
             val template = mapOf(
                 "name" to "@NAME",
@@ -278,8 +278,8 @@ class InternationalizationAdvancedTest {
         val results = mutableMapOf<Locale, Map<String, Any>>()
 
         locales.forEach { locale ->
-            MockRandom.setLocale(locale)
-            assertEquals(locale, MockRandom.getCurrentLocale())
+            GlobalMockConf.Locale.setLocale(locale)
+            assertEquals(locale, GlobalMockConf.Locale.getCurrentLocale())
 
             val template = mapOf(
                 "name" to "@NAME",
@@ -331,13 +331,13 @@ class InternationalizationAdvancedTest {
         )
 
         // 为每个用户的每个语言配置生成数据
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
         val englishResult = mock(template) as Map<String, Any>
 
-        MockRandom.setLocale(Locale.CHINESE)
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
         val chineseResult = mock(template) as Map<String, Any>
 
-        MockRandom.setLocale(Locale.JAPANESE)
+        GlobalMockConf.Locale.setLocale(Locale.JAPANESE)
         val japaneseResult = mock(template) as Map<String, Any>
 
         // 验证所有结果都有效
@@ -367,18 +367,18 @@ class InternationalizationAdvancedTest {
     @Test
     fun testLocaleSpecificFeatures() {
         // 测试中文特定功能
-        MockRandom.setLocale(Locale.CHINESE)
-        val chineseWords = MockRandom.words(10)
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
+        val chineseWords = GlobalMockConf.Random.words(10)
         assertTrue(chineseWords.isNotEmpty(), "中文词汇不应为空")
 
         // 测试英文特定功能
-        MockRandom.setLocale(Locale.ENGLISH)
-        val englishWords = MockRandom.words(10)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
+        val englishWords = GlobalMockConf.Random.words(10)
         assertTrue(englishWords.isNotEmpty(), "英文词汇不应为空")
 
         // 测试日文特定功能
-        MockRandom.setLocale(Locale.JAPANESE)
-        val japaneseWords = MockRandom.words(10)
+        GlobalMockConf.Locale.setLocale(Locale.JAPANESE)
+        val japaneseWords = GlobalMockConf.Random.words(10)
         assertTrue(japaneseWords.isNotEmpty(), "日文词汇不应为空")
 
         println("Chinese words: $chineseWords")
@@ -403,11 +403,11 @@ class InternationalizationAdvancedTest {
         )
 
         unsupportedLocales.forEach { locale ->
-            MockRandom.setLocale(locale)
+            GlobalMockConf.Locale.setLocale(locale)
 
             // 即使是不支持的语言环境，也应该能生成基本数据
-            val name = MockRandom.name()
-            val word = MockRandom.word()
+            val name = GlobalMockConf.Random.name()
+            val word = GlobalMockConf.Random.word()
 
             assertNotNull(name, "即使是不支持的语言环境，姓名也不应为 null")
             assertNotNull(word, "即使是不支持的语言环境，单词也不应为 null")
@@ -430,17 +430,17 @@ class InternationalizationAdvancedTest {
         )
 
         locales.forEach { locale ->
-            MockRandom.setLocale(locale)
+            GlobalMockConf.Locale.setLocale(locale)
 
             val startTime = System.currentTimeMillis()
 
             // 生成大量数据
             repeat(100) {
-                MockRandom.name()
-                MockRandom.city()
-                MockRandom.company()
-                MockRandom.word()
-                MockRandom.sentence()
+                GlobalMockConf.Random.name()
+                GlobalMockConf.Random.city()
+                GlobalMockConf.Random.company()
+                GlobalMockConf.Random.word()
+                GlobalMockConf.Random.sentence()
             }
 
             val endTime = System.currentTimeMillis()

@@ -83,6 +83,7 @@ internal object MethodMockStub {
      * 此类处理方法调用的拦截，并根据
      * 方法的返回类型生成适当的模拟返回值。
      */
+    @Suppress("UNUSED")
     class MockInterceptor {
 
         companion object {
@@ -108,13 +109,7 @@ internal object MethodMockStub {
                     return null
                 }
                 val genericReturnType = method.genericReturnType
-                return if (isSingleType(returnType.kotlin, Mocks.ContainerAdapter)) {
-                    // 处理单类型
-                    mock(genericReturnType.toKType())
-                } else {
-                    // 处理复杂类型
-                    mock(returnType)
-                }
+                return mock(genericReturnType.toKType())
             }
 
         }

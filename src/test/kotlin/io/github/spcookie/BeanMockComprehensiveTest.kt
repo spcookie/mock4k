@@ -24,7 +24,7 @@ class BeanMockComprehensiveTest {
     @BeforeEach
     fun setUp() {
         // 重置为默认语言环境
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
     }
 
     // ==================== 基本Bean测试 ====================

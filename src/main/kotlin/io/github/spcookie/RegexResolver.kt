@@ -6,9 +6,9 @@ package io.github.spcookie
  * @author spcookie
  * @since 1.0.0
  */
-internal class RegexResolver {
-
-    private val random = MockRandom
+internal class RegexResolver(
+    private val random: MockRandom
+) {
 
     /**
      * 解析 /pattern/ 格式的正则表达式模式

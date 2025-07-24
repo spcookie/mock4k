@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.test.assertTrue
 
 /**
- * 测试 MockRandom 的线程安全性
+ * 测试 GlobalMockConf.Random 的线程安全性
  */
 class ThreadSafetyTest {
 
@@ -24,12 +24,12 @@ class ThreadSafetyTest {
             executor.submit {
                 try {
                     repeat(operationsPerThread) {
-                        // 测试各种 MockRandom 操作
-                        val randomInt = MockRandom.integer(1, 100)
-                        val randomString = MockRandom.string(10)
-                        val randomBoolean = MockRandom.boolean()
-                        val randomFloat = MockRandom.float(0.0, 1.0)
-                        val randomWord = MockRandom.word()
+                        // 测试各种 GlobalMockConf.Random 操作
+                        val randomInt = GlobalMockConf.Random.integer(1, 100)
+                        val randomString = GlobalMockConf.Random.string(10)
+                        val randomBoolean = GlobalMockConf.Random.boolean()
+                        val randomFloat = GlobalMockConf.Random.float(0.0, 1.0)
+                        val randomWord = GlobalMockConf.Random.word()
 
                         synchronized(results) {
                             results.add(randomInt)
@@ -73,8 +73,8 @@ class ThreadSafetyTest {
         val exceptions = mutableListOf<Exception>()
 
         // 注册一些自定义占位符
-        MockRandom.extend("threadTest") { "Thread-${Thread.currentThread().id}" }
-        MockRandom.extendWithParams("threadTestWithParam") { params ->
+        GlobalMockConf.Random.extend("threadTest") { "Thread-${Thread.currentThread().id}" }
+        GlobalMockConf.Random.extendWithParams("threadTestWithParam") { params ->
             "Thread-${Thread.currentThread().id}-${params.firstOrNull() ?: "default"}"
         }
 
@@ -83,10 +83,11 @@ class ThreadSafetyTest {
                 try {
                     repeat(operationsPerThread) {
                         // 测试自定义占位符操作
-                        val hasExtended = MockRandom.hasExtended("threadTest")
-                        val customResult = MockRandom.getExtended("threadTest")?.invoke()
+                        val hasExtended = GlobalMockConf.Random.hasExtended("threadTest")
+                        val customResult = GlobalMockConf.Random.getExtended("threadTest")?.invoke()
                         val customWithParamResult =
-                            MockRandom.getExtendedWithParams("threadTestWithParam")?.invoke(listOf(threadIndex))
+                            GlobalMockConf.Random.getExtendedWithParams("threadTestWithParam")
+                                ?.invoke(listOf(threadIndex))
 
                         assertTrue(hasExtended, "自定义占位符应该存在")
                         assertTrue(customResult != null, "自定义占位符应该返回结果")
@@ -116,7 +117,7 @@ class ThreadSafetyTest {
         )
 
         // 清理
-        MockRandom.clearExtended()
+        GlobalMockConf.Random.clearExtended()
     }
 
     @Test

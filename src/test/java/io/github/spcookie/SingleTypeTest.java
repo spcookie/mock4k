@@ -10,7 +10,7 @@ public class SingleTypeTest {
 
     @Test
     public void testSingleTypeMocking() {
-        BeanMethodMock mock = MockUtils.load(BeanMethodMock.class);
+        BeanMethodMock mock = GlobalMocks.load(BeanMethodMock.class);
 
         Map<String, Object> map = mock.getMap();
         BeanMethodMock.TestEnum testEnum = mock.getEnum();
@@ -23,7 +23,7 @@ public class SingleTypeTest {
         assertNotNull(testEnum);
 
         assertDoesNotThrow(() -> {
-            BeanMethodMock.TestEnum anEnum = MockUtils.mock(BeanMethodMock.TestEnum.class);
+            BeanMethodMock.TestEnum anEnum = GlobalMocks.mock(BeanMethodMock.TestEnum.class);
             assertNotNull(anEnum);
         });
     }

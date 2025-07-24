@@ -175,7 +175,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * 使用 TypeAdapter 将值转换为目标类型
+     * 使用 typeAdapter 将值转换为目标类型
      */
     internal fun convertValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
         if (value == null) return null
@@ -183,7 +183,7 @@ internal class BeanMockMapper(
         val targetClass = targetType.classifier as? KClass<*> ?: return value
 
         return when {
-            // 使用 TypeAdapter 处理基本类型
+            // 使用 typeAdapter 处理基本类型
             isBasicType(targetClass) -> {
                 val adapter = typeAdapter.get(targetClass)
                 adapter?.invoke(value) ?: value
@@ -295,7 +295,7 @@ internal class BeanMockMapper(
     }
 
     /**
-     * 使用 ContainerAdapter 转换容器值
+     * 使用 containerAdapter 转换容器值
      */
     private fun convertContainerValue(value: Any?, targetType: KType, config: BeanMockConfig): Any? {
         return containerAdapter.convertContainerValue(
@@ -338,7 +338,7 @@ internal class BeanMockMapper(
             }
 
             else -> {
-                // 如果可用，尝试使用 TypeAdapter
+                // 如果可用，尝试使用 typeAdapter
                 val adapter = typeAdapter.get(targetClass)
                 adapter?.invoke(value) ?: value
             }

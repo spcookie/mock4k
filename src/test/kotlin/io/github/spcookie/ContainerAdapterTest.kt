@@ -8,7 +8,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
- * Test class for ContainerAdapter functionality
+ * Test class for containerAdapter functionality
  *
  * @author spcookie
  * @since 1.2.0
@@ -17,8 +17,8 @@ class ContainerAdapterTest {
 
     @Test
     fun testRegisterCustomContainerTypes() {
-        // Access the global container adapter through Mocks object
-        val containerAdapter = Mocks.ContainerAdapter
+        // Access the global container adapter through GlobalMockConf object
+        val containerAdapter = GlobalMockConf.ContainerAdapter
 
         // Test 1: Register a simple container type with SINGLE_VALUE behavior
         containerAdapter.register(
@@ -65,7 +65,7 @@ class ContainerAdapterTest {
     @Test
     fun testIsContainerType() {
         // Register test container types
-        val containerAdapter = Mocks.ContainerAdapter
+        val containerAdapter = GlobalMockConf.ContainerAdapter
         containerAdapter.register(
             "com.test.TestContainer",
             ContainerAdapter.ContainerBehavior.SINGLE_VALUE

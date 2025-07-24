@@ -9,9 +9,9 @@ import kotlin.math.pow
  * @author spcookie
  * @since 1.0.0
  */
-internal class RuleExecutor {
-
-    private val random = MockRandom
+internal class RuleExecutor(
+    val random: MockRandom
+) {
 
     /**
      * 使用给定值执行规则

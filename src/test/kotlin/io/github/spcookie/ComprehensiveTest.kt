@@ -13,7 +13,7 @@ class ComprehensiveTest {
     @BeforeEach
     fun setUp() {
         // 重置为默认语言环境
-        MockRandom.setLocale(Locale.ENGLISH)
+        GlobalMockConf.Locale.setLocale(Locale.ENGLISH)
     }
 
     // ==================== 基础规则测试 ====================
@@ -307,7 +307,7 @@ class ComprehensiveTest {
 
     @Test
     fun testChineseLocalization() {
-        MockRandom.setLocale(Locale.CHINESE)
+        GlobalMockConf.Locale.setLocale(Locale.CHINESE)
 
         val template = mapOf(
             "name" to "@NAME",
@@ -332,7 +332,7 @@ class ComprehensiveTest {
 
     @Test
     fun testJapaneseLocalization() {
-        MockRandom.setLocale(Locale.JAPANESE)
+        GlobalMockConf.Locale.setLocale(Locale.JAPANESE)
 
         val template = mapOf(
             "name" to "@NAME",
@@ -354,7 +354,7 @@ class ComprehensiveTest {
 
     @Test
     fun testKoreanLocalization() {
-        MockRandom.setLocale(Locale.KOREAN)
+        GlobalMockConf.Locale.setLocale(Locale.KOREAN)
 
         val template = mapOf(
             "name" to "@NAME",
@@ -390,8 +390,8 @@ class ComprehensiveTest {
         )
 
         locales.forEach { (locale, localeName) ->
-            MockRandom.setLocale(locale)
-            assertEquals(locale, MockRandom.getCurrentLocale())
+            GlobalMockConf.Locale.setLocale(locale)
+            assertEquals(locale, GlobalMockConf.Locale.getCurrentLocale())
 
             val result = mock(template) as Map<String, Any>
 

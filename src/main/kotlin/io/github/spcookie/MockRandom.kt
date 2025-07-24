@@ -12,10 +12,13 @@ import kotlin.random.Random
  * @author spcookie
  * @since 1.0.0
  */
-object MockRandom {
+class MockRandom {
 
     private val logger = LoggerFactory.getLogger(MockRandom::class.java)
-    private val random = Random.Default
+
+    companion object {
+        private val random = Random.Default
+    }
 
     /**
      * 扩展占位符生成器的注册表
@@ -534,7 +537,7 @@ object MockRandom {
 
     /**
      * Generate bank card with default settings
-     * @return Random bank card number
+     * @return random bank card number
      */
     fun bankCard(): String {
         return bankCard(null, null, 19, "debit")
@@ -673,7 +676,7 @@ object MockRandom {
 
     /**
      * Generate area code
-     * @return Random area code
+     * @return random area code
      */
     fun areaCode(): String {
         val areaCodes = getAreaCodes()
@@ -791,22 +794,6 @@ object MockRandom {
     // Internationalization
 
     /**
-     * Set current locale
-     * @param locale locale to set
-     */
-    fun setLocale(locale: Locale) {
-        LocaleManager.setLocale(locale)
-    }
-
-    /**
-     * Get current locale
-     * @return current locale
-     */
-    fun getCurrentLocale(): Locale {
-        return LocaleManager.getCurrentLocale()
-    }
-
-    /**
      * Get data list from properties
      * @param key property key
      * @return list of data
@@ -818,7 +805,7 @@ object MockRandom {
         return dataList
     }
 
-    // Locale-based data generation methods
+    // locale-based data generation methods
 
     /**
      * Get random word from current locale

@@ -44,7 +44,7 @@ object LocaleManager {
         logger.debug("Loading locale data for: {}", localeKey)
 
         if (localeDataCache.containsKey(localeKey)) {
-            logger.debug("Locale data found in cache for: {}", localeKey)
+            logger.debug("locale data found in cache for: {}", localeKey)
             return localeDataCache[localeKey]!!
         }
 
@@ -63,7 +63,7 @@ object LocaleManager {
                 loaded = true
                 logger.debug("Successfully loaded locale data from: {}", resourceName)
             } else {
-                logger.debug("Locale resource not found: {}", resourceName)
+                logger.debug("locale resource not found: {}", resourceName)
             }
         } catch (e: Exception) {
             logger.warn("Failed to load locale resource {}: {}", resourceName, e.message)

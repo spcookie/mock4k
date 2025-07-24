@@ -757,7 +757,7 @@ src/
 │   │   ├── Mock.kt                # 主要Mock对象和注解
 │   │   ├── MockEngine.kt          # Mock引擎实现
 │   │   ├── MockRandom.kt          # 随机数据生成器
-│   │   ├── Mocks.kt               # Mock对象
+│   │   ├── GlobalMocks.kt               # Mock对象
 │   │   ├── ParsedRule.kt          # 规则解析数据结构
 │   │   ├── PlaceholderResolver.kt # 占位符解析逻辑
 │   │   ├── RegexResolver.kt       # 正则表达式解析器
@@ -776,7 +776,7 @@ src/
 - **Mock.kt**: 提供简单易用的API和注解定义
 - **MockEngine.kt**: 模拟引擎的核心实现，负责解析和执行模板
 - **MockRandom.kt**: 随机数据生成器，提供各种类型的随机数据生成方法
-- **Mocks.kt**: 主要的模拟数据生成入口
+- **GlobalMock.kt**: 主要的模拟数据生成入口
 - **RuleParser.kt**: 规则解析器，负责解析占位符规则
 - **RuleExecutor.kt**: 规则执行器，负责执行解析后的规则
 - **PlaceholderResolver.kt**: 占位符解析器，处理模板中的占位符，支持属性引用

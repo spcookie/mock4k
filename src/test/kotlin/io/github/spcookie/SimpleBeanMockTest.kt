@@ -29,8 +29,7 @@ class SimpleBeanMockTest {
         logger.info("生成的模板: $template")
 
         // 测试MockEngine生成
-        val mockEngine = MockEngine()
-        val generatedData = MockEngine().generate(template)
+        val generatedData = MockEngine(GlobalMockConf.Random).generate(template)
         logger.info("MockEngine生成的数据: $generatedData")
 
         val user = mock(TestUser::class, includePrivate = true)
