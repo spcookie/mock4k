@@ -350,8 +350,12 @@ internal class BeanMockMapper(
      */
     private fun setPropertyValue(instance: Any, property: KProperty<*>, value: Any?) {
         property.isAccessible = true
-        @Suppress("UNCHECKED_CAST")
-        (property as KMutableProperty<Any?>).setter.call(instance, value)
+        try {
+            @Suppress("UNCHECKED_CAST")
+            (property as KMutableProperty<Any?>).setter.call(instance, value)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Failed to set property ${property.name} on ${instance::class.simpleName}: ${e.message}")
+        }
     }
 
     /**
