@@ -1,5 +1,6 @@
 package io.github.spcookie
 
+import Mock
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
@@ -18,7 +19,7 @@ class BeanIntrospectEnhancedTest {
 
     private val logger = LoggerFactory.getLogger(BeanIntrospectEnhancedTest::class.java)
     private val containerAdapter = ContainerAdapter()
-    private val beanIntrospect = BeanIntrospect(containerAdapter)
+    private val typeIntrospect = TypeIntrospect(containerAdapter)
 
     // ==================== 注解测试Bean ====================
 
@@ -45,7 +46,7 @@ class BeanIntrospectEnhancedTest {
         logger.info("测试带注解Bean的内省...")
 
         val config = BeanMockConfig()
-        val template = beanIntrospect.analyzeBean(AnnotatedBean::class, config)
+        val template = typeIntrospect.analyzeBean(AnnotatedBean::class, config)
 
         assertNotNull(template, "注解Bean模板不应为null")
         assertTrue(template is Map<*, *>, "模板应该是一个Map")
@@ -81,7 +82,7 @@ class BeanIntrospectEnhancedTest {
         logger.info("测试嵌套注解Bean的内省...")
 
         val config = BeanMockConfig(includePrivate = true)
-        val template = beanIntrospect.analyzeBean(NestedAnnotatedBean::class, config)
+        val template = typeIntrospect.analyzeBean(NestedAnnotatedBean::class, config)
 
         assertNotNull(template, "嵌套注解Bean模板不应为null")
         val templateMap = template as Map<String, Any>
@@ -117,7 +118,7 @@ class BeanIntrospectEnhancedTest {
         logger.info("测试复杂类型Bean的内省...")
 
         val config = BeanMockConfig()
-        val template = beanIntrospect.analyzeBean(ComplexTypesBean::class, config)
+        val template = typeIntrospect.analyzeBean(ComplexTypesBean::class, config)
 
         assertNotNull(template, "复杂类型Bean模板不应为null")
         val templateMap = template as Map<String, Any>
@@ -148,7 +149,7 @@ class BeanIntrospectEnhancedTest {
 
         val config = BeanMockConfig()
         // 测试String类型的泛型Bean
-        val template = beanIntrospect.analyzeBean(GenericBean::class, config)
+        val template = typeIntrospect.analyzeBean(GenericBean::class, config)
 
         assertNotNull(template, "泛型Bean模板不应为null")
         val templateMap = template as Map<String, Any>
@@ -178,7 +179,7 @@ class BeanIntrospectEnhancedTest {
         logger.info("测试枚举Bean的内省...")
 
         val config = BeanMockConfig()
-        val template = beanIntrospect.analyzeBean(EnumBean::class, config)
+        val template = typeIntrospect.analyzeBean(EnumBean::class, config)
 
         assertNotNull(template, "枚举Bean模板不应为null")
         val templateMap = template as Map<String, Any>
@@ -209,7 +210,7 @@ class BeanIntrospectEnhancedTest {
         logger.info("测试继承Bean的内省...")
 
         val config = BeanMockConfig()
-        val template = beanIntrospect.analyzeBean(ExtendedEntity::class, config)
+        val template = typeIntrospect.analyzeBean(ExtendedEntity::class, config)
 
         assertNotNull(template, "继承Bean模板不应为null")
         val templateMap = template as Map<String, Any>
@@ -234,7 +235,7 @@ class BeanIntrospectEnhancedTest {
         logger.info("测试空Bean的内省...")
 
         val config = BeanMockConfig()
-        val template = beanIntrospect.analyzeBean(EmptyBean::class, config)
+        val template = typeIntrospect.analyzeBean(EmptyBean::class, config)
 
         assertNotNull(template, "空Bean模板不应为null")
         assertTrue(template is Map<*, *>, "模板应该是一个Map")
@@ -257,7 +258,7 @@ class BeanIntrospectEnhancedTest {
 
         // 测试不包含私有字段
         val configExcludePrivate = BeanMockConfig(includePrivate = false)
-        val templateExcludePrivate = beanIntrospect.analyzeBean(PrivateFieldBean::class, configExcludePrivate)
+        val templateExcludePrivate = typeIntrospect.analyzeBean(PrivateFieldBean::class, configExcludePrivate)
         val mapExcludePrivate = templateExcludePrivate as Map<String, Any>
 
         assertTrue(mapExcludePrivate.containsKey("publicField"), "公共字段应该存在")
@@ -266,7 +267,7 @@ class BeanIntrospectEnhancedTest {
 
         // 测试包含私有字段
         val configIncludePrivate = BeanMockConfig(includePrivate = true)
-        val templateIncludePrivate = beanIntrospect.analyzeBean(PrivateFieldBean::class, configIncludePrivate)
+        val templateIncludePrivate = typeIntrospect.analyzeBean(PrivateFieldBean::class, configIncludePrivate)
         val mapIncludePrivate = templateIncludePrivate as Map<String, Any>
 
         assertTrue(mapIncludePrivate.containsKey("publicField"), "公共字段应该存在")
@@ -311,7 +312,7 @@ class BeanIntrospectEnhancedTest {
         )
 
         configs.forEach { config ->
-            val template = beanIntrospect.analyzeBean(Level1::class, config)
+            val template = typeIntrospect.analyzeBean(Level1::class, config)
             assertNotNull(template, "深度嵌套Bean模板不应为null（深度=${config.depth}）")
 
             val templateMap = template as Map<String, Any>
@@ -341,11 +342,11 @@ class BeanIntrospectEnhancedTest {
         val config = BeanMockConfig(depth = 3)
 
         // 测试NodeA
-        val templateA = beanIntrospect.analyzeBean(NodeA::class, config)
+        val templateA = typeIntrospect.analyzeBean(NodeA::class, config)
         assertNotNull(templateA, "循环引用Bean A模板不应为null")
 
         // 测试NodeB
-        val templateB = beanIntrospect.analyzeBean(NodeB::class, config)
+        val templateB = typeIntrospect.analyzeBean(NodeB::class, config)
         assertNotNull(templateB, "循环引用Bean B模板不应为null")
 
         logger.info("循环引用Bean A模板: $templateA")
@@ -371,7 +372,7 @@ class BeanIntrospectEnhancedTest {
 
         repeat(iterations) {
             classes.forEach { clazz ->
-                val template = beanIntrospect.analyzeBean(clazz, config)
+                val template = typeIntrospect.analyzeBean(clazz, config)
                 assertNotNull(template, "模板不应为null")
             }
         }
@@ -408,7 +409,7 @@ class BeanIntrospectEnhancedTest {
 
         // 接口应该能够被内省，但可能会有特殊处理
         assertDoesNotThrow {
-            val template = beanIntrospect.analyzeBean(InterfaceBean::class, config)
+            val template = typeIntrospect.analyzeBean(InterfaceBean::class, config)
             assertNotNull(template, "接口Bean模板不应为null")
             logger.info("接口Bean模板: $template")
         }
@@ -428,7 +429,7 @@ class BeanIntrospectEnhancedTest {
         logger.info("测试特殊容器类型的内省...")
 
         val config = BeanMockConfig()
-        val template = beanIntrospect.analyzeBean(SpecialContainerBean::class, config)
+        val template = typeIntrospect.analyzeBean(SpecialContainerBean::class, config)
 
         assertNotNull(template, "特殊容器Bean模板不应为null")
         val templateMap = template as Map<String, Any>

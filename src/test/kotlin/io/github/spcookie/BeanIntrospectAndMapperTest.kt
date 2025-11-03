@@ -17,8 +17,8 @@ class BeanIntrospectAndMapperTest {
     private val logger = LoggerFactory.getLogger(BeanIntrospectAndMapperTest::class.java)
     private val containerAdapter = ContainerAdapter()
     private val typeAdapter = TypeAdapter()
-    private val beanIntrospect = BeanIntrospect(containerAdapter)
-    private val beanMockMapper = BeanMockMapper(typeAdapter, containerAdapter)
+    private val typeIntrospect = TypeIntrospect(containerAdapter)
+    private val typeMockMapper = TypeMockMapper(typeAdapter, containerAdapter)
 
     // ==================== Bean内省测试 ====================
 
@@ -36,7 +36,7 @@ class BeanIntrospectAndMapperTest {
         logger.info("测试简单Bean内省...")
 
         val config = BeanMockConfig(includePrivate = true)
-        val template = beanIntrospect.analyzeBean(SimpleBean::class, config)
+        val template = typeIntrospect.analyzeBean(SimpleBean::class, config)
 
         assertNotNull(template, "模板不应为null")
         assertTrue(template is Map<*, *>, "模板应该是一个Map")
@@ -73,7 +73,7 @@ class BeanIntrospectAndMapperTest {
         logger.info("测试复杂Bean内省...")
 
         val config = BeanMockConfig(includePrivate = true, depth = 3)
-        val template = beanIntrospect.analyzeBean(ComplexBean::class, config)
+        val template = typeIntrospect.analyzeBean(ComplexBean::class, config)
 
         assertNotNull(template, "复杂Bean模板不应为null")
         assertTrue(template is Map<*, *>, "模板应该是一个Map")
@@ -110,7 +110,7 @@ class BeanIntrospectAndMapperTest {
         logger.info("测试容器类型内省...")
 
         val config = BeanMockConfig(includePrivate = true)
-        val template = beanIntrospect.analyzeBean(ContainerBean::class, config)
+        val template = typeIntrospect.analyzeBean(ContainerBean::class, config)
 
         assertNotNull(template, "容器Bean模板不应为null")
         assertTrue(template is Map<*, *>, "模板应该是一个Map")
@@ -135,10 +135,10 @@ class BeanIntrospectAndMapperTest {
         val booleanType = Boolean::class.createType()
         val doubleType = Double::class.createType()
 
-        val stringTemplate = beanIntrospect.analyzePropertyType(stringType, null, null)
-        val intTemplate = beanIntrospect.analyzePropertyType(intType, null, null)
-        val booleanTemplate = beanIntrospect.analyzePropertyType(booleanType, null, null)
-        val doubleTemplate = beanIntrospect.analyzePropertyType(doubleType, null, null)
+        val stringTemplate = typeIntrospect.analyzePropertyType(stringType, null, null)
+        val intTemplate = typeIntrospect.analyzePropertyType(intType, null, null)
+        val booleanTemplate = typeIntrospect.analyzePropertyType(booleanType, null, null)
+        val doubleTemplate = typeIntrospect.analyzePropertyType(doubleType, null, null)
 
         assertNotNull(stringTemplate, "字符串类型模板不应为null")
         assertNotNull(intTemplate, "整数类型模板不应为null")
@@ -160,9 +160,9 @@ class BeanIntrospectAndMapperTest {
             )
         )
 
-        val listTemplate = beanIntrospect.analyzePropertyType(listType, null, null)
-        val setTemplate = beanIntrospect.analyzePropertyType(setType, null, null)
-        val mapTemplate = beanIntrospect.analyzePropertyType(mapType, null, null)
+        val listTemplate = typeIntrospect.analyzePropertyType(listType, null, null)
+        val setTemplate = typeIntrospect.analyzePropertyType(setType, null, null)
+        val mapTemplate = typeIntrospect.analyzePropertyType(mapType, null, null)
 
         assertNotNull(listTemplate, "列表类型模板不应为null")
         assertNotNull(setTemplate, "集合类型模板不应为null")
@@ -178,8 +178,8 @@ class BeanIntrospectAndMapperTest {
         val optionalType = Optional::class.createType(listOf(KTypeProjection.invariant(String::class.createType())))
         val futureType = CompletableFuture::class.createType(listOf(KTypeProjection.invariant(Int::class.createType())))
 
-        val optionalTemplate = beanIntrospect.analyzePropertyType(optionalType, null, null)
-        val futureTemplate = beanIntrospect.analyzePropertyType(futureType, null, null)
+        val optionalTemplate = typeIntrospect.analyzePropertyType(optionalType, null, null)
+        val futureTemplate = typeIntrospect.analyzePropertyType(futureType, null, null)
 
         assertNotNull(optionalTemplate, "Optional类型模板不应为null")
         assertNotNull(futureTemplate, "Future类型模板不应为null")
@@ -200,7 +200,7 @@ class BeanIntrospectAndMapperTest {
         )
 
         val config = BeanMockConfig()
-        val bean = beanMockMapper.mapToBean(SimpleBean::class, data, config)
+        val bean = typeMockMapper.mapToBean(SimpleBean::class, data, config)
 
         assertNotNull(bean, "映射的Bean不应为null")
         assertEquals(12345L, bean.id, "ID应该正确映射")
@@ -232,7 +232,7 @@ class BeanIntrospectAndMapperTest {
         )
 
         val config = BeanMockConfig()
-        val bean = beanMockMapper.mapToBean(ComplexBean::class, data, config)
+        val bean = typeMockMapper.mapToBean(ComplexBean::class, data, config)
 
         assertNotNull(bean, "映射的复杂Bean不应为null")
         assertEquals(67890L, bean.id, "ID应该正确映射")
@@ -274,7 +274,7 @@ class BeanIntrospectAndMapperTest {
         )
 
         val config = BeanMockConfig()
-        val bean = beanMockMapper.mapToBean(ContainerBean::class, data, config)
+        val bean = typeMockMapper.mapToBean(ContainerBean::class, data, config)
 
         assertNotNull(bean, "映射的容器Bean不应为null")
         assertNotNull(bean.optionalString, "Optional字符串不应为null")
@@ -301,7 +301,7 @@ class BeanIntrospectAndMapperTest {
 
         // 对于不可空字段包含null值，应该使用默认值
         assertDoesNotThrow {
-            val bean = beanMockMapper.mapToBean(SimpleBean::class, data, config)
+            val bean = typeMockMapper.mapToBean(SimpleBean::class, data, config)
             logger.info("包含null值的Bean: $bean")
         }
 
@@ -321,7 +321,7 @@ class BeanIntrospectAndMapperTest {
 
         // 对于缺少必需字段，应该使用默认值
         assertDoesNotThrow {
-            val bean = beanMockMapper.mapToBean(SimpleBean::class, data, config)
+            val bean = typeMockMapper.mapToBean(SimpleBean::class, data, config)
             logger.info("测试缺少字段的Bean: $bean")
         }
 
@@ -341,7 +341,7 @@ class BeanIntrospectAndMapperTest {
         )
 
         val config = BeanMockConfig()
-        val bean = beanMockMapper.mapToBean(SimpleBean::class, data, config)
+        val bean = typeMockMapper.mapToBean(SimpleBean::class, data, config)
 
         // 额外字段应该被忽略，Bean应该正常创建
         assertNotNull(bean, "包含额外字段的Bean应该能正常创建")
@@ -365,7 +365,7 @@ class BeanIntrospectAndMapperTest {
         )
 
         val config = BeanMockConfig()
-        val bean = beanMockMapper.mapToBean(SimpleBean::class, data, config)
+        val bean = typeMockMapper.mapToBean(SimpleBean::class, data, config)
 
         assertNotNull(bean, "类型转换Bean不应为null")
         // 验证类型转换是否正确
@@ -389,7 +389,7 @@ class BeanIntrospectAndMapperTest {
 
         configs.forEach { config ->
             // 测试内省
-            val template = beanIntrospect.analyzeBean(ComplexBean::class, config)
+            val template = typeIntrospect.analyzeBean(ComplexBean::class, config)
             assertNotNull(template, "配置 $config 下的模板不应为null")
 
             // 测试映射
@@ -403,7 +403,7 @@ class BeanIntrospectAndMapperTest {
                 "optionalValue" to "value"
             )
 
-            val bean = beanMockMapper.mapToBean(ComplexBean::class, data, config)
+            val bean = typeMockMapper.mapToBean(ComplexBean::class, data, config)
             assertNotNull(bean, "配置 $config 下的Bean不应为null")
 
             logger.info("配置 $config 测试通过")
@@ -421,7 +421,7 @@ class BeanIntrospectAndMapperTest {
 
         val startTime = System.currentTimeMillis()
         repeat(iterations) {
-            val template = beanIntrospect.analyzeBean(ComplexBean::class, config)
+            val template = typeIntrospect.analyzeBean(ComplexBean::class, config)
             assertNotNull(template)
         }
         val endTime = System.currentTimeMillis()
@@ -453,7 +453,7 @@ class BeanIntrospectAndMapperTest {
         val startTime = System.currentTimeMillis()
 
         repeat(iterations) {
-            val bean = beanMockMapper.mapToBean(ComplexBean::class, data, config)
+            val bean = typeMockMapper.mapToBean(ComplexBean::class, data, config)
             assertNotNull(bean)
         }
 

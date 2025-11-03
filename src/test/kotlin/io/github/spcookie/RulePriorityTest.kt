@@ -1,5 +1,6 @@
 package io.github.spcookie
 
+import Mock
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import kotlin.test.assertEquals
@@ -34,9 +35,9 @@ class RulePriorityTest {
     fun testRulePriority() {
         logger.info("测试规则优先级...")
 
-        val beanIntrospect = BeanIntrospect(ContainerAdapter())
+        val typeIntrospect = TypeIntrospect(ContainerAdapter())
         val config = BeanMockConfig(includePrivate = true)
-        val template = beanIntrospect.analyzeBean(TestRulePriority::class, config)
+        val template = typeIntrospect.analyzeBean(TestRulePriority::class, config)
 
         logger.info("生成的模板: $template")
 
@@ -67,8 +68,8 @@ class RulePriorityTest {
             val value: Int = 0
         )
 
-        val beanIntrospect = BeanIntrospect(ContainerAdapter())
-        val template = beanIntrospect.analyzeBean(StepTest::class, BeanMockConfig(includePrivate = true))
+        val typeIntrospect = TypeIntrospect(ContainerAdapter())
+        val template = typeIntrospect.analyzeBean(StepTest::class, BeanMockConfig(includePrivate = true))
 
         logger.info("Step规则测试模板: $template")
 
@@ -87,8 +88,8 @@ class RulePriorityTest {
             val value: Double = 0.0
         )
 
-        val beanIntrospect = BeanIntrospect(ContainerAdapter())
-        val template = beanIntrospect.analyzeBean(CountTest::class, BeanMockConfig(includePrivate = true))
+        val typeIntrospect = TypeIntrospect(ContainerAdapter())
+        val template = typeIntrospect.analyzeBean(CountTest::class, BeanMockConfig(includePrivate = true))
 
         logger.info("Count规则测试模板: $template")
 
@@ -110,8 +111,8 @@ class RulePriorityTest {
             val value2: Double = 0.0
         )
 
-        val beanIntrospect = BeanIntrospect(ContainerAdapter())
-        val template = beanIntrospect.analyzeBean(DecimalTest::class, BeanMockConfig(includePrivate = true))
+        val typeIntrospect = TypeIntrospect(ContainerAdapter())
+        val template = typeIntrospect.analyzeBean(DecimalTest::class, BeanMockConfig(includePrivate = true))
 
         logger.info("Decimal规则测试模板: $template")
 

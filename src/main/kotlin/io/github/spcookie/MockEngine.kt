@@ -36,7 +36,7 @@ internal class MockEngine(
      * 根据模板生成模拟数据
      */
     @Suppress("UNCHECKED_CAST")
-    fun generate(template: Any, context: ExecutionContext? = null): Any? {
+    fun generate(template: Any, context: ExecutionContext? = null): Any {
         // 对于顶级调用，使用唯一的实例 ID 创建新的执行上下文
         // 对于嵌套调用，使用提供的上下文
         val executionContext = context ?: ExecutionContext()
@@ -69,19 +69,17 @@ internal class MockEngine(
                     result[parsedRule.name] = null
                     null
                 } else {
-                    resolve(key, value, parsedRule, context, result)
+                    resolve(parsedRule.name, value, parsedRule, context, result)
                 }
 
                 // 将解析后的值存储在上下文中以供将来参考
                 context.storeResolvedValue(parsedRule.name, generatedValue)
             } else {
-                if (keyObject != null) {
-                    if (value == null) {
-                        result[keyObject] = null
-                    } else {
-                        val parsedRule = ParsedRule(key.toString(), null)
-                        resolve(keyObject, value, parsedRule, context, result)
-                    }
+                if (value == null) {
+                    result[keyObject] = null
+                } else {
+                    val parsedRule = ParsedRule(key.toString(), null)
+                    resolve(keyObject, value, parsedRule, context, result)
                 }
             }
         }

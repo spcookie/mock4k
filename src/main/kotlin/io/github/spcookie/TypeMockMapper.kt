@@ -18,12 +18,12 @@ import kotlin.reflect.jvm.isAccessible
  * @author spcookie
  * @since 1.2.0
  */
-internal class BeanMockMapper(
+internal class TypeMockMapper(
     private val typeAdapter: TypeAdapter,
     private val containerAdapter: ContainerAdapter
 ) {
 
-    private val logger = LoggerFactory.getLogger(BeanMockMapper::class.java)
+    private val logger = LoggerFactory.getLogger(TypeMockMapper::class.java)
 
     /**
      * 将生成的数据映射到 Bean 实例

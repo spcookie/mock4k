@@ -1,6 +1,7 @@
 package io.github.spcookie
 
 import net.bytebuddy.ByteBuddy
+import net.bytebuddy.ClassFileVersion
 import net.bytebuddy.NamingStrategy
 import net.bytebuddy.description.method.MethodDescription
 import net.bytebuddy.implementation.MethodDelegation
@@ -41,14 +42,15 @@ internal object MethodMockStub {
      * @throws IllegalArgumentException 如果该类无法被子类化
      */
     @JvmStatic
-    fun <T : Any> make(clazz: KClass<T>): KClass<out T> {
+    fun <T : Any> make(clazz: KClass<T>, config: BeanMockConfig? = null): KClass<out T> {
         // 用于线程安全缓存访问的双重检查锁定模式
         if (!stubCache.containsKey(clazz)) {
             synchronized(MethodMockStub) {
                 if (!stubCache.containsKey(clazz)) {
+                    val interceptor = MockInterceptor(config)
                     try {
                         // 使用 ByteBuddy 创建动态子类
-                        val dynamicType = ByteBuddy()
+                        val dynamicType = ByteBuddy(ClassFileVersion.ofThisVm())
                             .with(NamingStrategy.SuffixingRandom("Mock"))
                             .subclass(clazz.java)
                             .method(
@@ -57,7 +59,7 @@ internal object MethodMockStub {
                                     .and(not(returns(Void::class.java)))
                                     .and(not(returns(Unit::class.java)))
                             )
-                            .intercept(MethodDelegation.to(MockInterceptor::class.java))
+                            .intercept(MethodDelegation.to(interceptor))
                             .make()
                             .load(clazz.java.classLoader)
                             .loaded
@@ -84,34 +86,29 @@ internal object MethodMockStub {
      * 方法的返回类型生成适当的模拟返回值。
      */
     @Suppress("UNUSED")
-    class MockInterceptor {
+    class MockInterceptor(val beanMockConfig: BeanMockConfig?) {
 
-        companion object {
-            /**
-             * 拦截方法调用并返回模拟值
-             *
-             * 每当调用被拦截的方法时，ByteBuddy 都会调用此方法。
-             * 它会分析方法的返回类型并生成适当的模拟数据。
-             *
-             * @param methodType 包括返回类型在内的方法类型信息
-             * @param args 方法参数（当前未使用，但 ByteBuddy 需要）
-             * @return 适合方法返回类型的模拟值，对于 void/Unit 则为 null
-             */
-            @JvmStatic
-            @RuntimeType
-            fun intercept(
-                @Origin method: Method,
-                @AllArguments args: Array<Any?>
-            ): Any? {
-                val returnType = method.returnType
-                // 处理 void 和 Unit 返回
-                if (returnType == Void.TYPE || returnType == Unit::class.java) {
-                    return null
-                }
-                val genericReturnType = method.genericReturnType
-                return mock(genericReturnType.toKType())
+        /**
+         * 拦截方法调用并返回模拟值
+         *
+         * 每当调用被拦截的方法时，ByteBuddy 都会调用此方法。
+         * 它会分析方法的返回类型并生成适当的模拟数据。
+         *
+         * @param methodType 包括返回类型在内的方法类型信息
+         * @param args 方法参数（当前未使用，但 ByteBuddy 需要）
+         * @return 适合方法返回类型的模拟值，对于 void/Unit 则为 null
+         */
+        @RuntimeType
+        fun intercept(
+            @Origin method: Method,
+            @AllArguments args: Array<Any?>
+        ): Any? {
+            val returnType = method.returnType
+            // 处理 void 和 Unit 返回
+            if (returnType == Void.TYPE || returnType == Unit::class.java) {
+                return null
             }
-
+            return mock(method.genericReturnType)
         }
     }
 

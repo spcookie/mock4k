@@ -16,9 +16,9 @@ import kotlin.reflect.full.primaryConstructor
  * @author spcookie
  * @since 1.2.0
  */
-internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
+internal class TypeIntrospect(val containerAdapter: ContainerAdapter) {
 
-    private val logger = LoggerFactory.getLogger(BeanIntrospect::class.java)
+    private val logger = LoggerFactory.getLogger(TypeIntrospect::class.java)
 
     /**
      * 分析Bean类并转换为MockEngine的MapList结构
@@ -118,11 +118,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
      */
     private fun buildPropertyKey(property: KProperty<*>, annotation: Mock.Property?): String {
         val baseName = property.name
-        val rule = annotation?.rule
-
-        if (rule == null) {
-            return baseName
-        }
+        val rule = annotation?.rule ?: return baseName
 
         // 优先级1：step规则（最高优先级）
         if (rule.step >= 0) {
@@ -226,7 +222,7 @@ internal class BeanIntrospect(val containerAdapter: ContainerAdapter) {
         }
     }
 
-    private fun <T : Any> analyzeEnumClass(kClass: KClass<T>): Any? {
+    private fun <T : Any> analyzeEnumClass(kClass: KClass<T>): Any {
         val size = kClass.java.enumConstants.size
         return "@integer(0, $size)"
     }

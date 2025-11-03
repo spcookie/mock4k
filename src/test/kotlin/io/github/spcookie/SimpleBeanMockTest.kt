@@ -23,9 +23,9 @@ class SimpleBeanMockTest {
         logger.info("开始测试基本Bean Mock功能...")
 
         // 测试模板生成
-        val beanIntrospect = BeanIntrospect(ContainerAdapter())
+        val typeIntrospect = TypeIntrospect(ContainerAdapter())
         val config = BeanMockConfig(includePrivate = true) // 包含私有属性
-        val template = beanIntrospect.analyzeBean(TestUser::class, config)
+        val template = typeIntrospect.analyzeBean(TestUser::class, config)
         logger.info("生成的模板: $template")
 
         // 测试MockEngine生成

@@ -43,11 +43,11 @@ class ContainerAdapterTest {
             "com.example.MyCustomContainer",
             ContainerAdapter.ContainerBehavior.SINGLE_VALUE,
             analyzer = { types: List<KType>, _: Any?, config: BeanMockConfig, _: Int ->
-                // Custom analysis logic for BeanIntrospect
+                // Custom analysis logic for TypeIntrospect
                 "@custom_placeholder"
             },
             mapper = { value: Any?, targetType: List<KType>, config: BeanMockConfig ->
-                // Custom mapping logic for BeanMockMapper
+                // Custom mapping logic for TypeMockMapper
                 // This would create an instance of MyCustomContainer with the wrapped value
                 // For demonstration purposes, we'll just return the value
                 value

@@ -1,5 +1,7 @@
 package io.github.spcookie
 
+import Mock
+
 data class UserWithMockParamTest(
     @Mock.Property(rule = Mock.Rule(min = 1000, max = 9999))
     var id: Long = 0L,
