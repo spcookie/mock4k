@@ -165,16 +165,12 @@ fun isSingleType(kClass: KClass<*>, containerAdapter: ContainerAdapter): Boolean
 fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KProperty<*>> {
     val constructor = clazz.primaryConstructor
     val isDataClass = clazz.isData
-    val isJavaRecord = clazz.java.isRecord
 
     val properties = clazz.memberProperties.filter { property ->
         val javaField = property.javaField
 
         // 对于 Kotlin 数据类，应包括主构造函数中的所有 val 属性
         val isDataClassProperty = isDataClass && constructor?.parameters?.any { it.name == property.name } == true
-
-        // 对于 Java 记录，应包括所有属性（它们没有 javaField）
-        val isRecordProperty = isJavaRecord && javaField == null
 
         // 对于 Kotlin 属性，检查它们是否是可变的 (var) 而不是字段可见性
         val isMutableProperty = property is KMutableProperty<*>
@@ -185,7 +181,7 @@ fun getEligibleProperties(clazz: KClass<*>, config: BeanMockConfig): List<KPrope
         // 根据配置检查是否应包括属性
         when {
             // 数据类和记录属性的特殊处理
-            isDataClassProperty || isRecordProperty -> {
+            isDataClassProperty -> {
                 // 对于数据类和记录，检查隐私设置
                 if (!config.includePrivate && isKotlinPrivateProperty) {
                     false

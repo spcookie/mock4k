@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "io.github.spcookie"
-version = "2.1.0"
+version = "2.1.0-jre11"
 
 repositories {
     mavenCentral()
@@ -37,12 +37,12 @@ tasks.test {
 
 // Configure java and kotlin interoperability
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(11)
 }
 
 // Configure dokka document generation
