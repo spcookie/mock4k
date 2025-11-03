@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "io.github.spcookie"
-version = "2.1.0-jre11"
+version = "2.1.1-jre11"
 
 repositories {
     mavenCentral()

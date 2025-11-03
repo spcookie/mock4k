@@ -130,14 +130,14 @@ internal class PlaceholderResolver(
             val lowerMethodName = methodName.lowercase()
             if (params.isNotEmpty()) {
                 // 尝试带参数的自定义占位符
-                val customGenerator = random.getExtendedWithParams(lowerMethodName)
+                val customGenerator = random.extendConfig.getExtendedWithParams(lowerMethodName)
                 if (customGenerator != null) {
                     val paramList = parseParams(params)
                     return customGenerator(paramList)
                 }
             } else {
                 // 尝试不带参数的自定义占位符
-                val customGenerator = random.getExtended(lowerMethodName)
+                val customGenerator = random.extendConfig.getExtended(lowerMethodName)
                 if (customGenerator != null) {
                     return customGenerator()
                 }
@@ -167,7 +167,7 @@ internal class PlaceholderResolver(
 
 
     private fun callMethod(methodName: String, placeholder: String): Any {
-        val method = random::class.memberFunctions.find { it.name.lowercase() == methodName.lowercase() }
+        val method = random::class.memberFunctions.find { it.name.equals(methodName, ignoreCase = true) }
         return if (method != null && method.parameters.size == 1) {
             method.call(random) ?: placeholder
         } else {

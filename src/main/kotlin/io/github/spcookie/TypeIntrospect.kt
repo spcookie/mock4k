@@ -8,6 +8,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.full.primaryConstructor
 
 /**
@@ -16,7 +17,10 @@ import kotlin.reflect.full.primaryConstructor
  * @author spcookie
  * @since 1.2.0
  */
-internal class TypeIntrospect(val containerAdapter: ContainerAdapter) {
+internal class TypeIntrospect(
+    val containerAdapter: ContainerAdapter,
+    val mockRandom: MockRandom
+) {
 
     private val logger = LoggerFactory.getLogger(TypeIntrospect::class.java)
 
@@ -59,7 +63,8 @@ internal class TypeIntrospect(val containerAdapter: ContainerAdapter) {
                     propertyAnnotation,
                     propertyBeanAnnotation,
                     config,
-                    currentDepth
+                    currentDepth,
+                    property
                 )
 
                 result[key] = value
@@ -175,7 +180,8 @@ internal class TypeIntrospect(val containerAdapter: ContainerAdapter) {
         annotation: Mock.Property?,
         propertyBeanAnnotation: Mock.Bean? = null,
         config: BeanMockConfig = BeanMockConfig(),
-        currentDepth: Int = 0
+        currentDepth: Int = 0,
+        kProperty: KProperty<*>? = null
     ): Any? {
         val kClass = type.classifier as? KClass<*> ?: return "@string"
 
@@ -187,7 +193,7 @@ internal class TypeIntrospect(val containerAdapter: ContainerAdapter) {
 
         return when {
             // 基本类型
-            isBasicType(kClass) -> getBasicTypePlaceholder(kClass)
+            isBasicType(kClass) -> getBasicTypePlaceholder(kClass, kProperty)
 
             // 集合类型
             isCollectionType(kClass) -> analyzeCollectionType(
@@ -230,7 +236,14 @@ internal class TypeIntrospect(val containerAdapter: ContainerAdapter) {
     /**
      * 获取基本类型的占位符
      */
-    private fun getBasicTypePlaceholder(kClass: KClass<*>): String {
+    private fun getBasicTypePlaceholder(kClass: KClass<*>, kProperty: KProperty<*>?): String {
+        if (kProperty != null) {
+            if (mockRandom.extendConfig.hasExtended(kProperty.name)
+                || mockRandom::class.memberFunctions.any { it.name.equals(kProperty.name, ignoreCase = true) }
+            ) {
+                return "@${kProperty.name}"
+            }
+        }
         return when (kClass) {
             String::class -> "@string"
             Int::class, Integer::class -> "@integer"
