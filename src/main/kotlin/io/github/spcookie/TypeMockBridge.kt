@@ -17,10 +17,10 @@ import kotlin.reflect.full.starProjectedType
 internal class TypeMockBridge(
     private val mockEngine: MockEngine,
     typeAdapter: TypeAdapter,
-    containerAdapter: ContainerAdapter
+    containerAdapter: ContainerAdapter,
 ) {
 
-    private val typeIntrospect = TypeIntrospect(containerAdapter)
+    private val typeIntrospect = TypeIntrospect(containerAdapter, mockEngine.random)
 
     private val typeMockMapper = TypeMockMapper(typeAdapter, containerAdapter)
 

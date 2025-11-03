@@ -230,6 +230,9 @@ object GlobalMockConf {
     @JvmField
     val Random = MockRandom()
 
+    @JvmField
+    val Extend = Random.extendConfig
+
     /** 用于特定区域设置数据生成的Locale工具实例 */
     @JvmField
     val Locale = LocaleManager

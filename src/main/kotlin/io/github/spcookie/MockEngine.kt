@@ -7,7 +7,7 @@ package io.github.spcookie
  * @since 1.0.0
  */
 internal class MockEngine(
-    random: MockRandom
+    val random: MockRandom
 ) {
 
     companion object {
